@@ -1,0 +1,19 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Android
+local.properties
+*.apk.idsig
+.cxx/
+
+# IDE
+.idea/
+*.iml
+.kotlin/
+
+# Signing material must never be committed
+*.jks
+*.keystore
+keystore.properties

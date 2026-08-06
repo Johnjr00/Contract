@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<title>The Contract — Controller</title>
+<link rel="stylesheet" href="/assets/controller.css">
+</head>
+<body>
+<div id="app">
+  <header id="bar">
+    <div class="bar-row">
+      <span id="who" class="who">Connecting…</span>
+      <span id="link" class="pill pill-warn">Connecting</span>
+    </div>
+    <div class="bar-row">
+      <span id="progress" class="progress"></span>
+      <span id="peer" class="pill"></span>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="card">
+      <h1 id="heading">Connecting to the TV…</h1>
+      <p id="body" class="body"></p>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <footer id="foot">
+    <button id="pauseBtn" class="btn btn-stop" type="button">Pause / Stop</button>
+  </footer>
+</div>
+<script src="/assets/controller.js"></script>
+</body>
+</html>

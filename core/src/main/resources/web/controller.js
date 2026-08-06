@@ -1,0 +1,840 @@
+/*
+ * The Contract — phone controller.
+ *
+ * An ordinary browser page: no service worker, no install prompt, no manifest, no native shell.
+ * It never mutates game state; it renders whatever the TV server sends and posts actions back.
+ *
+ * Reconnection contract (specification section 8):
+ *   - a device id and a resume token live in localStorage
+ *   - HELLO carries both, so a refresh, a lock, a dropped Wi-Fi connection or a closed tab all
+ *     return this phone to its own player slot
+ *   - a full state snapshot arrives after every (re)connection
+ *   - every action carries a unique id and the expected state version, so retries are safe
+ */
+(function () {
+  "use strict";
+
+  var KEY_DEVICE = "thecontract.deviceId";
+  var KEY_RESUME = "thecontract.resume";
+
+  var S = {
+    token: null,
+    deviceId: null,
+    resume: null,          // { sessionId, slot, token }
+    slot: null,
+    version: 0,
+    view: null,
+    ws: null,
+    retry: 0,
+    retryTimer: null,
+    pingTimer: null,
+    tickTimer: null,
+    timerAnchor: 0,
+    profileDraft: null,
+    setupDraft: null,
+    reclaim: null
+  };
+
+  // ------------------------------------------------------------------ helpers
+
+  function $(id) { return document.getElementById(id); }
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined && text !== null) n.textContent = text;
+    return n;
+  }
+
+  function uuid() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    var b = new Uint8Array(16);
+    (window.crypto || {}).getRandomValues ? crypto.getRandomValues(b) : b.forEach(function (_, i) { b[i] = Math.random() * 256; });
+    return Array.prototype.map.call(b, function (x) { return ("0" + x.toString(16)).slice(-2); }).join("");
+  }
+
+  function load(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+  function save(key, value) { try { localStorage.setItem(key, value); } catch (e) { /* private mode */ } }
+
+  function toast(message) {
+    var t = $("toast");
+    t.textContent = message;
+    t.hidden = false;
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { t.hidden = true; }, 3800);
+  }
+
+  function fmtClock(ms) {
+    var total = Math.max(0, Math.ceil(ms / 1000));
+    var m = Math.floor(total / 60);
+    var s = total % 60;
+    return m + ":" + (s < 10 ? "0" : "") + s;
+  }
+
+  // ------------------------------------------------------------------ transport
+
+  function tokenFromLocation() {
+    var m = location.pathname.match(/\/join\/([^\/?#]+)/);
+    return m ? decodeURIComponent(m[1]) : null;
+  }
+
+  function connect() {
+    if (S.ws && (S.ws.readyState === 0 || S.ws.readyState === 1)) return;
+    setLink("Connecting", "pill-warn");
+    var proto = location.protocol === "https:" ? "wss:" : "ws:";
+    var url = proto + "//" + location.host + "/ws?token=" + encodeURIComponent(S.token || "");
+    var ws;
+    try {
+      ws = new WebSocket(url);
+    } catch (e) {
+      scheduleRetry();
+      return;
+    }
+    S.ws = ws;
+
+    ws.onopen = function () {
+      S.retry = 0;
+      setLink("Connected", "pill-ok");
+      var hello = { type: "HELLO", deviceId: S.deviceId };
+      if (S.resume && S.resume.token) hello.resumeToken = S.resume.token;
+      send(hello);
+      startPing();
+    };
+
+    ws.onmessage = function (event) {
+      var msg;
+      try { msg = JSON.parse(event.data); } catch (e) { return; }
+      handle(msg);
+    };
+
+    ws.onclose = function () {
+      setLink("Reconnecting", "pill-warn");
+      stopPing();
+      scheduleRetry();
+    };
+
+    ws.onerror = function () { /* onclose follows */ };
+  }
+
+  function scheduleRetry() {
+    clearTimeout(S.retryTimer);
+    var delay = Math.min(8000, 400 * Math.pow(2, S.retry++));
+    S.retryTimer = setTimeout(connect, delay);
+  }
+
+  function send(obj) {
+    if (!S.ws || S.ws.readyState !== 1) return false;
+    S.ws.send(JSON.stringify(obj));
+    return true;
+  }
+
+  function act(action) {
+    if (!send({ type: "PLAYER_ACTION", actionId: uuid(), expectedVersion: S.version, action: action })) {
+      toast("Not connected yet. Trying again.");
+      connect();
+    }
+  }
+
+  function startPing() {
+    stopPing();
+    S.pingTimer = setInterval(function () { send({ type: "PING", t: Date.now() }); }, 15000);
+  }
+  function stopPing() { clearInterval(S.pingTimer); }
+
+  function setLink(text, cls) {
+    var n = $("link");
+    n.textContent = text;
+    n.className = "pill " + (cls || "");
+  }
+
+  // ------------------------------------------------------------------ inbound
+
+  function handle(msg) {
+    switch (msg.type) {
+      case "HELLO_OK":
+        S.slot = msg.slot;
+        S.version = msg.version;
+        S.resume = { sessionId: msg.sessionId, slot: msg.slot, token: msg.resumeToken };
+        save(KEY_RESUME, JSON.stringify(S.resume));
+        S.reclaim = null;
+        if (msg.reclaimed) toast("Slot confirmed from the TV.");
+        break;
+
+      case "SESSION_FULL":
+        S.view = null;
+        renderMessage("Session full", msg.message +
+          " This game allows exactly two phones. If one of them is yours, reconnect from that phone " +
+          "or release the slot with the TV remote.");
+        return;
+
+      case "RECLAIM_PENDING":
+        S.reclaim = msg;
+        renderMessage("Waiting for the TV", msg.message);
+        return;
+
+      case "STATE_SNAPSHOT":
+      case "STATE_CHANGED":
+        S.view = msg.view;
+        S.version = msg.view.version;
+        S.timerAnchor = Date.now();
+        if (S.view.phase !== "PRIVATE_PROFILES" && S.view.phase !== "WAITING_FOR_PROFILES") S.profileDraft = null;
+        if (S.view.phase !== "PLAYER_1_SETUP") S.setupDraft = null;
+        render();
+        return;
+
+      case "TIMER_UPDATE":
+        if (S.view) {
+          S.view.timers = msg.timers;
+          S.version = msg.version;
+          S.timerAnchor = Date.now();
+          paintTimers();
+        }
+        return;
+
+      case "ACTION_ACCEPTED":
+        S.version = msg.version;
+        return;
+
+      case "ACTION_REJECTED":
+        S.version = msg.version;
+        if (msg.code === "STALE_VERSION") {
+          toast("That screen had moved on. Showing the current one.");
+        } else if (msg.code !== "DUPLICATE") {
+          toast(msg.message || "That is not available right now.");
+        }
+        return;
+
+      case "ERROR":
+        toast(msg.message || "Something went wrong.");
+        return;
+
+      case "PONG":
+        return;
+    }
+  }
+
+  // ------------------------------------------------------------------ rendering
+
+  function renderMessage(heading, body) {
+    var main = $("main");
+    main.textContent = "";
+    var card = el("section", "card");
+    card.appendChild(el("h1", null, heading));
+    card.appendChild(el("p", "body", body));
+    main.appendChild(card);
+  }
+
+  function render() {
+    var v = S.view;
+    if (!v) return;
+
+    $("who").textContent = (v.names && v.names[v.slot] ? v.names[v.slot] : v.slot === "PLAYER_1" ? "Player 1" : "Player 2") +
+      (v.roles && v.roles[v.slot] ? " · " + (v.roles[v.slot] === "DOMINANT" ? "Dominant" : "submissive") : "");
+
+    var other = v.slot === "PLAYER_1" ? "PLAYER_2" : "PLAYER_1";
+    var otherState = v.connections ? v.connections[other] : null;
+    var peer = $("peer");
+    if (otherState === "CONNECTED") { peer.textContent = "Other phone: connected"; peer.className = "pill pill-ok"; }
+    else if (otherState === "DISCONNECTED") { peer.textContent = "Other phone: offline"; peer.className = "pill pill-bad"; }
+    else { peer.textContent = "Other phone: not joined"; peer.className = "pill"; }
+
+    $("progress").textContent = v.progress
+      ? "Act " + v.progress.act + " · " + v.progress.actTitle + " · " +
+        v.progress.signedRegular + "/" + v.progress.requiredRegular + " terms" +
+        (v.progress.signedClosing ? " · " + v.progress.signedClosing + "/2 closing" : "")
+      : "";
+
+    var main = $("main");
+    main.textContent = "";
+
+    var head = el("section", "card");
+    head.appendChild(el("h1", null, v.heading || ""));
+    if (v.body) head.appendChild(el("p", "body", v.body));
+    if (v.waiting) {
+      var w = el("div", "waiting");
+      w.appendChild(el("span", "dot"));
+      w.appendChild(el("span", null, "Waiting…"));
+      head.appendChild(w);
+    }
+    main.appendChild(head);
+
+    if (v.blockedNotice) {
+      var nb = el("section", "card quiet");
+      nb.appendChild(el("div", "notice", v.blockedNotice));
+      main.appendChild(nb);
+    }
+
+    if (v.setup) main.appendChild(renderSetup(v.setup));
+    if (v.profile) main.appendChild(renderProfile(v.profile));
+    if (v.term) main.appendChild(renderTerm(v.term, "Proposed term"));
+    if (v.bundledTerm) main.appendChild(renderTerm(v.bundledTerm, "Second term in the trade"));
+    if (v.termOptions && v.termOptions.length) {
+      v.termOptions.forEach(function (t) { main.appendChild(renderTerm(t, "Option")); });
+    }
+    if (v.consideration) main.appendChild(renderConsideration(v.consideration));
+    if (v.considerationOptions && v.considerationOptions.length) {
+      v.considerationOptions.forEach(function (c) { main.appendChild(renderConsideration(c, true)); });
+    }
+    if (v.execution) main.appendChild(renderExecution(v.execution));
+    if (v.timers && v.timers.length) main.appendChild(renderTimers(v));
+    if (v.draft) main.appendChild(renderDraft(v.draft));
+
+    if (v.choices && v.choices.length) {
+      var box = el("section", "card");
+      var list = el("div", "choices");
+      v.choices.forEach(function (c) {
+        if (c.kind === "status") { list.appendChild(el("div", "tag", c.label)); return; }
+        var b = el("button", "btn" + (c.danger ? " btn-danger" : c.kind === "nav" ? " btn-nav" : " btn-primary"));
+        b.type = "button";
+        b.appendChild(document.createTextNode(c.label));
+        if (c.detail) b.appendChild(el("small", null, c.detail));
+        b.addEventListener("click", function () { dispatchChoice(c.id); });
+        list.appendChild(b);
+      });
+      box.appendChild(list);
+      main.appendChild(box);
+    }
+
+    if (v.canGoBack && !(v.choices || []).some(function (c) { return c.id === "back"; })) {
+      var backBox = el("section", "card");
+      var back = el("button", "btn btn-nav", "Back");
+      back.type = "button";
+      back.addEventListener("click", function () { act({ type: "back" }); });
+      backBox.appendChild(back);
+      main.appendChild(backBox);
+    }
+
+    if (v.stopWord) {
+      var sw = el("p", "meta");
+      sw.appendChild(document.createTextNode("Stop word: "));
+      sw.appendChild(el("strong", null, v.stopWord));
+      main.appendChild(sw);
+    }
+
+    paintTimers();
+  }
+
+  function renderTerm(t, label) {
+    var card = el("section", "card");
+    card.appendChild(el("h3", null, label + " · " + t.actTitle + (t.climax ? " · closing term" : "")));
+    card.appendChild(el("h2", null, t.title));
+    card.appendChild(el("p", "instruction", t.instruction));
+
+    if (t.equipment && t.equipment.length) {
+      var eq = el("div");
+      t.equipment.forEach(function (e) { eq.appendChild(el("span", "tag", e)); });
+      card.appendChild(eq);
+    }
+    (t.conditions || []).forEach(function (c) { card.appendChild(el("div", "notice", "Condition: " + c)); });
+    (t.amendments || []).forEach(function (a) { card.appendChild(el("div", "notice", "Amendment: " + a)); });
+
+    if (t.timers && t.timers.length) {
+      var tl = el("p", "meta", "Timed: " + t.timers.map(function (x) {
+        return x.label + " " + fmtClock(x.totalSeconds * 1000);
+      }).join(" · "));
+      card.appendChild(tl);
+    }
+
+    var m = el("p", "meta");
+    m.appendChild(document.createTextNode(t.benefitExplanation || ""));
+    card.appendChild(m);
+    return card;
+  }
+
+  function renderConsideration(c, selectable) {
+    var card = el("section", "card quiet");
+    card.appendChild(el("h3", null, selectable ? "Consideration option" : "Consideration"));
+    card.appendChild(el("h2", null, c.title));
+    card.appendChild(el("p", "instruction", c.instruction));
+    if (c.equipment && c.equipment.length) {
+      var eq = el("div");
+      c.equipment.forEach(function (e) { eq.appendChild(el("span", "tag", e)); });
+      card.appendChild(eq);
+    }
+    var who = c.mutual
+      ? "Both of you perform this and both of you confirm."
+      : c.performerName + " performs this for " + c.recipientName + ".";
+    card.appendChild(el("p", "meta", who));
+    if (selectable) {
+      var b = el("button", "btn btn-primary", "Choose this");
+      b.type = "button";
+      b.addEventListener("click", function () { act({ type: "pick_consideration", actionId: c.actionId }); });
+      card.appendChild(b);
+    }
+    return card;
+  }
+
+  function renderExecution(x) {
+    var card = el("section", "card quiet");
+    card.appendChild(el("h3", null, "Final scene"));
+    card.appendChild(el("p", "meta", "Term " + x.stepIndex + " of " + x.stepCount +
+      (x.started ? " · running" : " · not started")));
+    return card;
+  }
+
+  function renderTimers(v) {
+    var card = el("section", "card");
+    card.id = "timers";
+    card.appendChild(el("h3", null, "Timers"));
+    var control = v.timerControl || { mayControl: true, mayComplete: true, showStopAll: false };
+
+    v.timers.forEach(function (t) {
+      var box = el("div", "timer " + t.state.toLowerCase());
+      box.dataset.timerId = t.id;
+
+      var head = el("div", "timer-head");
+      head.appendChild(el("span", "timer-label", t.label));
+      var clock = el("span", "timer-clock", fmtClock(t.remainingMs));
+      clock.dataset.role = "clock";
+      head.appendChild(clock);
+      box.appendChild(head);
+
+      var bar = el("div", "timer-bar");
+      var fill = el("span");
+      fill.dataset.role = "bar";
+      fill.style.width = Math.max(0, Math.min(100, (t.remainingMs / (t.totalSeconds * 1000)) * 100)) + "%";
+      bar.appendChild(fill);
+      box.appendChild(bar);
+
+      if (control.mayControl) {
+        var row = el("div", "btn-row");
+        [["start", "Start"], ["pause", "Pause"], ["resume", "Resume"], ["reset", "Reset"]].forEach(function (pair) {
+          var b = el("button", "btn", pair[1]);
+          b.type = "button";
+          b.addEventListener("click", function () {
+            act({ type: "timer", timerId: t.id, command: pair[0] });
+          });
+          row.appendChild(b);
+        });
+        box.appendChild(row);
+      } else {
+        box.appendChild(el("p", "meta", (control.controllerName || "The other player") + " controls this timer."));
+      }
+      card.appendChild(box);
+    });
+
+    if (control.showStopAll && control.mayControl) {
+      var stop = el("button", "btn btn-danger", "Stop all timers");
+      stop.type = "button";
+      stop.style.marginTop = "12px";
+      stop.addEventListener("click", function () { act({ type: "stop_all_timers" }); });
+      card.appendChild(stop);
+    }
+    return card;
+  }
+
+  function paintTimers() {
+    var v = S.view;
+    if (!v || !v.timers) return;
+    var elapsed = Date.now() - S.timerAnchor;
+    v.timers.forEach(function (t) {
+      var box = document.querySelector('[data-timer-id="' + CSS.escape(t.id) + '"]');
+      if (!box) return;
+      var remaining = t.state === "RUNNING" ? Math.max(0, t.remainingMs - elapsed) : t.remainingMs;
+      var clock = box.querySelector('[data-role="clock"]');
+      if (clock) clock.textContent = fmtClock(remaining);
+      var bar = box.querySelector('[data-role="bar"]');
+      if (bar) bar.style.width = Math.max(0, Math.min(100, (remaining / (t.totalSeconds * 1000)) * 100)) + "%";
+      box.className = "timer " + t.state.toLowerCase();
+    });
+  }
+
+  function renderDraft(d) {
+    var card = el("section", "card");
+    card.appendChild(el("h2", null, "Draft contract"));
+    card.appendChild(el("p", "meta",
+      d.signedRegular + " of " + d.requiredRegular + " regular terms · " +
+      d.signedClosing + " of 2 closing terms · " + d.receiptsCompleted + " consideration receipts"));
+    Object.keys(d.byAct).forEach(function (act) {
+      card.appendChild(el("h3", null, act));
+      d.byAct[act].forEach(function (t) {
+        var box = el("div", "draft-term");
+        box.appendChild(el("div", "num", "Term " + t.index + (t.closingForName ? " · closing for " + t.closingForName : "")));
+        box.appendChild(el("h2", null, t.title));
+        box.appendChild(el("p", "instruction", t.instruction));
+        if (t.bundledInstruction) {
+          box.appendChild(el("div", "num", "Traded with"));
+          box.appendChild(el("p", "instruction", t.bundledInstruction));
+        }
+        (t.conditions || []).forEach(function (c) { box.appendChild(el("span", "tag", "Condition: " + c)); });
+        (t.amendments || []).forEach(function (a) { box.appendChild(el("span", "tag", "Amendment: " + a)); });
+        if (t.considerationTitle) {
+          box.appendChild(el("p", "meta", "Consideration performed: " + t.considerationTitle));
+        }
+        box.appendChild(el("p", "meta", "Signed by " + (t.signedBy || []).join(" and ")));
+        card.appendChild(box);
+      });
+    });
+    return card;
+  }
+
+  // ------------------------------------------------------------------ profile
+
+  function profileDraft(form) {
+    if (!S.profileDraft) {
+      S.profileDraft = { answers: {}, conditions: {} };
+      form.sections.forEach(function (sec) {
+        sec.items.forEach(function (item) {
+          S.profileDraft.answers[item.id] = item.answer;
+          if (item.condition) S.profileDraft.conditions[item.id] = item.condition;
+        });
+      });
+    }
+    return S.profileDraft;
+  }
+
+  function renderProfile(form) {
+    var draft = profileDraft(form);
+    var card = el("section", "card");
+    card.appendChild(el("h2", null, "Private profile"));
+    card.appendChild(el("p", "meta",
+      "Everything starts at Maybe. A Maybe is not a no — it is a yes with the condition you pick."));
+
+    var global = el("div", "btn-row");
+    [["YES", "Everything Yes"], ["MAYBE", "Everything Maybe"], ["NO", "Everything No"]].forEach(function (p) {
+      var b = el("button", "btn", p[1]);
+      b.type = "button";
+      b.addEventListener("click", function () { bulk(form, null, p[0]); });
+      global.appendChild(b);
+    });
+    card.appendChild(global);
+
+    form.sections.forEach(function (sec) {
+      var det = el("details", "section");
+      var sum = el("summary");
+      sum.appendChild(document.createTextNode(sec.title));
+      var count = el("span", "tag", countFor(sec, draft));
+      count.dataset.role = "count";
+      count.dataset.section = sec.id;
+      sum.appendChild(count);
+      det.appendChild(sum);
+
+      var body = el("div", "section-body");
+      var row = el("div", "btn-row");
+      [["YES", "All Yes"], ["MAYBE", "All Maybe"], ["NO", "All No"]].forEach(function (p) {
+        var b = el("button", "btn", p[1]);
+        b.type = "button";
+        b.addEventListener("click", function (e) { e.preventDefault(); bulk(form, sec.id, p[0]); });
+        row.appendChild(b);
+      });
+      body.appendChild(row);
+
+      sec.items.forEach(function (item) {
+        body.appendChild(renderPref(form, item, draft));
+      });
+      det.appendChild(body);
+      card.appendChild(det);
+    });
+
+    var save = el("button", "btn btn-nav", "Save my answers");
+    save.type = "button";
+    save.addEventListener("click", function () { submitProfile(false); });
+    card.appendChild(save);
+
+    var done = el("button", "btn btn-primary", "Save and finish");
+    done.type = "button";
+    done.style.marginTop = "10px";
+    done.addEventListener("click", function () { submitProfile(true); });
+    card.appendChild(done);
+    return card;
+  }
+
+  function countFor(sec, draft) {
+    var yes = 0, no = 0;
+    sec.items.forEach(function (i) {
+      if (draft.answers[i.id] === "YES") yes++;
+      if (draft.answers[i.id] === "NO") no++;
+    });
+    return yes + " yes · " + no + " no";
+  }
+
+  function renderPref(form, item, draft) {
+    var box = el("div", "pref");
+    box.appendChild(el("div", "pref-label", item.label));
+    var seg = el("div", "seg");
+    [["YES", "Yes", "yes"], ["MAYBE", "Maybe", "maybe"], ["NO", "No", "no"]].forEach(function (p) {
+      var b = el("button", p[2], p[1]);
+      b.type = "button";
+      b.setAttribute("aria-pressed", String(draft.answers[item.id] === p[0]));
+      b.addEventListener("click", function (e) {
+        e.preventDefault();
+        draft.answers[item.id] = p[0];
+        Array.prototype.forEach.call(seg.children, function (c) {
+          c.setAttribute("aria-pressed", String(c === b));
+        });
+        cond.hidden = draft.answers[item.id] !== "MAYBE";
+        refreshCounts(form, draft);
+      });
+      seg.appendChild(b);
+    });
+    box.appendChild(seg);
+
+    var cond = el("div", "cond");
+    cond.hidden = draft.answers[item.id] !== "MAYBE";
+    var sel = document.createElement("select");
+    var def = document.createElement("option");
+    def.value = "";
+    def.textContent = "Use the session default condition";
+    sel.appendChild(def);
+    form.conditionOptions.forEach(function (o) {
+      var opt = document.createElement("option");
+      opt.value = o.id;
+      opt.textContent = o.label;
+      sel.appendChild(opt);
+    });
+    sel.value = draft.conditions[item.id] || "";
+    sel.addEventListener("change", function () {
+      if (sel.value) draft.conditions[item.id] = sel.value;
+      else delete draft.conditions[item.id];
+    });
+    cond.appendChild(sel);
+    box.appendChild(cond);
+    return box;
+  }
+
+  function bulk(form, sectionId, answer) {
+    var draft = profileDraft(form);
+    form.sections.forEach(function (sec) {
+      if (sectionId && sec.id !== sectionId) return;
+      sec.items.forEach(function (item) { draft.answers[item.id] = answer; });
+    });
+    // Collapsed sections are updated too; re-render so every control reflects the change.
+    render();
+  }
+
+  function refreshCounts(form, draft) {
+    form.sections.forEach(function (sec) {
+      var n = document.querySelector('[data-role="count"][data-section="' + CSS.escape(sec.id) + '"]');
+      if (n) n.textContent = countFor(sec, draft);
+    });
+  }
+
+  function submitProfile(complete) {
+    var draft = S.profileDraft;
+    if (!draft) return;
+    act({ type: "save_profile", answers: draft.answers, conditions: draft.conditions, complete: !!complete });
+    toast(complete ? "Profile saved." : "Answers saved.");
+  }
+
+  // ------------------------------------------------------------------ setup
+
+  function setupDraft(form) {
+    if (!S.setupDraft) {
+      S.setupDraft = {
+        player1Name: form.player1Name,
+        player2Name: form.player2Name,
+        dominantSlot: form.dominantSlot,
+        analRoles: Object.assign({}, form.analRoles),
+        erectionDifficulty: Object.assign({}, form.erectionDifficulty),
+        sessionLength: form.sessionLength,
+        explicitness: form.explicitness,
+        finaleFormat: form.finaleFormat,
+        stopWord: form.stopWord,
+        defaultMaybeCondition: form.defaultMaybeCondition,
+        boundaries: (form.boundaries || []).slice(),
+        equipment: (form.equipment || []).slice()
+      };
+    }
+    return S.setupDraft;
+  }
+
+  function field(labelText, control) {
+    var f = el("div", "field");
+    var l = el("label", null, labelText);
+    f.appendChild(l);
+    f.appendChild(control);
+    return f;
+  }
+
+  function selectFor(options, value, onChange) {
+    var sel = document.createElement("select");
+    options.forEach(function (o) {
+      var opt = document.createElement("option");
+      opt.value = o.id;
+      opt.textContent = o.detail ? o.label + " — " + o.detail : o.label;
+      sel.appendChild(opt);
+    });
+    sel.value = value;
+    sel.addEventListener("change", function () { onChange(sel.value); });
+    return sel;
+  }
+
+  function textFor(value, onChange) {
+    var i = document.createElement("input");
+    i.type = "text";
+    i.value = value || "";
+    i.autocomplete = "off";
+    i.addEventListener("input", function () { onChange(i.value); });
+    return i;
+  }
+
+  function checkList(options, selected, onToggle) {
+    var wrap = el("div", "checks");
+    options.forEach(function (o) {
+      var lab = el("label", "check");
+      var cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = selected.indexOf(o.id) >= 0;
+      cb.addEventListener("change", function () { onToggle(o.id, cb.checked); });
+      lab.appendChild(cb);
+      lab.appendChild(el("span", null, o.label));
+      wrap.appendChild(lab);
+    });
+    return wrap;
+  }
+
+  function renderSetup(form) {
+    var d = setupDraft(form);
+    var card = el("section", "card");
+    card.appendChild(el("h2", null, "Shared setup"));
+    card.appendChild(el("p", "meta", "Only you can change these. The other phone waits until you finish."));
+
+    card.appendChild(field("Player 1 name (you)", textFor(d.player1Name, function (v) { d.player1Name = v; })));
+    card.appendChild(field("Player 2 name", textFor(d.player2Name, function (v) { d.player2Name = v; })));
+
+    card.appendChild(field("Who is Dominant?", selectFor(
+      [{ id: "PLAYER_1", label: "Player 1" }, { id: "PLAYER_2", label: "Player 2" }],
+      d.dominantSlot, function (v) { d.dominantSlot = v; })));
+
+    card.appendChild(field("Session length", selectFor(form.options.sessionLength, d.sessionLength,
+      function (v) { d.sessionLength = v; })));
+
+    card.appendChild(el("h3", null, "Anal roles"));
+    ["PLAYER_1", "PLAYER_2"].forEach(function (slot) {
+      card.appendChild(field(slot === "PLAYER_1" ? "Player 1" : "Player 2",
+        selectFor(form.options.analRole, d.analRoles[slot], function (v) { d.analRoles[slot] = v; })));
+      var lab = el("label", "check");
+      var cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = !!d.erectionDifficulty[slot];
+      cb.addEventListener("change", function () { d.erectionDifficulty[slot] = cb.checked; });
+      lab.appendChild(cb);
+      lab.appendChild(el("span", null, "Has trouble getting or staying hard"));
+      card.appendChild(lab);
+    });
+
+    card.appendChild(el("h3", null, "Style"));
+    card.appendChild(field("Explicitness", selectFor(form.options.explicitness, d.explicitness,
+      function (v) { d.explicitness = v; })));
+    card.appendChild(field("Finale format", selectFor(form.options.finaleFormat, d.finaleFormat,
+      function (v) { d.finaleFormat = v; })));
+    card.appendChild(field("Stop word", textFor(d.stopWord, function (v) { d.stopWord = v; })));
+    card.appendChild(field("Default condition for a Maybe", selectFor(form.options.maybeCondition,
+      d.defaultMaybeCondition, function (v) { d.defaultMaybeCondition = v; })));
+
+    card.appendChild(el("h3", null, "Shared hard boundaries"));
+    card.appendChild(checkList(form.options.boundaries, d.boundaries, function (id, on) {
+      toggle(d.boundaries, id, on);
+    }));
+
+    card.appendChild(el("h3", null, "Equipment you actually have"));
+    card.appendChild(checkList(form.options.equipment, d.equipment, function (id, on) {
+      toggle(d.equipment, id, on);
+    }));
+
+    var submit = el("button", "btn btn-primary", "Save setup and open the profiles");
+    submit.type = "button";
+    submit.style.marginTop = "14px";
+    submit.addEventListener("click", function () { act({ type: "submit_setup", setup: buildSetup(d) }); });
+    card.appendChild(submit);
+    return card;
+  }
+
+  function toggle(list, id, on) {
+    var i = list.indexOf(id);
+    if (on && i < 0) list.push(id);
+    if (!on && i >= 0) list.splice(i, 1);
+  }
+
+  function buildSetup(d) {
+    return {
+      player1: {
+        name: d.player1Name,
+        role: d.dominantSlot === "PLAYER_1" ? "DOMINANT" : "SUBMISSIVE",
+        analRole: d.analRoles.PLAYER_1,
+        erectionDifficulty: !!d.erectionDifficulty.PLAYER_1
+      },
+      player2: {
+        name: d.player2Name,
+        role: d.dominantSlot === "PLAYER_2" ? "DOMINANT" : "SUBMISSIVE",
+        analRole: d.analRoles.PLAYER_2,
+        erectionDifficulty: !!d.erectionDifficulty.PLAYER_2
+      },
+      sessionLength: d.sessionLength,
+      explicitness: d.explicitness,
+      finaleFormat: d.finaleFormat,
+      stopWord: d.stopWord,
+      defaultMaybeCondition: d.defaultMaybeCondition,
+      boundaries: d.boundaries,
+      equipment: d.equipment
+    };
+  }
+
+  // ------------------------------------------------------------------ choices
+
+  function dispatchChoice(id) {
+    var i = id.indexOf(":");
+    var head = i < 0 ? id : id.slice(0, i);
+    var arg = i < 0 ? null : id.slice(i + 1);
+
+    switch (head) {
+      case "sign": return act({ type: "proposal_response", response: "SIGN" });
+      case "counteroffer": return act({ type: "proposal_response", response: "COUNTEROFFER" });
+      case "bundle": return act({ type: "proposal_response", response: "BUNDLE" });
+      case "reject": return act({ type: "proposal_response", response: "REJECT" });
+      case "pick_amendment": return act({ type: "pick_amendment", amendment: arg });
+      case "vote_amendment": return act({ type: "vote_amendment", amendment: arg });
+      case "approve_amended": return act({ type: "approve_amended", approve: arg === "true" });
+      case "pick_bundle": return act({ type: "pick_bundle", termId: arg });
+      case "vote_bundle": return act({ type: "vote_bundle", approve: arg === "true" });
+      case "pick_consideration": return act({ type: "pick_consideration", actionId: arg });
+      case "consideration_performed": return act({ type: "consideration_performed" });
+      case "confirm_signature": return act({ type: "confirm_signature", earned: arg === "true" });
+      case "continue": return act({ type: "continue" });
+      case "pick_closing": return act({ type: "pick_closing", termId: arg });
+      case "vote_closing": return act({ type: "vote_closing", approve: arg === "true" });
+      case "pick_finale_order": return act({ type: "pick_finale_order", order: arg });
+      case "exec": return act({ type: "exec", command: arg });
+      case "global_pause": return act({ type: "global_pause" });
+      case "resume": return act({ type: "resume_vote", confirm: true });
+      case "end": return act({ type: "end_session" });
+      case "back": return act({ type: "back" });
+      case "open_draft": return act({ type: "open_draft" });
+      case "close_draft": return act({ type: "close_draft" });
+      case "save_contract": return act({ type: "save_contract" });
+      case "reopen_profile":
+        S.profileDraft = null;
+        if (S.view && S.view.profile) S.view.profile.complete = false;
+        return render();
+      default:
+        return;
+    }
+  }
+
+  // ------------------------------------------------------------------ boot
+
+  function boot() {
+    S.token = tokenFromLocation();
+    S.deviceId = load(KEY_DEVICE);
+    if (!S.deviceId) { S.deviceId = uuid(); save(KEY_DEVICE, S.deviceId); }
+    try { S.resume = JSON.parse(load(KEY_RESUME) || "null"); } catch (e) { S.resume = null; }
+
+    $("pauseBtn").addEventListener("click", function () { act({ type: "global_pause" }); });
+
+    // A phone that comes back from lock or from another app reconnects immediately.
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) connect();
+    });
+    window.addEventListener("online", connect);
+    window.addEventListener("pageshow", connect);
+
+    S.tickTimer = setInterval(paintTimers, 250);
+    connect();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
+})();
