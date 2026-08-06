@@ -106,13 +106,66 @@ floor.
 | `targetSdk` / `compileSdk` | **35** (Android 15) |
 | Java/Kotlin target | Java 17 bytecode, Kotlin 2.2.21 |
 | Built and packaged against | Android SDK Platform 35, Build-Tools 35.0.0 |
-| Tested on device | **None.** Both APKs compile, package, sign and verify, but nothing was installed or run on any Android device, emulator or Shield — this environment has neither. |
-| Tested on JVM | JDK 21 (Ubuntu), producing Java 17 bytecode — the full `:core` suite, 53 tests |
+| Tested on device | **None.** An Android TV emulator (API 30, no hardware acceleration available — no `/dev/kvm` in this environment) was installed and did reach `sys.boot_completed=1` under pure software (TCG) CPU + software GPU emulation, but the qemu process crashed shortly after boot, consistent with a headless SwiftShader/GL failure. A second attempt with `-gpu guest` was abandoned as not worth the time; see section 3a below for what was verified instead. |
+| Tested on JVM | JDK 21 (Ubuntu), producing Java 17 bytecode — the full `:core` suite, 53 tests, plus a live run against a real browser (section 3a) |
 
-The APKs are real, signed and structurally verified against the packaged artifact. Claims that
-need a *running* Android system — the foreground service surviving Doze, Keystore key generation
-on device, Room schema creation, the boot receiver firing, Compose D-pad traversal with a real
-remote — are **compiled and packaged but not executed**.
+The APKs are real, signed and structurally verified against the packaged artifact (section 1).
+Claims that need a *running Android system specifically* — the foreground service surviving
+Doze, Keystore key generation on device, Room schema creation, the boot receiver firing, Compose
+D-pad traversal with a real remote — are compiled and packaged but not executed on Android.
+
+### 3a. What was verified live instead: the real server, the real browser pages, two real phones
+
+The Android emulator route was unreliable in this environment (no hardware acceleration), so
+rather than keep fighting it, the actual runtime behaviour was verified a different way: the
+exact same server code the APK ships — `SessionManager` and `ContractServer`, unmodified — was
+run as a plain JVM process outside Android (`core/src/main/kotlin/com/thecontract/core/devserver/DevServerMain.kt`,
+invoked as `./gradlew :core:run`), and the exact same bundled `controller.html/.css/.js` was
+opened in **real, unmodified headless Chromium** (Playwright, the browser pre-installed in this
+environment) in three separate browser contexts — two acting as the phones, one as an uninvited
+third device. This is not a simulation: it is the shipped server binary and the shipped client
+JS, talking over a real socket, in a real browser's JS engine and real `localStorage`.
+
+Only the Android/Compose television shell and Android-specific services (foreground service,
+Room, Keystore, boot receiver) are outside what this route can exercise — those remain
+compiled-but-unexecuted per the table above.
+
+What this run demonstrated, live, with the transcript and eleven screenshots kept at
+`docs/live-verification/` (script: `browser-drive-script.js`):
+
+* Player 1 connects and gets the real setup form; Player 2 connects and correctly sees a
+  waiting screen with no setup access; a third browser is refused with the exact
+  `SESSION_FULL` message and receives no `STATE_SNAPSHOT` at all.
+* Player 1 fills in and submits the real HTML form — names, stop word, 10 of the boundary
+  checkboxes (leaving equipment at zero) — and both phones transition to their private profiles
+  simultaneously.
+* Both phones use the real "Everything Yes" bulk control and "Save and finish", and both land on
+  the first proposed term at the same moment.
+* **The eligibility engine filtered live, correctly, on a boundary the test happened to select**:
+  the screenshot shows `"A proposal was blocked by your shared boundary: No toys. It was
+  replaced and nothing was used up."` — this was not scripted, it fell out of checking the
+  boundary box and equipment being empty, exactly the section 21 behaviour the tests assert in
+  isolation, now observed end to end.
+* The proposed term rendered was `"Marcus kisses Dan deeply, leading with his tongue and setting
+  the pace throughout."` — real name substitution, real style-engine output, a real library term
+  chosen because it needed no equipment neither player had.
+* The benefit explanation rendered as natural language with no numbers: `"Dan benefits more from
+  this term because Dan is on the receiving end of the kissing, which is where the pleasure sits
+  in this one. Dan therefore earns Marcus's signature."`
+* Both phones signed; the state correctly forked — Marcus (not the beneficiary) saw a neutral
+  waiting screen, Dan (the beneficiary) saw six real, varied consideration options, each
+  correctly captioned "Dan performs this for Marcus."
+* **Dan's browser tab was then reloaded** — the real equivalent of a locked phone or a closed and
+  reopened browser tab — and came back to the *exact same* consideration screen, having resumed
+  through the stored token in real `localStorage`, matching section 8 precisely.
+
+One real, small bug was found and fixed by this exercise (not something the JUnit suite could
+catch, since it never renders into a DOM): `render()` and `renderMessage()` rebuilt the heading
+and body elements on every state update without carrying over their `id="heading"`/`id="body"`
+attributes, so a page that had received at least one server message lost those hooks. It had no
+visible effect on a real user — nothing else in the client reads those ids — but it is now fixed
+in `controller.js`, and this is exactly the kind of thing that only shows up when the real
+client actually runs in a real DOM.
 
 ---
 

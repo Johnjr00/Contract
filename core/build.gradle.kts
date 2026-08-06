@@ -1,6 +1,12 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
+    application
+}
+
+application {
+    // Runs the embedded server standalone for manual testing: ./gradlew :core:run
+    mainClass.set("com.thecontract.core.devserver.DevServerMainKt")
 }
 
 // Java 17 bytecode: required by D8/R8 when :app packages this module into the APK, while

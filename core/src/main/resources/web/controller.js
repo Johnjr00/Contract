@@ -219,8 +219,12 @@
     var main = $("main");
     main.textContent = "";
     var card = el("section", "card");
-    card.appendChild(el("h1", null, heading));
-    card.appendChild(el("p", "body", body));
+    var headingEl = el("h1", null, heading);
+    headingEl.id = "heading";
+    var bodyEl = el("p", "body", body);
+    bodyEl.id = "body";
+    card.appendChild(headingEl);
+    card.appendChild(bodyEl);
     main.appendChild(card);
   }
 
@@ -248,8 +252,14 @@
     main.textContent = "";
 
     var head = el("section", "card");
-    head.appendChild(el("h1", null, v.heading || ""));
-    if (v.body) head.appendChild(el("p", "body", v.body));
+    var headingEl = el("h1", null, v.heading || "");
+    headingEl.id = "heading";
+    head.appendChild(headingEl);
+    if (v.body) {
+      var bodyEl = el("p", "body", v.body);
+      bodyEl.id = "body";
+      head.appendChild(bodyEl);
+    }
     if (v.waiting) {
       var w = el("div", "waiting");
       w.appendChild(el("span", "dot"));
