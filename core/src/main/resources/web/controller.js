@@ -131,26 +131,29 @@
   }
 
   /**
-   * Resends any action that could not be sent because the socket was mid-reconnect. Safe to call
-   * on every reconnect: each envelope keeps its original actionId, and the server already
-   * deduplicates by actionId and rejects a stale expectedVersion, so a resend can only be a
-   * harmless no-op if the original somehow did get through, or applied exactly once if it did not.
+   * Resends every action still awaiting a reply. Safe to call on every reconnect: each envelope
+   * keeps its original actionId, and the server already deduplicates by actionId and rejects a
+   * stale expectedVersion, so a resend can only be a harmless no-op if the original somehow did
+   * get through, or applied exactly once if it did not. An envelope is removed from the queue
+   * only once its ACTION_ACCEPTED/ACTION_REJECTED reply arrives (see handle()), not merely
+   * because send() returned true -- a send can succeed locally and still never reach the server
+   * if the connection drops in the window before the reply comes back.
    */
   function flushPending() {
-    if (!S.pendingActions.length) return;
-    var remaining = [];
-    S.pendingActions.forEach(function (envelope) {
-      if (!send(envelope)) remaining.push(envelope);
-    });
-    S.pendingActions = remaining;
+    S.pendingActions.forEach(function (envelope) { send(envelope); });
+  }
+
+  function removePending(actionId) {
+    S.pendingActions = S.pendingActions.filter(function (envelope) { return envelope.actionId !== actionId; });
   }
 
   function act(action) {
     var envelope = { type: "PLAYER_ACTION", actionId: uuid(), expectedVersion: S.version, action: action };
+    S.pendingActions.push(envelope);
     if (!send(envelope)) {
       // A brief reconnect (a real one happens even on a healthy local network) must not silently
-      // drop the tap that triggered it -- queue it and let flushPending() resend once reconnected.
-      S.pendingActions.push(envelope);
+      // drop the tap that triggered it -- it stays queued and flushPending() resends it once
+      // reconnected.
       toast("Not connected. Will send again once reconnected.");
       connect();
     }
@@ -214,10 +217,12 @@
 
       case "ACTION_ACCEPTED":
         S.version = msg.version;
+        removePending(msg.actionId);
         return;
 
       case "ACTION_REJECTED":
         S.version = msg.version;
+        removePending(msg.actionId);
         if (msg.code === "STALE_VERSION") {
           toast("That screen had moved on. Showing the current one.");
         } else if (msg.code !== "DUPLICATE") {
