@@ -12,16 +12,16 @@ Both APKs were built and verified.
 | --- | --- |
 | Debug APK | `app/build/outputs/apk/debug/app-debug.apk` |
 | | application id `com.thecontract.tv.debug` |
-| | SHA-256 `d177d109090a275252b47dd58cc5f2d786d1d12c195ff7dce22eb07ce8bd2366` |
+| | SHA-256 `5757d0fed7faeb989968e9c197a2cf3c1c87a8fa97f48da73ced0433526abb7b` |
 | Release APK | `app/build/outputs/apk/release/app-release.apk` |
 | | application id `com.thecontract.tv`, minified and resource-shrunk by R8 |
-| | SHA-256 `90c050a3f2f11f48f94fcd84347fc39312b5beab396b76b55ee255250bb61699` |
+| | SHA-256 `9a8b6f7660db5d4d8371f5a6d0043cf74dd2377367cd5d892bca66cba9e08cb8` |
 | Release signature | APK Signature Scheme v2, verified with `apksigner verify` |
 | | signer `CN=The Contract, OU=TheContract, O=TheContract, L=Unknown, ST=Unknown, C=US` |
 | | certificate SHA-256 `d460e29876eda8d73e6b1af100f78942b26ac8ab28d33aaa7f42ca605bef25e0` |
 
-These are the hashes as of the crash fix in "Regex crash after both private profiles save" below.
-The signing cert is unchanged from the previous fix (same keystore).
+These are the hashes as of the content fixes in "Full manual playtest: three complete games" in
+section 4a below. The signing cert is unchanged from the previous fix (same keystore).
 
 Toolchain actually used: AGP 8.7.3, Kotlin 2.2.21, KSP 2.2.21-2.0.4, Compose BOM 2024.10.01,
 Room 2.6.1, Android SDK Platform 35, Build-Tools 35.0.0, Gradle 8.14.3, JDK 21 emitting Java 17
