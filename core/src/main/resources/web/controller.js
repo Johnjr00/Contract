@@ -32,7 +32,8 @@
     timerAnchor: 0,
     profileDraft: null,
     setupDraft: null,
-    reclaim: null
+    reclaim: null,
+    pendingActions: []
   };
 
   // ------------------------------------------------------------------ helpers
@@ -99,6 +100,7 @@
       if (S.resume && S.resume.token) hello.resumeToken = S.resume.token;
       send(hello);
       startPing();
+      flushPending();
     };
 
     ws.onmessage = function (event) {
@@ -128,9 +130,28 @@
     return true;
   }
 
+  /**
+   * Resends any action that could not be sent because the socket was mid-reconnect. Safe to call
+   * on every reconnect: each envelope keeps its original actionId, and the server already
+   * deduplicates by actionId and rejects a stale expectedVersion, so a resend can only be a
+   * harmless no-op if the original somehow did get through, or applied exactly once if it did not.
+   */
+  function flushPending() {
+    if (!S.pendingActions.length) return;
+    var remaining = [];
+    S.pendingActions.forEach(function (envelope) {
+      if (!send(envelope)) remaining.push(envelope);
+    });
+    S.pendingActions = remaining;
+  }
+
   function act(action) {
-    if (!send({ type: "PLAYER_ACTION", actionId: uuid(), expectedVersion: S.version, action: action })) {
-      toast("Not connected yet. Trying again.");
+    var envelope = { type: "PLAYER_ACTION", actionId: uuid(), expectedVersion: S.version, action: action };
+    if (!send(envelope)) {
+      // A brief reconnect (a real one happens even on a healthy local network) must not silently
+      // drop the tap that triggered it -- queue it and let flushPending() resend once reconnected.
+      S.pendingActions.push(envelope);
+      toast("Not connected. Will send again once reconnected.");
       connect();
     }
   }
