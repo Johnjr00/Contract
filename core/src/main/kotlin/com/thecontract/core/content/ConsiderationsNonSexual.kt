@@ -321,7 +321,7 @@ internal object ConsiderationsNonSexual {
         c(
             id = "cn_ear_with_fingering", intensity = 4, family = F_EAR, cats = setOf(EAR_PLAY),
             title = "Ear play while he is fingered",
-            base = "{G} works {R+} ear with his mouth while [v_finger] him with #lubricant#, both at the same rhythm.",
+            base = "{G} works {R+} ear with his mouth while he [v_finger] him with #lubricant#, both at the same rhythm.",
             explicit = "{G} works {R+} ear with his mouth while he [v_finger] him with #lubricant#, both moving in the same rhythm.",
             acts = setOf("ear_play", "fingering"), anal = true,
             equip = setOf(Equipment.LUBRICANT),

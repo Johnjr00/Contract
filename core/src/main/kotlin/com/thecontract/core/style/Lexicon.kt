@@ -35,7 +35,7 @@ object Lexicon {
         // --- Oral -------------------------------------------------------------------------
         k("v_suck", "worships", "sucks", "sucks", "swallows")
         k("v_suck_slow", "takes his time over", "sucks slowly on", "works over", "works over")
-        k("v_deep", "takes deep", "takes deep into his throat", "takes down his throat", "buries in his throat")
+        k("v_deep", "sinks slowly onto", "takes deeper onto", "works his throat onto", "forces himself down onto")
         k("v_lick", "traces his tongue over", "licks", "licks", "laps at")
         k("v_mouth", "attends to", "works", "works over", "uses")
         k("v_tongue", "circles his tongue around", "runs his tongue over", "drags his tongue over", "drags his tongue over")
@@ -43,8 +43,8 @@ object Lexicon {
         k("n_mouth_use", "attention", "mouth work", "mouth", "throat")
 
         // --- Rimming ----------------------------------------------------------------------
-        k("v_rim", "opens with his tongue", "rims", "eats out", "eats out")
-        k("v_rim_hard", "works open with his tongue", "rims hard", "tongue-fucks", "tongue-fucks")
+        k("v_rim", "works his tongue over", "rims", "tongues", "eats")
+        k("v_rim_hard", "works his tongue deep into", "rims hard into", "tongue-fucks", "tongue-fucks")
         k("n_rim", "tongue work", "rimming", "rimming", "rimming")
 
         // --- Kissing ----------------------------------------------------------------------
@@ -67,11 +67,11 @@ object Lexicon {
         k("v_knead", "kneads", "kneads", "digs into", "digs into")
 
         // --- Anal -------------------------------------------------------------------------
-        k("v_finger", "opens with one finger", "fingers", "fingers", "works open with his fingers")
-        k("v_finger_deep", "works deeper with two fingers", "fingers deep with two fingers", "fucks with two fingers", "fucks open with two fingers")
+        k("v_finger", "opens", "fingers", "fingers", "finger-fucks")
+        k("v_finger_deep", "works deeper into", "fingers deep into", "finger-fucks deep into", "finger-fucks hard into")
         k("v_open", "opens", "opens up", "opens up", "works open")
         k("v_fuck", "takes", "fucks", "fucks", "fucks")
-        k("v_fuck_hard", "moves hard into", "fucks hard", "fucks hard", "pounds")
+        k("v_fuck_hard", "moves hard into", "fucks hard into", "drives hard into", "pounds")
         k("v_enter", "eases into", "pushes into", "pushes into", "shoves into")
         k("v_bottom_take", "takes", "takes", "takes", "takes every inch of")
         k("adv_thrust_slow", "in long, slow strokes", "in long, slow strokes", "in long, slow strokes", "in long, deep strokes")
@@ -84,7 +84,7 @@ object Lexicon {
         k("adv_toy_pace", "on a low setting", "on a low setting", "on a high setting", "on the highest setting he can take")
 
         // --- Rough play -------------------------------------------------------------------
-        k("v_pin", "holds down", "pins", "pins", "pins down hard")
+        k("v_pin", "holds", "pins", "presses", "clamps")
         k("v_handle", "moves", "handles", "handles roughly", "manhandles")
         k("v_shove", "guides", "pushes", "shoves", "shoves")
         k("v_spank", "swats", "spanks", "spanks", "cracks his hand across")

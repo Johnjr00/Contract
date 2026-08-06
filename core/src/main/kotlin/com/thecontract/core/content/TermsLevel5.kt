@@ -406,7 +406,7 @@ internal object TermsLevel5 {
         t(
             id = "l5_bdsm_degradation_scene", level = 5, cats = setOf(LANGUAGE, POWER, ROUGH),
             title = "Talked down and taken",
-            base = "{DOM} talks {SUB} down in the agreed terms while [v_handle] him, from start to finish.",
+            base = "{DOM} talks {SUB} down in the agreed terms while he [v_handle] him, from start to finish.",
             explicit = "{DOM} talks {SUB} down in the agreed terms the entire time he [v_handle] him, and does not soften it once.",
             benefit = GIVER, type = BenefitType.OWNERSHIP,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,

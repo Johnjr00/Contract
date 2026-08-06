@@ -287,7 +287,7 @@ internal object ClimaxTerms {
         t(
             id = "cx_np_worship_and_kissing", level = 5, cats = setOf(CLIMAX, KISSING), climax = true,
             title = "Worshipped and kissed until he finishes",
-            base = "{G} works {R+} chest, neck and stomach with his mouth while [v_stroke] him with #lubricant# until he finishes. If the timer ends first, both continue as they are until he does.",
+            base = "{G} works {R+} chest, neck and stomach with his mouth while he [v_stroke] him with #lubricant# until he finishes. If the timer ends first, both continue as they are until he does.",
             explicit = "{G} works {R+} chest, neck and stomach with his mouth while he [v_stroke] him with #lubricant# until he [v_come]. If the timer ends first, both carry on exactly as they are until he is done.",
             benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
             acts = setOf("body_worship", "neck_kissing"),
@@ -297,7 +297,7 @@ internal object ClimaxTerms {
         t(
             id = "cx_np_neck_and_ear", level = 5, cats = setOf(CLIMAX, EAR_PLAY, KISSING), climax = true,
             title = "Neck and ears until he finishes",
-            base = "{G} alternates between {R+} neck and both ears with his mouth while [v_stroke] him until he finishes. If the timer ends first, he keeps moving between them at the same pace until he does.",
+            base = "{G} alternates between {R+} neck and both ears with his mouth while he [v_stroke] him until he finishes. If the timer ends first, he keeps moving between them at the same pace until he does.",
             explicit = "{G} moves between {R+} neck and both ears with his mouth while he [v_stroke] him until he [v_come]. If the timer ends first he keeps moving between them at that pace until he is done.",
             benefit = RECEIVER, type = BenefitType.EAR_PLAY_RECIPIENT,
             acts = setOf("ear_play", "neck_kissing"),

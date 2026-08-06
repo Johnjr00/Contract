@@ -363,6 +363,58 @@ repeated words, malformed possessives, spacing before punctuation and mid-senten
 lexicon integrity. Plus: every register produces different text, the bundled web assets contain
 no external reference and no PWA machinery.
 
+### 4a. Full manual playtest: three complete games, real client and server
+
+Beyond the automated suite, three complete games were played start to finish against the real
+dev server through the real `controller.html/.css/.js`, using two headless-Chromium tabs driven
+by a purpose-built auto-player (not the JVM test harness) so every screen a real phone would
+render — every proposed term, consideration option, amendment, closing term and the full final
+draft — could be read and checked for sense, not just structurally validated. Setup, private
+profiles, negotiation (including a rejection, one- and two-sided counteroffers with amendment
+ballots, a bundle trade, and Back navigation), considerations, final execution and contract save
+were all driven through the actual wire protocol.
+
+- **Game 1** — broad profile (`Setups.broad`): all-Yes, all 28 equipment, Vers/Vers, Extremely
+  filthy, three-orders finale. Completed with the full 10-regular/2-closing contract.
+- **Game 2** — mixed profile: Yes/Maybe/No across preference sections, Vers Top/Vers Bottom, one
+  player with erection difficulty, three shared boundaries (no marks, no degradation, no foot
+  play), Filthy explicitness, Dominant-private finale. Confirmed the boundary system correctly
+  blocked and silently replaced 5 proposals that would have violated a boundary, and that only
+  the Dominant's phone saw the finale-order choice.
+- **Game 3** — restrictive profile: no anal for either player (role and boundary both set), no
+  toys, no pain, no rough sex, no degradation, no foot play, both players with erection
+  difficulty, Erotic (mildest) explicitness, uninterrupted finale. Confirmed 24 boundary-blocked
+  substitutions with zero violating content in the final contract, and that erection-difficulty
+  exclusion is scoped to content actually requiring an erection rather than all orgasm content.
+
+**Two real content bugs found and fixed** (neither could have been caught by the JVM test suite,
+which never renders through a real browser, or by the earlier live-verification in section 3a,
+which only ever drove the pure-JVM dev server's happy path — this was the first time the full
+negotiation, consideration and closing-term content was actually read end to end):
+
+1. **Grammatically broken sentences from seven `Lexicon` verb entries.** Several verb phrases
+   (`v_finger`, `v_finger_deep`, `v_rim`, `v_rim_hard`, `v_deep`, `v_fuck_hard`, `v_pin`) were
+   authored as complete prepositional phrases (e.g. `"works open with his fingers"`) or ended in
+   a bare adjective (e.g. `"fucks hard"`), but every calling template inserts the object
+   immediately after the token (`{G} [v_finger] {R}`) — the documented contract for the whole
+   lexicon. Live output was visibly broken: *"Dan fucks open with two fingers him with lube"*,
+   *"Marcus works open with his fingers him with lube"*. Fixed by rewriting each affected entry so
+   every register ends bare or in a preposition that can legitimately take the following object
+   (`"finger-fucks"`, `"works his tongue over"`, `"sinks slowly onto"`, `"fucks hard into"`,
+   `"clamps"`, etc.), verified by rereading the actual rendered text in all three games afterward.
+2. **A missing subject pronoun in four `base`-register templates** (`ClimaxTerms` ×2,
+   `ConsiderationsNonSexual` ×1, `TermsLevel5` ×1) — each read `"... while [v_x] him ..."` where
+   the sibling `explicit` line correctly had `"... while he [v_x] him ..."`. Only reachable at
+   Erotic/Direct explicitness (`base` is used below Filthy), which is why Game 3's transcript is
+   what caught it. Fixed by adding the missing `he`.
+
+All 53 automated tests, including content validation, still pass after both fixes. One further
+issue was found in the process but was in the manual test harness, not the app: the client's
+"Back" fallback button is not enclosed in `.choices .btn` like every other button (it renders
+directly under `#main`, see `controller.js` `render()`), so a `.choices`-scoped click helper
+cannot find it — confirmed working correctly (present within 200ms of signing, every time) once
+checked with an unscoped selector.
+
 ---
 
 ## 5. Requirement coverage
