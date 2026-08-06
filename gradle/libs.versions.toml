@@ -19,9 +19,7 @@ androidxCore = "1.13.1"
 androidxLifecycle = "2.8.7"
 androidxActivity = "1.9.3"
 composeBom = "2024.10.01"
-androidxTv = "1.0.0"
 room = "2.6.1"
-androidxSecurity = "1.1.0-alpha06"
 ksp = "2.2.21-2.0.4"
 
 [libraries]
@@ -50,11 +48,9 @@ androidx-compose-ui = { module = "androidx.compose.ui:ui" }
 androidx-compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-compose-foundation = { module = "androidx.compose.foundation:foundation" }
-androidx-tv-material = { module = "androidx.tv:tv-material", version.ref = "androidxTv" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
-androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "androidxSecurity" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

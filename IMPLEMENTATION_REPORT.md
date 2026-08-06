@@ -1,0 +1,367 @@
+# Implementation report
+
+Generated from the repository at the tip of `claude/contract-android-tv-app-1ogltr`.
+
+---
+
+## 1. Artifacts
+
+Both APKs were built and verified.
+
+| | |
+| --- | --- |
+| Debug APK | `app/build/outputs/apk/debug/app-debug.apk` — 8,066,424 bytes |
+| | application id `com.thecontract.tv.debug` |
+| | SHA-256 `def12ef108e1b1c486355787789f1c577f6b41b642993df47f51e7350162e9b0` |
+| Release APK | `app/build/outputs/apk/release/app-release.apk` — 1,265,143 bytes |
+| | application id `com.thecontract.tv`, minified and resource-shrunk by R8 |
+| | SHA-256 `3390eb18b53547ac16280626fe7b12cd91596f587d512f0be59e87157adebb87` |
+| Release signature | APK Signature Scheme v2, verified with `apksigner verify` |
+| | signer `CN=The Contract, OU=Local, O=The Contract, L=Local, ST=Local, C=GB` |
+| | certificate SHA-256 `810b62c47c08223bb183e74ce4f390ee0d06da8ca5899ba63823b00bd60d6364` |
+
+Toolchain actually used: AGP 8.7.3, Kotlin 2.2.21, KSP 2.2.21-2.0.4, Compose BOM 2024.10.01,
+Room 2.6.1, Android SDK Platform 35, Build-Tools 35.0.0, Gradle 8.14.3, JDK 21 emitting Java 17
+bytecode.
+
+Verified on the built artifacts rather than asserted from source:
+
+* `aapt2 dump badging` reports `leanback-launchable-activity` for
+  `com.thecontract.tv.ui.MainActivity` with the TV banner — the Android TV launcher intent is
+  wired correctly.
+* `uses-feature-not-required` for `android.hardware.touchscreen`, plus camera, microphone and
+  gamepad; `uses-feature: android.software.leanback` is required. The app declares television
+  support and does not require a touchscreen.
+* `targetSdkVersion` 35, `compileSdkVersion` 35.
+* Permissions in the shipped manifest are exactly the eight declared — `INTERNET`,
+  `ACCESS_NETWORK_STATE`, `ACCESS_WIFI_STATE`, `FOREGROUND_SERVICE`,
+  `FOREGROUND_SERVICE_SPECIAL_USE`, `RECEIVE_BOOT_COMPLETED`, `WAKE_LOCK`,
+  `POST_NOTIFICATIONS` — with no analytics, advertising or tracking permission of any kind.
+* The phone controller survives R8 intact inside the release APK: `web/controller.html` (1,084 B),
+  `web/controller.css` (7,802 B) and `web/controller.js` (31,508 B) are present and byte-identical
+  to source, and a grep across all three finds **zero** occurrences of `http://`, `https://`,
+  `cdn` or `googleapis`. Nothing is fetched from outside the APK.
+* Release `classes.dex` carries 15,355 method references — no multidex needed.
+
+### Note on the signing key
+
+The release APK is signed with a self-signed keystore generated in the build container
+(`the-contract-release.jks`, alias `the-contract`). It is deliberately **not** committed — `*.jks`
+and `keystore.properties` are git-ignored. For anything you intend to keep updating, generate
+your own keystore and back it up; the procedure is in BUILD.md. Reinstalling over this APK with
+a differently-signed build requires `adb uninstall com.thecontract.tv` first.
+
+### Build fixes this uncovered
+
+Compiling `:app` for the first time surfaced problems that source review had not:
+
+1. **Plugin classloader split.** Declaring the Kotlin plugin on the root build classpath while
+   AGP resolved only in `:app` made `kotlin-android` fail with
+   `NoClassDefFoundError: com/android/build/gradle/api/BaseVariant` — the Kotlin plugin reflects
+   on AGP types and the two must share a classloader. Fixed by removing the root `plugins {}`
+   block so each module resolves its own; this also keeps AGP off the classpath entirely when no
+   Android SDK is present and only `:core` is configured.
+2. **`fallbackToDestructiveMigration(dropAllTables = true)`** does not exist in Room 2.6.1 (it
+   arrives in 2.7). Reverted to the no-argument overload.
+3. **A Kotlin default parameter value on a Room DAO method**, which Room cannot generate against.
+   Removed, with the constant passed at the call site.
+4. **A `kotlin { }` block nested inside `android { }`**, which AGP 8.7 does not expose. Moved to
+   the top level.
+
+Items 2–4 were found and fixed by review before the SDK became available; item 1 could only be
+found by actually running the build.
+
+## 2. Counts
+
+| Item | Count | Specification floor |
+| --- | ---: | ---: |
+| Proposed contract terms | **202** | 202 |
+| — level 1 (Chemistry) | 42 | 42 |
+| — level 2 (Access) | 40 | 40 |
+| — level 3 (Privilege) | 40 | 40 |
+| — level 4 (Authority) | 40 | 40 |
+| — level 5 (Enforcement) | 40 | 40 |
+| Closing (climax) term options | **28** | — |
+| Consideration actions | **124** | 120 |
+| Private preferences | **147** | 132 |
+| Equipment options | **28** | 28 |
+| Shared hard boundaries | **13** | 13 |
+| Maybe conditions | 11 | 11 |
+| Counteroffer amendments | 11 | 11 |
+| Explicitness lexicon entries | 73 × 4 registers | — |
+
+Consideration actions break down as 16 massage, 8 kissing, 15 ear play and 85 sexual, covering
+every item the specification enumerates.
+
+Counts are asserted by the test suite, so the build fails if the library ever drops below a
+floor.
+
+---
+
+## 3. Android versions
+
+| | |
+| --- | --- |
+| `minSdk` | **26** (Android 8.0) — the level at which notification channels and `startForegroundService` exist, and comfortably below any Shield running current Shield Experience |
+| `targetSdk` / `compileSdk` | **35** (Android 15) |
+| Java/Kotlin target | Java 17 bytecode, Kotlin 2.2.21 |
+| Built and packaged against | Android SDK Platform 35, Build-Tools 35.0.0 |
+| Tested on device | **None.** An Android TV emulator (API 30, no hardware acceleration available — no `/dev/kvm` in this environment) was installed and did reach `sys.boot_completed=1` under pure software (TCG) CPU + software GPU emulation, but the qemu process crashed shortly after boot, consistent with a headless SwiftShader/GL failure. A second attempt with `-gpu guest` was abandoned as not worth the time; see section 3a below for what was verified instead. |
+| Tested on JVM | JDK 21 (Ubuntu), producing Java 17 bytecode — the full `:core` suite, 53 tests, plus a live run against a real browser (section 3a) |
+
+The APKs are real, signed and structurally verified against the packaged artifact (section 1).
+Claims that need a *running Android system specifically* — the foreground service surviving
+Doze, Keystore key generation on device, Room schema creation, the boot receiver firing, Compose
+D-pad traversal with a real remote — are compiled and packaged but not executed on Android.
+
+### 3a. What was verified live instead: the real server, the real browser pages, two real phones
+
+The Android emulator route was unreliable in this environment (no hardware acceleration), so
+rather than keep fighting it, the actual runtime behaviour was verified a different way: the
+exact same server code the APK ships — `SessionManager` and `ContractServer`, unmodified — was
+run as a plain JVM process outside Android (`core/src/main/kotlin/com/thecontract/core/devserver/DevServerMain.kt`,
+invoked as `./gradlew :core:run`), and the exact same bundled `controller.html/.css/.js` was
+opened in **real, unmodified headless Chromium** (Playwright, the browser pre-installed in this
+environment) in three separate browser contexts — two acting as the phones, one as an uninvited
+third device. This is not a simulation: it is the shipped server binary and the shipped client
+JS, talking over a real socket, in a real browser's JS engine and real `localStorage`.
+
+Only the Android/Compose television shell and Android-specific services (foreground service,
+Room, Keystore, boot receiver) are outside what this route can exercise — those remain
+compiled-but-unexecuted per the table above.
+
+What this run demonstrated, live, with the transcript and eleven screenshots kept at
+`docs/live-verification/` (script: `browser-drive-script.js`):
+
+* Player 1 connects and gets the real setup form; Player 2 connects and correctly sees a
+  waiting screen with no setup access; a third browser is refused with the exact
+  `SESSION_FULL` message and receives no `STATE_SNAPSHOT` at all.
+* Player 1 fills in and submits the real HTML form — names, stop word, 10 of the boundary
+  checkboxes (leaving equipment at zero) — and both phones transition to their private profiles
+  simultaneously.
+* Both phones use the real "Everything Yes" bulk control and "Save and finish", and both land on
+  the first proposed term at the same moment.
+* **The eligibility engine filtered live, correctly, on a boundary the test happened to select**:
+  the screenshot shows `"A proposal was blocked by your shared boundary: No toys. It was
+  replaced and nothing was used up."` — this was not scripted, it fell out of checking the
+  boundary box and equipment being empty, exactly the section 21 behaviour the tests assert in
+  isolation, now observed end to end.
+* The proposed term rendered was `"Marcus kisses Dan deeply, leading with his tongue and setting
+  the pace throughout."` — real name substitution, real style-engine output, a real library term
+  chosen because it needed no equipment neither player had.
+* The benefit explanation rendered as natural language with no numbers: `"Dan benefits more from
+  this term because Dan is on the receiving end of the kissing, which is where the pleasure sits
+  in this one. Dan therefore earns Marcus's signature."`
+* Both phones signed; the state correctly forked — Marcus (not the beneficiary) saw a neutral
+  waiting screen, Dan (the beneficiary) saw six real, varied consideration options, each
+  correctly captioned "Dan performs this for Marcus."
+* **Dan's browser tab was then reloaded** — the real equivalent of a locked phone or a closed and
+  reopened browser tab — and came back to the *exact same* consideration screen, having resumed
+  through the stored token in real `localStorage`, matching section 8 precisely.
+
+One real, small bug was found and fixed by this exercise (not something the JUnit suite could
+catch, since it never renders into a DOM): `render()` and `renderMessage()` rebuilt the heading
+and body elements on every state update without carrying over their `id="heading"`/`id="body"`
+attributes, so a page that had received at least one server message lost those hooks. It had no
+visible effect on a real user — nothing else in the client reads those ids — but it is now fixed
+in `controller.js`, and this is exactly the kind of thing that only shows up when the real
+client actually runs in a real DOM.
+
+---
+
+## 4. Multiplayer scenarios tested
+
+53 tests, all passing (`./gradlew :core:test`). Report at
+`core/build/reports/tests/test/index.html`.
+
+### Game 1 — broad profile (6 tests)
+Both players Yes to everything, all 28 equipment items, Vers and Vers, Extremely filthy.
+Exercised in one run: direct signatures, a rejection, a one-sided counteroffer, a both-sided
+counteroffer with an amendment ballot, a bundle trade, Back out of a proposal, Back out of a
+consideration choice, a refused consideration that was repeated, both closing terms, and guided
+final execution. Verified: exactly 10 regular slots consumed and exactly 2 closing terms; no
+duplicate term, receipt or signature; every signed term carries a consideration receipt; no
+consideration action leaked into the contract; both players are guaranteed to finish;
+beneficiaries assigned correctly and absent exactly for mutual terms; over 20 timers driven;
+climax terms last in the running order; TV and both phones on the same state version.
+Additionally: all three finale orders run to completion, a finale disagreement is resolved by
+the Dominant, the uninterrupted format silently uses Smooth Escalation with levels ascending,
+and a 15-term contract with two bundles still lands on exactly 15.
+
+### Game 2 — mixed profile (5 tests)
+Yes/Maybe/No answers, six equipment items, Vers Top and Vers Bottom, Player 2 with the
+erection-difficulty option, No visible marks / No degradation / No foot play, private Dominant
+finale, and Player 2 disconnecting mid-negotiation and reconnecting with his stored token.
+Verified: the game completes; the slot shows as disconnected rather than being released, and the
+returning phone gets its own slot back; no unavailable equipment appears in any signed term,
+consideration or view; no marking equipment, no degradation and no foot content anywhere;
+erection-dependent content never lands on Player 2 in a regular term, while receiving oral stays
+available to him and erection-dependent content returns only in his own closing term, which
+carries a written fallback; a Maybe condition demonstrably rewrites the instruction text and
+timers rather than appending a contradictory note; and the Dominant's private finale choice never
+appears in any TV view before submission.
+
+### Game 3 — restrictive profile (3 tests)
+Both players with erection difficulty, No anal activity, No anal penetration, No toys, No pain,
+No rough sex, No degradation, No foot play, three equipment items, one uninterrupted finale —
+with a simulated process death mid-negotiation and a second restart before the finale, both
+through a real on-disk store. Verified: the session restores both times, both phones reclaim
+their own slots with their tokens, profiles survive and stay private, the contract still
+completes at exactly 10 + 2, Smooth Escalation is used automatically, consideration stays varied
+in a very narrow pool, both closing terms are generated, and no anal, toy, pain, rough,
+degradation or foot content leaks anywhere. A separate test confirms a restrictive couple still
+has at least two usable closing options each, and another walks every TV view produced across a
+whole game asserting that no preference id and no preference label ever appears.
+
+### Protocol and pairing (20 tests)
+First phone becomes Player 1, second becomes Player 2, third gets `SESSION_FULL` and no game
+state; only Player 1 can submit the shared setup and Player 2 sees no setup form at all; the QR
+code disappears once both phones connect; a refreshed phone returns to its own slot and cannot
+become the other player; an unknown browser needs TV-remote confirmation to take an occupied
+slot; the remote can release a slot and restart pairing without losing the setup; a replayed
+action id is applied exactly once and does not even bump the version; a stale state version is
+rejected; a second response from the same phone is ignored; only the performer controls the
+consideration timers with the TV remote always allowed as backup, a second start is not a
+restart, and timers run on the server clock; either phone can pause immediately, the paused
+screen blames nobody, ordinary actions are refused while paused, and resuming needs both phones
+— or the TV remote alone; pause works from a phone several versions behind; the draft opens and
+closes back into the byte-identical prior state; Back never duplicates a vote, term or receipt
+and cannot reopen a signed term; interface selection, address change and QR regeneration leave
+the game state untouched; interface ranking ignores loopback, link-local and VPN; invalid join
+tokens are refused and rate-limited per address; join tokens are long, URL-safe and unique; the
+QR matrix encodes the join URL offline.
+
+### Network, over real sockets (6 tests)
+The controller page and its assets are served from the bundled resources with correct content
+types; an invalid join token gives 403 and path traversal is blocked; the server falls back to
+another port when the preferred one is taken and advertises the port it actually bound; two
+phones join over a real WebSocket and a third is told the session is full and gets no state; the
+heartbeat is answered; a phone that drops its socket keeps its slot and reclaims it on
+reconnect.
+
+### Persistence (7 tests)
+Every meaningful mutation is written through, including reconnect tokens; a running timer is
+restored **paused** at the last safely persisted value and the per-second countdown is never
+written to storage; an unfinished session is offered as Resume or Start New on a cold launch and
+is never silently destroyed; a completed contract can be saved, listed, reopened from a cold
+store and deleted; abandoning removes it; a half-written session file does not corrupt the next
+launch.
+
+### Content validation (6 tests)
+Section 44 in full: minimum counts and per-level distribution, unique ids, valid preference,
+equipment, boundary and role references, positive timer durations, no unresolved placeholders in
+any of the four registers across every legal binding, no forbidden content, no female or gendered
+wording, no unavailable-item leak (each term is re-checked with each of its required items
+removed, and every toy-using term must be blocked by the No-toys boundary), valid benefit
+assignments, valid closing-term beneficiaries with a written fallback, grammar checks for
+repeated words, malformed possessives, spacing before punctuation and mid-sentence capitals, and
+lexicon integrity. Plus: every register produces different text, the bundled web assets contain
+no external reference and no PWA machinery.
+
+---
+
+## 5. Requirement coverage
+
+| Area | Status |
+| --- | --- |
+| Native Kotlin Android TV app, Compose, leanback launcher intent, touchscreen not required | Built; verified in the packaged APK |
+| Embedded HTTP + WebSocket server (NanoHTTPD/NanoWSD), pinned versions | Written and tested over real sockets |
+| Room persistence, Keystore encryption, no release logging | Built; not executed on a device |
+| Offline QR generation (ZXing core, bundled) | Written and tested |
+| Phone controllers as plain bundled HTML/CSS/JS | Written and tested (no CDN, no PWA) |
+| Interface detection, selection, address change, port fallback | Written and tested |
+| Exactly two slots, third device refused | Written and tested |
+| Secure tokens, reconnection, TV-confirmed reclaim, rate limiting | Written and tested |
+| Server-authoritative state, versioning, idempotency | Written and tested |
+| Persistence across restart and reboot, paused timer restore | Tested on the JVM; the boot-receiver path is built but not executed |
+| Saved games and contracts | Written and tested |
+| All 24 game phases, negotiation, consideration, bundles, closing terms, finale | Written and tested |
+| Escalation across five acts | Written and tested |
+| Explicitness registers | Written and tested |
+| Boundaries, equipment gating, erection filtering, Maybe conditions | Written and tested |
+| Back navigation | Written and tested |
+| Timers, synchronisation, Stop All | Written and tested |
+| Global pause from either phone and from the remote | Written and tested |
+| TV remote backup controls | Built; not driven with a real remote |
+| Privacy: nothing private on TV or the other phone | Written and tested |
+| Forbidden content excluded | Written and tested |
+| Debug APK | **Built** — 8,066,424 bytes |
+| Release APK | **Built and signed** — 1,265,143 bytes, APK Signature Scheme v2 |
+
+---
+
+## 6. Remaining limitations
+
+1. **Nothing has been run on an Nvidia Shield**, an emulator, or any Android device. Both APKs
+   build, sign and verify, and the packaged manifest and assets were inspected directly, but no
+   line of Android runtime code has ever executed. Device-specific behaviour — Shield Ethernet
+   interface naming, foreground-service restrictions on the installed OS version, Keystore
+   behaviour, D-pad focus traversal in the real Compose runtime — is unverified. **Install the
+   debug APK and play one short game before trusting it with an evening.**
+
+2. **The first real install may still surface issues** that compilation cannot catch: a runtime
+   permission prompt on API 33+ for `POST_NOTIFICATIONS`, a foreground-service type rejection on
+   a specific OEM build, or focus landing somewhere awkward on the remote panel. The `:core`
+   module underneath is fully tested; the risk is concentrated in the thin Android layer.
+
+3. **R8 emits `An error occurred when parsing kotlin metadata` warnings** during the release
+   build, because the bundled R8 predates Kotlin 2.2.21. The build succeeds, the release APK is
+   correct, and the ProGuard rules keep serializers, NanoHTTPD and ZXing — but the release APK
+   in particular is the one to smoke-test first, since R8 shrinking is where a missing keep rule
+   would show up.
+
+4. **Explicitness uses two authored registers plus a four-level lexicon**, not four
+   independently hand-written variants of all 354 pieces of content. Sentence structure and
+   command framing change between the measured and coarse registers; 73 lexicon entries then
+   differentiate verbs, adverbs, commands, dominance phrasing and orgasm/ownership language
+   across all four levels, and Extremely filthy appends an authored tail. Tests assert all four
+   outputs differ and that Direct and Extremely filthy are never identical. It is a real
+   rewriting system, but it is not 808 bespoke sentences.
+
+5. **No mDNS.** The specification made it optional and required that the app not depend on it;
+   an IPv4 URL is always available and is what the QR code carries.
+
+6. **The remote can only stand in for a disconnected player during a proposal response.** It
+   deliberately cannot make a private selection — a private counteroffer, consideration choice or
+   finale pick — because doing so from the TV would expose it. If a phone drops during a private
+   step the options are to wait for it to reconnect, or release and reassign the slot.
+
+7. **Reboot restore is best-effort**, as Android allows. `BOOT_COMPLETED` starts the service only
+   when an unfinished session exists; on OEM builds with aggressive background restrictions the
+   user may have to open the app once.
+
+8. **Levels 2–5 sit exactly on the 40-term floor**, and level 1 exactly on 42. There is no
+   surplus, so removing a term would breach the specification and fail the build — which is the
+   intent, but it means adding restrictions to the library needs new content alongside.
+
+9. **Consideration escalation is act-based**, derived from signed regular terms. Within an act
+   the intensity band is fixed, with a one-level bump for bundle trades. It does not model a
+   finer-grained curve.
+
+10. **The phone controller needs the TV reachable to render anything.** That follows from having
+    no service worker and no offline cache, which the specification required.
+
+---
+
+## 7. Reproducing the verification
+
+```bash
+./gradlew :core:test          # 53 tests, all passing — no Android SDK needed
+./gradlew validateContent     # the content validation suite
+
+./gradlew :app:assembleDebug    # → app/build/outputs/apk/debug/app-debug.apk
+./gradlew :app:assembleRelease  # → app/build/outputs/apk/release/app-release.apk
+```
+
+The `:core` commands need no Android SDK. The `:app` commands need Platform 35 and
+Build-Tools 35.0.0, plus `keystore.properties` for a signed release — see BUILD.md.
+
+To verify the artifacts:
+
+```bash
+$ANDROID_HOME/build-tools/35.0.0/apksigner verify --print-certs \
+    app/build/outputs/apk/release/app-release.apk
+$ANDROID_HOME/build-tools/35.0.0/aapt2 dump badging \
+    app/build/outputs/apk/release/app-release.apk | grep leanback
+unzip -l app/build/outputs/apk/release/app-release.apk | grep web/
+```

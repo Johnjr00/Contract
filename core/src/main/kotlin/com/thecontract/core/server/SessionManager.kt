@@ -590,12 +590,20 @@ class SessionManager(
                 }
             )
         }
-        return ViewBuilder.tvView(
+        val view = ViewBuilder.tvView(
             es.state,
             connectionsLocked(),
             joinInfoLocked(),
             clock(),
             store.listContracts().map { SavedContractSummary(it.id, it.title, it.completedAtMs, it.signedTerms.size) }
+        )
+        val pending = record?.pendingReclaim ?: return view
+        return view.copy(
+            reclaimRequest = com.thecontract.core.protocol.ReclaimRequestView(
+                requestId = pending.requestId,
+                slotName = pending.slot.name,
+                playerName = es.state.setup.name(pending.slot)
+            )
         )
     }
 
