@@ -172,6 +172,14 @@ data class JoinInfo(
     val availableInterfaces: List<Choice> = emptyList()
 )
 
+/** A pending slot takeover awaiting confirmation from the TV remote (section 8). */
+@Serializable
+data class ReclaimRequestView(
+    val requestId: String,
+    val slotName: String,
+    val playerName: String
+)
+
 @Serializable
 data class SavedContractSummary(
     val id: String,
@@ -214,5 +222,7 @@ data class ClientView(
     val join: JoinInfo? = null,
     val blockedNotice: String? = null,
     val savedContracts: List<SavedContractSummary> = emptyList(),
-    val stopWord: String? = null
+    val stopWord: String? = null,
+    /** TV only. A phone is asking to take over an occupied slot and needs remote confirmation. */
+    val reclaimRequest: ReclaimRequestView? = null
 )

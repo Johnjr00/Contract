@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">The Contract</string>
+    <string name="notification_channel_name">Game session</string>
+    <string name="notification_channel_description">Keeps the local game server running while a session is active.</string>
+    <string name="notification_title">The Contract is running</string>
+    <string name="notification_text">Both phones stay connected while this is showing.</string>
+</resources>
