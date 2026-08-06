@@ -4,63 +4,72 @@ Generated from the repository at the tip of `claude/contract-android-tv-app-1ogl
 
 ---
 
-## 1. Headline: the APKs were not produced, and why
+## 1. Artifacts
 
-**No debug APK and no release APK exist in this repository.** They could not be built in the
-environment this work was done in, and I am not going to claim otherwise.
+Both APKs were built and verified.
 
-The blocker is a single host. `dl.google.com` is refused by this environment's egress policy:
+| | |
+| --- | --- |
+| Debug APK | `app/build/outputs/apk/debug/app-debug.apk` — 8,066,424 bytes |
+| | application id `com.thecontract.tv.debug` |
+| | SHA-256 `def12ef108e1b1c486355787789f1c577f6b41b642993df47f51e7350162e9b0` |
+| Release APK | `app/build/outputs/apk/release/app-release.apk` — 1,265,143 bytes |
+| | application id `com.thecontract.tv`, minified and resource-shrunk by R8 |
+| | SHA-256 `3390eb18b53547ac16280626fe7b12cd91596f587d512f0be59e87157adebb87` |
+| Release signature | APK Signature Scheme v2, verified with `apksigner verify` |
+| | signer `CN=The Contract, OU=Local, O=The Contract, L=Local, ST=Local, C=GB` |
+| | certificate SHA-256 `810b62c47c08223bb183e74ce4f390ee0d06da8ca5899ba63823b00bd60d6364` |
 
-```
-$ curl -sS -o /dev/null -w "%{http_code}" https://dl.google.com/android/repository/repository2-3.xml
-curl: (56) CONNECT tunnel failed, response 403
+Toolchain actually used: AGP 8.7.3, Kotlin 2.2.21, KSP 2.2.21-2.0.4, Compose BOM 2024.10.01,
+Room 2.6.1, Android SDK Platform 35, Build-Tools 35.0.0, Gradle 8.14.3, JDK 21 emitting Java 17
+bytecode.
 
-$ curl -sS "$HTTPS_PROXY/__agentproxy/status"
-  "recentRelayFailures": [
-    { "kind": "connect_rejected",
-      "detail": "gateway answered 403 to CONNECT (policy denial or upstream failure)",
-      "host": "dl.google.com:443" } ]
-```
+Verified on the built artifacts rather than asserted from source:
 
-That one host serves **all three** things an Android build needs:
+* `aapt2 dump badging` reports `leanback-launchable-activity` for
+  `com.thecontract.tv.ui.MainActivity` with the TV banner — the Android TV launcher intent is
+  wired correctly.
+* `uses-feature-not-required` for `android.hardware.touchscreen`, plus camera, microphone and
+  gamepad; `uses-feature: android.software.leanback` is required. The app declares television
+  support and does not require a touchscreen.
+* `targetSdkVersion` 35, `compileSdkVersion` 35.
+* Permissions in the shipped manifest are exactly the eight declared — `INTERNET`,
+  `ACCESS_NETWORK_STATE`, `ACCESS_WIFI_STATE`, `FOREGROUND_SERVICE`,
+  `FOREGROUND_SERVICE_SPECIAL_USE`, `RECEIVE_BOOT_COMPLETED`, `WAKE_LOCK`,
+  `POST_NOTIFICATIONS` — with no analytics, advertising or tracking permission of any kind.
+* The phone controller survives R8 intact inside the release APK: `web/controller.html` (1,084 B),
+  `web/controller.css` (7,802 B) and `web/controller.js` (31,508 B) are present and byte-identical
+  to source, and a grep across all three finds **zero** occurrences of `http://`, `https://`,
+  `cdn` or `googleapis`. Nothing is fetched from outside the APK.
+* Release `classes.dex` carries 15,355 method references — no multidex needed.
 
-1. the Android SDK (platforms, build-tools, platform-tools),
-2. the Android Gradle Plugin, and
-3. every AndroidX artifact — Compose, Room, Lifecycle, Core-KTX.
+### Note on the signing key
 
-`maven.google.com` is reachable but 301-redirects straight to `dl.google.com`. Maven Central
-carries the Android Gradle Plugin only up to **2.3.0 (2017)**, which cannot build a Kotlin 2.x
-Compose project. Ubuntu's `universe` repository offers `android-sdk-platform-23` and
-`android-sdk-build-tools 29`, but API 23 predates `startForegroundService`, notification
-channels and the whole AndroidX line — building against it would have produced something that
-does not match the specification and would not run correctly on a Shield.
+The release APK is signed with a self-signed keystore generated in the build container
+(`the-contract-release.jks`, alias `the-contract`). It is deliberately **not** committed — `*.jks`
+and `keystore.properties` are git-ignored. For anything you intend to keep updating, generate
+your own keystore and back it up; the procedure is in BUILD.md. Reinstalling over this APK with
+a differently-signed build requires `adb uninstall com.thecontract.tv` first.
 
-The exact failure, reproduced against the finished project:
+### Build fixes this uncovered
 
-```
-$ ./gradlew :app:assembleDebug
-* What went wrong:
-Plugin [id: 'com.android.application', version: '8.7.3'] was not found in any of the following sources:
-  … could not resolve plugin artifact 'com.android.application:com.android.application.gradle.plugin:8.7.3'
-  Searched in the following repositories: Google, MavenRepo, Gradle Central Plugin Repository
-```
+Compiling `:app` for the first time surfaced problems that source review had not:
 
-On any machine with the Android SDK and normal access to Google Maven, `./gradlew
-:app:assembleDebug` and `./gradlew :app:assembleRelease` are the only commands needed;
-`BUILD.md` covers both, plus signing and sideloading to a Shield.
+1. **Plugin classloader split.** Declaring the Kotlin plugin on the root build classpath while
+   AGP resolved only in `:app` made `kotlin-android` fail with
+   `NoClassDefFoundError: com/android/build/gradle/api/BaseVariant` — the Kotlin plugin reflects
+   on AGP types and the two must share a classloader. Fixed by removing the root `plugins {}`
+   block so each module resolves its own; this also keeps AGP off the classpath entirely when no
+   Android SDK is present and only `:core` is configured.
+2. **`fallbackToDestructiveMigration(dropAllTables = true)`** does not exist in Room 2.6.1 (it
+   arrives in 2.7). Reverted to the no-argument overload.
+3. **A Kotlin default parameter value on a Room DAO method**, which Room cannot generate against.
+   Removed, with the constant passed at the call site.
+4. **A `kotlin { }` block nested inside `android { }`**, which AGP 8.7 does not expose. Moved to
+   the top level.
 
-### What I did about it
-
-I put as much of the system as possible into a **pure-JVM `:core` module** that has no Android
-dependency: the content library, the style engine, the rules engine, the server-authoritative
-state machine, the wire protocol, the timer engine and the embedded HTTP/WebSocket server. That
-module builds and its full test suite runs here — including three complete end-to-end games with
-two simulated phone clients, and network tests that stand up the real server on real sockets.
-
-So the parts that were verifiable were verified properly. The parts that were not are named
-plainly in section 6.
-
----
+Items 2–4 were found and fixed by review before the SDK became available; item 1 could only be
+found by actually running the build.
 
 ## 2. Counts
 
@@ -96,11 +105,14 @@ floor.
 | `minSdk` | **26** (Android 8.0) — the level at which notification channels and `startForegroundService` exist, and comfortably below any Shield running current Shield Experience |
 | `targetSdk` / `compileSdk` | **35** (Android 15) |
 | Java/Kotlin target | Java 17 bytecode, Kotlin 2.2.21 |
-| Tested on device | **None.** No APK was produced, so nothing was installed or run on any Android version, emulator or Shield. |
-| Tested on JVM | JDK 21 (Ubuntu), producing Java 17 bytecode — the full `:core` suite |
+| Built and packaged against | Android SDK Platform 35, Build-Tools 35.0.0 |
+| Tested on device | **None.** Both APKs compile, package, sign and verify, but nothing was installed or run on any Android device, emulator or Shield — this environment has neither. |
+| Tested on JVM | JDK 21 (Ubuntu), producing Java 17 bytecode — the full `:core` suite, 53 tests |
 
-Runtime-behaviour claims about Android specifically (foreground service, Keystore, Room, boot
-receiver, Compose focus handling) are **written, reviewed and conventional, but unexecuted**.
+The APKs are real, signed and structurally verified against the packaged artifact. Claims that
+need a *running* Android system — the foreground service surviving Doze, Keystore key generation
+on device, Room schema creation, the boot receiver firing, Compose D-pad traversal with a real
+remote — are **compiled and packaged but not executed**.
 
 ---
 
@@ -199,16 +211,16 @@ no external reference and no PWA machinery.
 
 | Area | Status |
 | --- | --- |
-| Native Kotlin Android TV app, Compose, leanback launcher intent, touchscreen not required | Written; not compiled |
+| Native Kotlin Android TV app, Compose, leanback launcher intent, touchscreen not required | Built; verified in the packaged APK |
 | Embedded HTTP + WebSocket server (NanoHTTPD/NanoWSD), pinned versions | Written and tested over real sockets |
-| Room persistence, Keystore encryption, no release logging | Written; not compiled |
+| Room persistence, Keystore encryption, no release logging | Built; not executed on a device |
 | Offline QR generation (ZXing core, bundled) | Written and tested |
 | Phone controllers as plain bundled HTML/CSS/JS | Written and tested (no CDN, no PWA) |
 | Interface detection, selection, address change, port fallback | Written and tested |
 | Exactly two slots, third device refused | Written and tested |
 | Secure tokens, reconnection, TV-confirmed reclaim, rate limiting | Written and tested |
 | Server-authoritative state, versioning, idempotency | Written and tested |
-| Persistence across restart and reboot, paused timer restore | Written and tested (reboot path via the boot receiver is written, not executed) |
+| Persistence across restart and reboot, paused timer restore | Tested on the JVM; the boot-receiver path is built but not executed |
 | Saved games and contracts | Written and tested |
 | All 24 game phases, negotiation, consideration, bundles, closing terms, finale | Written and tested |
 | Escalation across five acts | Written and tested |
@@ -217,28 +229,33 @@ no external reference and no PWA machinery.
 | Back navigation | Written and tested |
 | Timers, synchronisation, Stop All | Written and tested |
 | Global pause from either phone and from the remote | Written and tested |
-| TV remote backup controls | Written; the UI itself is not compiled |
+| TV remote backup controls | Built; not driven with a real remote |
 | Privacy: nothing private on TV or the other phone | Written and tested |
 | Forbidden content excluded | Written and tested |
-| Debug APK | **Not produced** |
-| Release APK | **Not produced** |
+| Debug APK | **Built** — 8,066,424 bytes |
+| Release APK | **Built and signed** — 1,265,143 bytes, APK Signature Scheme v2 |
 
 ---
 
 ## 6. Remaining limitations
 
-1. **No APKs.** See section 1. Everything needed to produce them is in the repository; the
-   environment could not reach `dl.google.com`.
+1. **Nothing has been run on an Nvidia Shield**, an emulator, or any Android device. Both APKs
+   build, sign and verify, and the packaged manifest and assets were inspected directly, but no
+   line of Android runtime code has ever executed. Device-specific behaviour — Shield Ethernet
+   interface naming, foreground-service restrictions on the installed OS version, Keystore
+   behaviour, D-pad focus traversal in the real Compose runtime — is unverified. **Install the
+   debug APK and play one short game before trusting it with an evening.**
 
-2. **The `:app` module has never been compiled.** Roughly 1,500 lines of Android code — the
-   foreground service, Room database, Keystore crypto, network monitor, boot receiver, Compose
-   surface and remote panel — are written to conventional, current APIs and reviewed, but not
-   compiled, not linted and not run. Expect to fix small things (an import, a Compose signature,
-   a Room annotation) on the first real build. The `:core` module it sits on is fully tested.
+2. **The first real install may still surface issues** that compilation cannot catch: a runtime
+   permission prompt on API 33+ for `POST_NOTIFICATIONS`, a foreground-service type rejection on
+   a specific OEM build, or focus landing somewhere awkward on the remote panel. The `:core`
+   module underneath is fully tested; the risk is concentrated in the thin Android layer.
 
-3. **Nothing has been run on an Nvidia Shield**, an emulator, or any Android version.
-   Device-specific behaviour — Shield Ethernet naming, foreground-service restrictions on the
-   installed OS version, D-pad focus traversal in the actual Compose runtime — is unverified.
+3. **R8 emits `An error occurred when parsing kotlin metadata` warnings** during the release
+   build, because the bundled R8 predates Kotlin 2.2.21. The build succeeds, the release APK is
+   correct, and the ProGuard rules keep serializers, NanoHTTPD and ZXing — but the release APK
+   in particular is the one to smoke-test first, since R8 shrinking is where a missing keep rule
+   would show up.
 
 4. **Explicitness uses two authored registers plus a four-level lexicon**, not four
    independently hand-written variants of all 354 pieces of content. Sentence structure and
@@ -276,9 +293,22 @@ no external reference and no PWA machinery.
 ## 7. Reproducing the verification
 
 ```bash
-./gradlew :core:test          # 53 tests, all passing
+./gradlew :core:test          # 53 tests, all passing — no Android SDK needed
 ./gradlew validateContent     # the content validation suite
+
+./gradlew :app:assembleDebug    # → app/build/outputs/apk/debug/app-debug.apk
+./gradlew :app:assembleRelease  # → app/build/outputs/apk/release/app-release.apk
 ```
 
-Neither needs an Android SDK or a network connection beyond the initial dependency download from
-Maven Central.
+The `:core` commands need no Android SDK. The `:app` commands need Platform 35 and
+Build-Tools 35.0.0, plus `keystore.properties` for a signed release — see BUILD.md.
+
+To verify the artifacts:
+
+```bash
+$ANDROID_HOME/build-tools/35.0.0/apksigner verify --print-certs \
+    app/build/outputs/apk/release/app-release.apk
+$ANDROID_HOME/build-tools/35.0.0/aapt2 dump badging \
+    app/build/outputs/apk/release/app-release.apk | grep leanback
+unzip -l app/build/outputs/apk/release/app-release.apk | grep web/
+```
