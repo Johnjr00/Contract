@@ -12,16 +12,16 @@ Both APKs were built and verified.
 | --- | --- |
 | Debug APK | `app/build/outputs/apk/debug/app-debug.apk` |
 | | application id `com.thecontract.tv.debug` |
-| | SHA-256 `e6553c4d42475dd5fb3bbf8c8b3bbf88bdba6d980e7d41b5f185eb40892c4500` |
+| | SHA-256 `d177d109090a275252b47dd58cc5f2d786d1d12c195ff7dce22eb07ce8bd2366` |
 | Release APK | `app/build/outputs/apk/release/app-release.apk` |
 | | application id `com.thecontract.tv`, minified and resource-shrunk by R8 |
-| | SHA-256 `ab331728286a1802d37b4b0d5d01c603a98fbb23c19db628528892cc25ac8e07` |
+| | SHA-256 `90c050a3f2f11f48f94fcd84347fc39312b5beab396b76b55ee255250bb61699` |
 | Release signature | APK Signature Scheme v2, verified with `apksigner verify` |
 | | signer `CN=The Contract, OU=TheContract, O=TheContract, L=Unknown, ST=Unknown, C=US` |
 | | certificate SHA-256 `d460e29876eda8d73e6b1af100f78942b26ac8ab28d33aaa7f42ca605bef25e0` |
 
-These are the hashes as of the runtime fix in "Real-device crash found and fixed" below; the keystore
-was regenerated at the same time (see that section), so the signing cert changed too.
+These are the hashes as of the crash fix in "Regex crash after both private profiles save" below.
+The signing cert is unchanged from the previous fix (same keystore).
 
 Toolchain actually used: AGP 8.7.3, Kotlin 2.2.21, KSP 2.2.21-2.0.4, Compose BOM 2024.10.01,
 Room 2.6.1, Android SDK Platform 35, Build-Tools 35.0.0, Gradle 8.14.3, JDK 21 emitting Java 17
@@ -134,6 +134,47 @@ GitHub PR problem — the release build above is signed with a newly generated k
 therefore a new signing certificate. Anyone who installed the earlier release build must
 `adb uninstall com.thecontract.tv` (it never got far enough to write any user data) before
 installing this one.
+
+### Regex crash after both private profiles save
+
+The previous fix let the app launch, but it crashed reliably as soon as both players finished
+their private profiles — the exact point where the game engine builds and renders the first
+proposed term. Reproducing it required actually playing through the app on the emulator: two
+headless-Chromium "phones" driven by Playwright against the real, installed APK's embedded
+server (via `adb forward`), joining with the real per-session token (read once via a temporary,
+never-committed `Log.e` line, since the token is deliberately never logged in shipped code and the
+QR/URL panel wasn't visible on this emulator's virtual network interface). `logcat` caught the
+real crash:
+
+```
+FATAL EXCEPTION: NanoHttpd Request Processor (#7)
+java.lang.ExceptionInInitializerError
+Caused by: java.util.regex.PatternSyntaxException: Syntax error in regexp pattern near index 21
+\{([A-Za-z0-9_]+\+?)}
+                     ^
+	at com.android.icu.util.regex.PatternNative.compileImpl(Native Method)
+	...
+	at g1.d.<clinit>
+```
+
+Root cause: `StyleEngine.kt` compiled its token-substitution regex as
+`Regex("""\{([A-Za-z0-9_]+\+?)}""")` — a trailing, unescaped `}`. The JVM's own regex engine
+(what every unit test and the desktop dev-server live-verification in 3a both run on) accepts a
+bare `}` outside a quantifier as a literal character. Android's ICU-backed regex engine does not,
+and throws `PatternSyntaxException` from the class's static initializer the first time
+`StyleEngine` is touched — which is precisely when a term is first rendered, i.e. the instant both
+profiles are saved and the game proposes its opening term. No test in this repository could have
+caught this: it is specifically a JVM-regex-engine-vs-Android-ICU-regex-engine divergence, invisible
+anywhere except a real Android runtime.
+
+Fixed by escaping the offending brace, and the same latent issue in the adjacent lexicon-token
+regex (`\[([a-z0-9_]+)]` → `\[([a-z0-9_]+)\]`) in both `StyleEngine.kt` and
+`ContentValidator.kt`, before it could cause an identical crash on the next lexicon-key term. The
+53-test JVM suite still passes unchanged (that engine never enforced the stricter rule either way).
+
+Verified fixed by rerunning the same real-app repro end to end: both simulated phones complete
+setup and their private profiles, and the TV successfully renders "Proposed term" with no crash
+anywhere in `logcat` — confirmed on both the debug and release builds.
 
 ## 2. Counts
 

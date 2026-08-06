@@ -413,7 +413,7 @@ object ContentValidator {
     private fun validateLexicon(): List<Problem> = buildList {
         val used = mutableSetOf<String>()
         fun scan(where: String, text: String) {
-            Regex("""\[([a-z0-9_]+)]""").findAll(text).forEach { m ->
+            Regex("""\[([a-z0-9_]+)\]""").findAll(text).forEach { m ->
                 val key = m.groupValues[1]
                 used += key
                 if (!Lexicon.has(key)) add(Problem(where, "unknown lexicon key [$key]"))

@@ -41,8 +41,12 @@ class UnresolvableTemplateException(message: String) : IllegalStateException(mes
  */
 object StyleEngine {
 
-    private val tokenRegex = Regex("""\{([A-Za-z0-9_]+\+?)}""")
-    private val lexiconRegex = Regex("""\[([a-z0-9_]+)]""")
+    // Android's ICU-backed regex engine rejects a bare, unescaped `}` or `]` outside a
+    // quantifier/character-class context with a PatternSyntaxException, even though the JVM's
+    // own regex engine (used by every unit test and the desktop dev server) accepts it — so
+    // both must be escaped explicitly to work on-device.
+    private val tokenRegex = Regex("""\{([A-Za-z0-9_]+\+?)\}""")
+    private val lexiconRegex = Regex("""\[([a-z0-9_]+)\]""")
     private val equipmentRegex = Regex("""#([A-Za-z0-9_]+)#""")
 
     /** Possessive form. Always `name's`, which is correct for names ending in s as well. */
