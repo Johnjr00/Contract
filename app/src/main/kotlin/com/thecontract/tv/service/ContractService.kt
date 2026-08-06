@@ -28,6 +28,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /**
  * Hosts the embedded server for the whole life of a session (section 5).
@@ -85,11 +86,14 @@ class ContractService : Service() {
         manager.tvListener = SessionManager.TvListener { ServerHolder.publish(it) }
         ServerHolder.attach(manager)
 
-        monitor = AndroidNetworkMonitor(applicationContext) { interfaces ->
-            manager.refreshInterfaces(interfaces)
-        }.also { it.start() }
-
         scope.launch {
+            // AndroidNetworkMonitor.start() synchronously builds and broadcasts the first TV
+            // view, which reads saved session/contract state from Room — must not run on the
+            // main thread that onCreate() is executing on.
+            monitor = AndroidNetworkMonitor(applicationContext) { interfaces ->
+                manager.refreshInterfaces(interfaces)
+            }.also { it.start() }
+
             runCatching {
                 val started = ContractServer.startWithFallback(manager)
                 server = started
@@ -132,8 +136,10 @@ class ContractService : Service() {
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
-        // The launcher swiped the task away. Persist before anything else happens.
-        runCatching { manager.persistNow() }
+        // The launcher swiped the task away. Persist before anything else happens. Blocks this
+        // (main) thread until done, but the actual Room write runs on Dispatchers.IO, since Room
+        // forbids running it on the main thread directly.
+        runBlocking(Dispatchers.IO) { runCatching { manager.persistNow() } }
         super.onTaskRemoved(rootIntent)
     }
 
@@ -143,8 +149,9 @@ class ContractService : Service() {
     }
 
     private fun shutDown() {
-        // Persist first, so a running timer is frozen at a safe value before we go away.
-        runCatching { manager.persistNow() }
+        // Persist first, so a running timer is frozen at a safe value before we go away. Same
+        // main-thread-blocking-but-IO-executing shape as onTaskRemoved, for the same reason.
+        runBlocking(Dispatchers.IO) { runCatching { manager.persistNow() } }
         tickJob?.cancel()
         monitor?.stop()
         runCatching { server?.stop() }

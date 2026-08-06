@@ -10,15 +10,18 @@ Both APKs were built and verified.
 
 | | |
 | --- | --- |
-| Debug APK | `app/build/outputs/apk/debug/app-debug.apk` — 8,066,424 bytes |
+| Debug APK | `app/build/outputs/apk/debug/app-debug.apk` |
 | | application id `com.thecontract.tv.debug` |
-| | SHA-256 `def12ef108e1b1c486355787789f1c577f6b41b642993df47f51e7350162e9b0` |
-| Release APK | `app/build/outputs/apk/release/app-release.apk` — 1,265,143 bytes |
+| | SHA-256 `e6553c4d42475dd5fb3bbf8c8b3bbf88bdba6d980e7d41b5f185eb40892c4500` |
+| Release APK | `app/build/outputs/apk/release/app-release.apk` |
 | | application id `com.thecontract.tv`, minified and resource-shrunk by R8 |
-| | SHA-256 `3390eb18b53547ac16280626fe7b12cd91596f587d512f0be59e87157adebb87` |
+| | SHA-256 `ab331728286a1802d37b4b0d5d01c603a98fbb23c19db628528892cc25ac8e07` |
 | Release signature | APK Signature Scheme v2, verified with `apksigner verify` |
-| | signer `CN=The Contract, OU=Local, O=The Contract, L=Local, ST=Local, C=GB` |
-| | certificate SHA-256 `810b62c47c08223bb183e74ce4f390ee0d06da8ca5899ba63823b00bd60d6364` |
+| | signer `CN=The Contract, OU=TheContract, O=TheContract, L=Unknown, ST=Unknown, C=US` |
+| | certificate SHA-256 `d460e29876eda8d73e6b1af100f78942b26ac8ab28d33aaa7f42ca605bef25e0` |
+
+These are the hashes as of the runtime fix in "Real-device crash found and fixed" below; the keystore
+was regenerated at the same time (see that section), so the signing cert changed too.
 
 Toolchain actually used: AGP 8.7.3, Kotlin 2.2.21, KSP 2.2.21-2.0.4, Compose BOM 2024.10.01,
 Room 2.6.1, Android SDK Platform 35, Build-Tools 35.0.0, Gradle 8.14.3, JDK 21 emitting Java 17
@@ -70,6 +73,67 @@ Compiling `:app` for the first time surfaced problems that source review had not
 
 Items 2–4 were found and fixed by review before the SDK became available; item 1 could only be
 found by actually running the build.
+
+### Real-device crash found and fixed
+
+The APK described above actually built and ran `apksigner verify` clean, but crashed instantly
+on real Android TV hardware. That is a class of bug none of the earlier verification could catch
+— the JVM test suite runs against `JsonFileStateStore`, not `RoomStateStore`, and the live-browser
+verification in 3a drives the same `JsonFileStateStore`-backed dev server, so Room never entered
+the picture in either case.
+
+With the emulator back up, the crash reproduced identically there, giving a real stack trace:
+
+```
+FATAL EXCEPTION: main
+java.lang.RuntimeException: Unable to create service com.thecontract.tv.service.ContractService:
+java.lang.IllegalStateException: Cannot access database on the main thread since it may
+potentially lock the UI for a long period of time.
+	at com.thecontract.tv.service.ContractService.onCreate
+```
+
+Root cause: `ContractService.onCreate()` called `AndroidNetworkMonitor(...).start()` synchronously
+on the main thread (`Service.onCreate()` always runs there). `start()` immediately calls
+`SessionManager.refreshInterfaces()`, which broadcasts a TV view — and building that view reads
+saved session and contract state from Room. Room refuses to run a query on the main thread, so the
+service died on every single launch, unconditionally.
+
+Two more instances of the same mistake were reachable but hadn't yet been hit: `onTaskRemoved()`
+and `shutDown()` (called from `onDestroy()` and the `ACTION_STOP` path) both called
+`manager.persistNow()` — a Room write — directly, also on the main thread.
+
+Fixes, all in `ContractService.kt`:
+* The network monitor's construction and `start()` call moved inside the existing
+  `scope.launch { }` (`Dispatchers.Default`), alongside the server startup that was already
+  correctly off the main thread.
+* `onTaskRemoved()` and `shutDown()` now wrap `manager.persistNow()` in
+  `runBlocking(Dispatchers.IO) { }` — these two call sites need the write to have landed before
+  the function returns (the process may be killed right after), so they block the main thread
+  deliberately, but the query itself now executes on an IO-dispatcher thread rather than main,
+  which is what Room's check actually requires.
+
+Verified fixed the same way it was found: reinstalled the rebuilt release APK on the emulator,
+launched it, and confirmed via `logcat` that the service starts, the foreground notification
+posts, and the TV surface renders (screenshot on file) with no `FATAL EXCEPTION` over a sustained
+run.
+
+A second, different failure appeared intermittently during this same testing round — a foreground
+service start timeout (`Context.startForegroundService() did not then call
+Service.startForeground()`) — but `startForeground()` is literally the second statement in
+`onCreate()`, and `logcat` showed class verification running at 21–26,000 bytecodes/second on this
+sandbox's unaccelerated (no KVM) emulator, i.e. slow enough on its own to blow through the OS's
+short foreground-service-start window. This did not recur on the rebuilt release APK's
+verification run. It reads as an artifact of this specific software-only emulator rather than a
+code defect — real Android TV hardware has none of that verification overhead — but it hasn't been
+confirmed on real silicon, so if a foreground-service crash of that shape turns up on real
+hardware, treat this as unresolved rather than closed.
+
+Because the previous keystore (`the-contract-release.jks`, git-ignored by design) was lost earlier
+in this same work — deleted by an unrelated `git clean -fdx` run while resolving an unrelated
+GitHub PR problem — the release build above is signed with a newly generated keystore, and
+therefore a new signing certificate. Anyone who installed the earlier release build must
+`adb uninstall com.thecontract.tv` (it never got far enough to write any user data) before
+installing this one.
 
 ## 2. Counts
 
