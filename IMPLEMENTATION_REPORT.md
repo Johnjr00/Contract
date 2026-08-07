@@ -12,16 +12,16 @@ Both APKs were built and verified.
 | --- | --- |
 | Debug APK | `app/build/outputs/apk/debug/app-debug.apk` |
 | | application id `com.thecontract.tv.debug` |
-| | SHA-256 `5757d0fed7faeb989968e9c197a2cf3c1c87a8fa97f48da73ced0433526abb7b` |
+| | SHA-256 `2161f0e661c7683b28e677c2566721e7afa3b544ab156e784b7c5d9007dbb6e8` |
 | Release APK | `app/build/outputs/apk/release/app-release.apk` |
 | | application id `com.thecontract.tv`, minified and resource-shrunk by R8 |
-| | SHA-256 `9a8b6f7660db5d4d8371f5a6d0043cf74dd2377367cd5d892bca66cba9e08cb8` |
+| | SHA-256 `f821653b5d9703605f8301a46321aef55a01b5090dcc664d27b3ca9d0e44a6df` |
 | Release signature | APK Signature Scheme v2, verified with `apksigner verify` |
 | | signer `CN=The Contract, OU=TheContract, O=TheContract, L=Unknown, ST=Unknown, C=US` |
 | | certificate SHA-256 `d460e29876eda8d73e6b1af100f78942b26ac8ab28d33aaa7f42ca605bef25e0` |
 
-These are the hashes as of the content fixes in "Full manual playtest: three complete games" in
-section 4a below. The signing cert is unchanged from the previous fix (same keystore).
+These are the hashes as of the reconnect fix in "On-device quick round on the Android emulator"
+in section 4b below. The signing cert is unchanged from the previous fix (same keystore).
 
 Toolchain actually used: AGP 8.7.3, Kotlin 2.2.21, KSP 2.2.21-2.0.4, Compose BOM 2024.10.01,
 Room 2.6.1, Android SDK Platform 35, Build-Tools 35.0.0, Gradle 8.14.3, JDK 21 emitting Java 17
@@ -41,7 +41,7 @@ Verified on the built artifacts rather than asserted from source:
   `FOREGROUND_SERVICE_SPECIAL_USE`, `RECEIVE_BOOT_COMPLETED`, `WAKE_LOCK`,
   `POST_NOTIFICATIONS` — with no analytics, advertising or tracking permission of any kind.
 * The phone controller survives R8 intact inside the release APK: `web/controller.html` (1,084 B),
-  `web/controller.css` (7,802 B) and `web/controller.js` (31,508 B) are present and byte-identical
+  `web/controller.css` (7,802 B) and `web/controller.js` (33,078 B) are present and byte-identical
   to source, and a grep across all three finds **zero** occurrences of `http://`, `https://`,
   `cdn` or `googleapis`. Nothing is fetched from outside the APK.
 * Release `classes.dex` carries 15,355 method references — no multidex needed.
@@ -414,6 +414,53 @@ issue was found in the process but was in the manual test harness, not the app: 
 directly under `#main`, see `controller.js` `render()`), so a `.choices`-scoped click helper
 cannot find it — confirmed working correctly (present within 200ms of signing, every time) once
 checked with an unscoped selector.
+
+### 4b. On-device quick round on the Android emulator
+
+Every earlier playthrough drove the pure-JVM dev server. This one ran against the **installed
+release APK** on an Android TV emulator (API 35, 1920×1080 leanback profile, software-rendered —
+the environment has no `/dev/kvm`), with the app's own foreground service hosting the embedded
+NanoHTTPD server on port 8765, reached over `adb forward`. Two headless-Chromium tabs acted as the
+two phones, loading the real `controller.html/.css/.js` served by the app itself. One complete
+**quick** session (10 regular + 2 closing terms) was played setup → private profiles → negotiation
+→ considerations → closing terms → finale execution → contract save, with `logcat` captured
+continuously and every WebSocket frame logged on both phones.
+
+Result: the round completed — 10/10 regular terms, 2/2 closing terms, 12 consideration receipts,
+both phones reaching `Done` and the TV reaching `Complete` — with **zero** `FATAL EXCEPTION` or
+`AndroidRuntime` entries in logcat across the whole run. Persistence was then verified from the
+other side: after abandoning the session (which clears the active session but keeps saved
+contracts), the TV's "Saved contracts on this TV" card listed **"Marcus and Dan — 12 terms"**,
+proving the contract had been written to the Keystore-encrypted Room database rather than merely
+displayed. That entry also survived a subsequent `adb install -r` upgrade of the APK.
+
+**One real reliability bug found and fixed.** An earlier run left the TV showing "Dan: in
+progress" indefinitely after Player 2's profile save appeared to succeed on the phone. WebSocket
+frame logging showed the cause: this emulator's `adb forward` link drops and re-establishes the
+socket every few seconds, and an action sent into that window was lost silently — `controller.js`
+showed a "trying again" toast but never actually retried, even though the protocol was explicitly
+designed for safe retries (`actionId` deduplication server-side, `expectedVersion` staleness
+rejection) that the client simply never used. Fixed in two commits:
+
+1. Actions whose `send()` fails because the socket is already closed are queued and replayed from
+   `ws.onopen` once reconnected.
+2. An action is then treated as pending from the moment it is *created* until a reply naming its
+   `actionId` arrives — not merely until `send()` returns true. A send can succeed locally and
+   still never reach the server if the connection dies before the reply comes back, so every
+   reconnect replays whatever is still unacknowledged. This is safe for the same reason a
+   duplicate tap always was: the server dedups by `actionId` and rejects a stale
+   `expectedVersion`, so a replay is either a no-op or applies exactly once.
+
+All 53 automated tests still pass, and the shipped `controller.js` inside the release APK remains
+byte-identical to source with zero external URL references.
+
+Two further issues surfaced during this work and were **not** app bugs, recorded here so they are
+not re-investigated later. The auto-player harness had no case for the shared "Draft contract"
+overlay — `draftReviewOpen` is global state either phone can enter, and the harness had no way
+out of it, so a run could park there indefinitely; the harness now closes it. Separately, the
+constant reconnect churn is a property of `adb forward` over a software-emulated network in this
+container, not of the app: on a real LAN the phones hold a stable socket. It was, however, exactly
+the condition that exposed the dropped-action bug, which is a genuine defect on any flaky Wi-Fi.
 
 ---
 
