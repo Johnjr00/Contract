@@ -330,6 +330,120 @@ internal object TermsLevel5 {
             timers = listOf(tm("Hard", 240))
         ),
 
+        // -------------------------------------------------------------- fisting (4)
+        t(
+            id = "l5_fist_build", level = 5, cats = setOf(ANAL),
+            title = "Building up to his whole hand",
+            base = "{G} uses plenty of #lubricant# and builds from two fingers to four inside {R}, adding one more every two minutes.",
+            explicit = "{G} slicks his whole hand with #lubricant# and builds from two fingers to four inside {R}, one more every two minutes.",
+            benefit = RECEIVER, type = BenefitType.FINGERING_RECIPIENT,
+            acts = setOf("fisting"), anal = true,
+            rCon = PartyConstraint.BOTTOM,
+            equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Two", 120), tm("Three", 120), tm("Four", 120))
+        ),
+        t(
+            id = "l5_fist_past_knuckles", level = 5, cats = setOf(ANAL),
+            title = "Past the knuckles",
+            base = "{G} slicks his hand with #lubricant# and pushes it into {R} past the knuckles, then holds it still for a slow count of thirty.",
+            explicit = "{G} slicks his hand with #lubricant# and pushes it into {R} past the knuckles, then holds completely still for a slow count of thirty.",
+            benefit = RECEIVER, type = BenefitType.FINGERING_RECIPIENT,
+            acts = setOf("fisting"), anal = true,
+            rCon = PartyConstraint.BOTTOM,
+            equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing in", 150), tm("Held still", 30), tm("Deeper", 120))
+        ),
+        t(
+            id = "l5_fist_whole_hand", level = 5, cats = setOf(ANAL),
+            title = "As much of his hand as he takes",
+            base = "{G} pushes as much of his hand into {R} as it will take with #lubricant# and keeps it there for the rest of the term.",
+            explicit = "{G} pushes as much of his hand into {R} as it will take with #lubricant# and keeps it buried for the rest of the term.",
+            benefit = RECEIVER, type = BenefitType.FINGERING_RECIPIENT,
+            acts = setOf("fisting"), anal = true,
+            rCon = PartyConstraint.BOTTOM,
+            equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing in", 150), tm("Buried", 180))
+        ),
+        t(
+            id = "l5_fist_turning", level = 5, cats = setOf(ANAL, ROUGH),
+            title = "His hand turning inside him",
+            base = "{G} pushes his hand into {R} with #lubricant# and turns it a quarter turn every thirty seconds without pulling out.",
+            explicit = "{G} pushes his hand into {R} with #lubricant# and turns it a quarter turn every thirty seconds, never pulling out once.",
+            benefit = RECEIVER, type = BenefitType.FINGERING_RECIPIENT,
+            acts = setOf("fisting", "rough_anal"), anal = true,
+            rCon = PartyConstraint.BOTTOM,
+            equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing in", 120), tm("Turning", 180))
+        ),
+
+        // ------------------------------------------------------------ rough anal (6)
+        t(
+            id = "l5_ranal_pinned", level = 5, cats = setOf(ANAL, ROUGH),
+            title = "Pinned flat and taken hard",
+            base = "{G} pins {R+} shoulders down with #lubricant# and fucks him [adv_thrust_hard] for the whole term, keeping him flat.",
+            explicit = "{G} pins {R+} shoulders down with #lubricant# and fucks him [adv_thrust_hard] for the whole term, keeping him flat and taking every stroke.",
+            benefit = GIVER, type = BenefitType.PENETRATION_RECIPIENT,
+            acts = setOf("topping", "rough_anal", "pinning"), anal = true, erection = PartyRef.GIVER,
+            gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
+            equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing in", 45), tm("Pinned and fucked", 180))
+        ),
+        t(
+            id = "l5_ranal_hair", level = 5, cats = setOf(ANAL, ROUGH),
+            title = "Hard, held by the hair",
+            base = "{G} takes {R} from behind with #lubricant#, keeps a fist in his hair and fucks him [adv_thrust_hard] for the whole term.",
+            explicit = "{G} takes {R} from behind with #lubricant#, fists his hair to hold his head up and fucks him [adv_thrust_hard] the whole way through.",
+            benefit = GIVER, type = BenefitType.PENETRATION_RECIPIENT,
+            acts = setOf("topping", "rough_anal", "rough_hair_pulling"), anal = true, erection = PartyRef.GIVER,
+            gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
+            equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing in", 45), tm("Hard", 180))
+        ),
+        t(
+            id = "l5_ranal_folded", level = 5, cats = setOf(ANAL, ROUGH),
+            title = "Folded up and fucked hard",
+            base = "{R} goes on his back with his knees pushed to his chest and {G} fucks him [adv_thrust_hard] with #lubricant# for the whole term.",
+            explicit = "{R} goes on his back with his knees pushed to his chest and {G} fucks him [adv_thrust_hard] with #lubricant#, holding him folded the whole term.",
+            benefit = GIVER, type = BenefitType.PENETRATION_RECIPIENT,
+            acts = setOf("topping", "rough_anal"), anal = true, erection = PartyRef.GIVER,
+            gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
+            equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing in", 45), tm("Hard", 180))
+        ),
+        t(
+            id = "l5_ranal_standing", level = 5, cats = setOf(ANAL, ROUGH),
+            title = "Bent over and pounded",
+            base = "{R} bends over #sturdy_chair# and {G} fucks him [adv_thrust_hard] with #lubricant# for the whole term without stopping.",
+            explicit = "{R} bends over #sturdy_chair# and holds on while {G} fucks him [adv_thrust_hard] with #lubricant# for the whole term without stopping once.",
+            benefit = GIVER, type = BenefitType.PENETRATION_RECIPIENT,
+            acts = setOf("topping", "rough_anal"), anal = true, erection = PartyRef.GIVER,
+            gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
+            equip = setOf(Equipment.LUBRICANT, Equipment.STURDY_CHAIR),
+            timers = listOf(tm("Pushing in", 45), tm("Hard", 180))
+        ),
+        t(
+            id = "l5_ranal_dildo_hard", level = 5, cats = setOf(ANAL, ROUGH, TOYS),
+            title = "The dildo, hard and fast",
+            base = "{G} pushes #dildo# into {R} with #lubricant# and drives it [adv_thrust_hard] for the whole term.",
+            explicit = "{G} pushes #dildo# into {R} with #lubricant# and drives it [adv_thrust_hard] for the whole term without slowing once.",
+            benefit = RECEIVER, type = BenefitType.TOY_RECIPIENT,
+            acts = setOf("dildo", "anal_toys", "rough_anal"), anal = true,
+            rCon = PartyConstraint.BOTTOM,
+            equip = setOf(Equipment.DILDO, Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing it in", 45), tm("Hard", 180))
+        ),
+        t(
+            id = "l5_ranal_fingers_hard", level = 5, cats = setOf(ANAL, ROUGH),
+            title = "Three fingers, hard",
+            base = "{G} builds to three fingers in {R} with #lubricant# and finger-fucks him hard for the rest of the term.",
+            explicit = "{G} builds to three fingers in {R} with #lubricant# and finger-fucks him hard for the rest of the term without easing off.",
+            benefit = RECEIVER, type = BenefitType.FINGERING_RECIPIENT,
+            acts = setOf("fingering", "rough_anal"), anal = true,
+            rCon = PartyConstraint.BOTTOM,
+            equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Building up", 60), tm("Hard", 180))
+        ),
+
         // ------------------------------------------------------- intense BDSM (8)
         t(
             id = "l5_bdsm_full_flogging", level = 5, cats = setOf(IMPACT, BONDAGE),

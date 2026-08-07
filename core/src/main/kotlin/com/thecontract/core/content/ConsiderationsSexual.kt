@@ -269,6 +269,86 @@ internal object ConsiderationsSexual {
             timers = listOf(tm("Outside only", 120))
         ),
 
+        // ------------------------------------------------------------ fisting (4)
+        c(
+            id = "cs_fist_building", intensity = 5, family = F_SEX, cats = setOf(ANAL),
+            title = "Building up to his hand",
+            base = "{G} uses plenty of #lubricant# and builds from two fingers to four inside {R}, one more every ninety seconds.",
+            explicit = "{G} slicks his whole hand with #lubricant# and builds from two fingers to four inside {R}, adding one more every ninety seconds.",
+            acts = setOf("fisting"), anal = true, equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Two", 90), tm("Three", 90), tm("Four", 90))
+        ),
+        c(
+            id = "cs_fist_knuckles", intensity = 5, family = F_SEX, cats = setOf(ANAL),
+            title = "Past the knuckles",
+            base = "{G} slicks his hand with #lubricant# and pushes it into {R} past the knuckles, then holds it still for a slow count of thirty.",
+            explicit = "{G} slicks his hand with #lubricant# and pushes it into {R} past the knuckles, then holds completely still for a slow count of thirty.",
+            acts = setOf("fisting"), anal = true, equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing in", 120), tm("Held still", 30))
+        ),
+        c(
+            id = "cs_fist_whole_hand", intensity = 5, family = F_SEX, cats = setOf(ANAL),
+            title = "His whole hand",
+            base = "{G} pushes as much of his hand into {R} as it will take with #lubricant# and keeps it there for the full timer.",
+            explicit = "{G} pushes as much of his hand into {R} as it will take with #lubricant# and keeps it buried for the full timer.",
+            acts = setOf("fisting"), anal = true, equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing in", 120), tm("Buried", 120))
+        ),
+        c(
+            id = "cs_fist_slow_turn", intensity = 5, family = F_SEX, cats = setOf(ANAL),
+            title = "Turning his hand inside him",
+            base = "{G} pushes his hand into {R} with #lubricant# and turns it a quarter turn every thirty seconds without pulling out.",
+            explicit = "{G} pushes his hand into {R} with #lubricant# and turns it a quarter turn every thirty seconds, never pulling out once.",
+            acts = setOf("fisting"), anal = true, equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing in", 90), tm("Turning", 150))
+        ),
+
+        // ------------------------------------------------------- rough anal (5)
+        c(
+            id = "cs_ranal_hard_behind", intensity = 5, family = F_SEX, cats = setOf(ANAL, ROUGH),
+            title = "Hard from behind",
+            base = "{G} takes {R} from behind with #lubricant# [adv_thrust_hard] for the whole timer and does not ease off once.",
+            explicit = "{G} takes {R} from behind with #lubricant# [adv_thrust_hard] for the whole timer and does not ease off once.",
+            acts = setOf("topping", "rough_anal"), anal = true, erection = PartyRef.GIVER,
+            pCon = PartyConstraint.TOP, equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing in", 45), tm("Hard", 150))
+        ),
+        c(
+            id = "cs_ranal_pinned_hard", intensity = 5, family = F_SEX, cats = setOf(ANAL, ROUGH),
+            title = "Pinned down and taken hard",
+            base = "{G} pins {R+} shoulders to the bed with #lubricant# and fucks him [adv_thrust_hard], keeping him flat the whole time.",
+            explicit = "{G} pins {R+} shoulders down with #lubricant# and fucks him [adv_thrust_hard], keeping him flat and taking it the whole time.",
+            acts = setOf("topping", "rough_anal", "pinning"), anal = true, erection = PartyRef.GIVER,
+            pCon = PartyConstraint.TOP, equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing in", 45), tm("Pinned and fucked", 150))
+        ),
+        c(
+            id = "cs_ranal_hair_hard", intensity = 5, family = F_SEX, cats = setOf(ANAL, ROUGH),
+            title = "Hard, with a fist in his hair",
+            base = "{G} takes {R} from behind with #lubricant#, keeps a fist in his hair and fucks him [adv_thrust_hard] for the whole timer.",
+            explicit = "{G} takes {R} from behind with #lubricant#, fists his hair to hold his head up and fucks him [adv_thrust_hard] the whole way through.",
+            acts = setOf("topping", "rough_anal", "rough_hair_pulling"), anal = true, erection = PartyRef.GIVER,
+            pCon = PartyConstraint.TOP, equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing in", 45), tm("Hard", 150))
+        ),
+        c(
+            id = "cs_ranal_dildo_hard", intensity = 5, family = F_SEX, cats = setOf(ANAL, ROUGH, TOYS),
+            title = "The dildo, hard",
+            base = "{G} pushes #dildo# into {R} with #lubricant# and drives it [adv_thrust_hard] for the whole timer.",
+            explicit = "{G} pushes #dildo# into {R} with #lubricant# and drives it [adv_thrust_hard] for the whole timer without slowing.",
+            acts = setOf("dildo", "anal_toys", "rough_anal"), anal = true,
+            equip = setOf(Equipment.DILDO, Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing it in", 45), tm("Hard", 150))
+        ),
+        c(
+            id = "cs_ranal_fingers_hard", intensity = 5, family = F_SEX, cats = setOf(ANAL, ROUGH),
+            title = "Three fingers, hard",
+            base = "{G} builds to three fingers in {R} with #lubricant# and finger-fucks him hard for the whole timer.",
+            explicit = "{G} builds to three fingers in {R} with #lubricant# and finger-fucks him hard for the whole timer, without easing off.",
+            acts = setOf("fingering", "rough_anal"), anal = true, equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Building up", 60), tm("Hard", 150))
+        ),
+
         // ------------------------------------------------------------ fingering (6)
         c(
             id = "cs_fing_one", intensity = 3, family = F_SEX, cats = setOf(ANAL),

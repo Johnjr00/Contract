@@ -41,11 +41,11 @@ sealed interface Eligibility {
  */
 object EligibilityEngine {
 
-    private val ANAL_ACTIVITIES = setOf("anal_external", "fingering", "anal_toys", "topping", "bottoming", "massage_anus", "plug", "dildo")
-    private val PENETRATIVE_ACTIVITIES = setOf("fingering", "anal_toys", "topping", "bottoming", "plug", "dildo")
+    private val ANAL_ACTIVITIES = setOf("anal_external", "fingering", "anal_toys", "topping", "bottoming", "massage_anus", "plug", "dildo", "rough_anal", "fisting")
+    private val PENETRATIVE_ACTIVITIES = setOf("fingering", "anal_toys", "topping", "bottoming", "plug", "dildo", "rough_anal", "fisting")
     private val FOOT_ACTIVITIES = setOf("foot_kissing", "foot_stimulation", "massage_calves_feet")
     private val ORGASM_ACTIVITIES = setOf("edging", "denial", "climax_permission")
-    private val ROUGH_ACTIVITIES = setOf("pinning", "rough_handling", "harder_oral", "hard_sex", "rough_hair_pulling")
+    private val ROUGH_ACTIVITIES = setOf("pinning", "rough_handling", "harder_oral", "hard_sex", "rough_hair_pulling", "rough_anal")
     private val PAIN_ACTIVITIES = setOf("spanking", "impact_toys", "nipple_clamps", "scratching")
     private val RESTRAINT_ACTIVITIES = setOf("restraint", "collaring")
     private val SEXUAL_MASSAGE_ACTIVITIES = setOf("massage_groin", "massage_anus", "massage_to_sexual")

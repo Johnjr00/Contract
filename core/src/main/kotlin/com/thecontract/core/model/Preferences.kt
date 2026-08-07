@@ -109,6 +109,8 @@ object PreferenceLibrary {
         pair(a, "anal_toys", "Using anal toys on him", "Having anal toys used on me")
         pair(a, "topping", "Fucking his ass", "Having my ass fucked by him")
         pair(a, "bottoming", "Bottoming for him", "Having him bottom for me")
+        pair(a, "rough_anal", "Fucking his hole hard and rough", "Having my hole fucked hard and rough")
+        pair(a, "fisting", "Pushing my hand into his hole", "Taking his hand inside me")
 
         // --- Toys -----------------------------------------------------------------------
         val y = PreferenceSection.TOYS

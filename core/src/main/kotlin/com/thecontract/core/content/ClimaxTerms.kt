@@ -10,6 +10,7 @@ import com.thecontract.core.model.Category.HANDS
 import com.thecontract.core.model.Category.KISSING
 import com.thecontract.core.model.Category.LANGUAGE
 import com.thecontract.core.model.Category.ORAL
+import com.thecontract.core.model.Category.ROUGH
 import com.thecontract.core.model.Category.RIMMING
 import com.thecontract.core.model.Category.TOYS
 import com.thecontract.core.model.Equipment
@@ -322,6 +323,84 @@ internal object ClimaxTerms {
             acts = setOf("long_making_out", "tongue_kissing"),
             equip = setOf(Equipment.LUBRICANT),
             timers = listOf(tm("Until he finishes", 240))
+        ),
+
+        // --- finishing while his partner's hand is inside him -------------------------
+        t(
+            id = "cx_bottom_self_while_fisted", level = 5, cats = setOf(CLIMAX, ANAL), climax = true,
+            title = "His own hand while he takes his partner's",
+            base = "{R} strokes himself with his own hand while {G} pushes as much of his hand into him as he takes, with #lubricant#, and holds it there until he finishes. If the timer ends first, {G} keeps his hand exactly where it is until he does.",
+            explicit = "{R} strokes his own cock while {G} pushes as much of his hand into him as he takes, with #lubricant#, and holds it buried until he [v_come]. If the timer ends first {G} keeps his hand exactly where it is until he is done.",
+            benefit = RECEIVER, type = BenefitType.FINGERING_RECIPIENT,
+            acts = setOf("fisting"), anal = true,
+            rCon = PartyConstraint.BOTTOM,
+            erection = PartyRef.RECEIVER,
+            equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing in", 150), tm("Until he finishes", 240))
+        ),
+        t(
+            id = "cx_bottom_fisted_and_sucked", level = 5, cats = setOf(CLIMAX, ANAL, ORAL), climax = true,
+            title = "Sucked with his partner's hand inside him",
+            base = "{G} pushes as much of his hand into {R} as he takes with #lubricant#, keeps it there and [v_suck] him until he finishes. If the timer ends first, nothing changes until he does.",
+            explicit = "{G} pushes as much of his hand into {R} as he takes with #lubricant#, keeps it buried and [v_suck] him until he [v_come]. If the timer ends first, nothing changes at all until he is done.",
+            benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
+            acts = setOf("fisting", "oral"), anal = true,
+            rCon = PartyConstraint.BOTTOM,
+            erection = PartyRef.RECEIVER,
+            equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing in", 150), tm("Until he finishes", 240))
+        ),
+
+        // --- finishing while he is fucked hard ---------------------------------------
+        t(
+            id = "cx_bottom_self_while_pounded", level = 5, cats = setOf(CLIMAX, ANAL, ROUGH), climax = true,
+            title = "His own hand while he is pounded",
+            base = "{R} strokes himself while {G} fucks him [adv_thrust_hard] with #lubricant# until he finishes. If the timer ends first, {G} keeps the same hard rhythm until he does.",
+            explicit = "{R} strokes his own cock while {G} fucks him [adv_thrust_hard] with #lubricant# until he [v_come]. If the timer ends first {G} keeps that exact hard rhythm going until he is done.",
+            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
+            acts = setOf("topping", "rough_anal"), anal = true,
+            gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
+            erection = PartyRef.BOTH,
+            equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing in", 60), tm("Until he finishes", 240))
+        ),
+        t(
+            id = "cx_bottom_self_while_dildo_hard", level = 5, cats = setOf(CLIMAX, ANAL, ROUGH, TOYS), climax = true,
+            title = "His own hand while the dildo goes hard",
+            base = "{R} strokes himself while {G} drives #dildo# into him [adv_thrust_hard] with #lubricant# until he finishes. If the timer ends first, {G} keeps the same hard rhythm until he does.",
+            explicit = "{R} strokes his own cock while {G} drives #dildo# into him [adv_thrust_hard] with #lubricant# until he [v_come]. If the timer ends first {G} keeps that exact hard rhythm going until he is done.",
+            benefit = RECEIVER, type = BenefitType.TOY_RECIPIENT,
+            acts = setOf("dildo", "anal_toys", "rough_anal"), anal = true,
+            rCon = PartyConstraint.BOTTOM,
+            erection = PartyRef.RECEIVER,
+            equip = setOf(Equipment.DILDO, Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing it in", 60), tm("Until he finishes", 240))
+        ),
+
+        // --- more ways to finish inside him ------------------------------------------
+        t(
+            id = "cx_top_inside_pinned", level = 5, cats = setOf(CLIMAX, ANAL, ROUGH), climax = true,
+            title = "He finishes inside him, pinned flat",
+            base = "{G} lies face down and {R} [v_enter] him with #lubricant#, pins his shoulders to the bed and fucks him [adv_thrust_hard] until he [v_come_in] him. He stays inside for a slow count of twenty, then withdraws. If the timer ends first he keeps the same hard rhythm until he finishes.",
+            explicit = "{G} lies face down and takes it. {R} [v_enter] him with #lubricant#, pins his shoulders down and fucks him [adv_thrust_hard] until he [v_come_in] him and gives him [n_load]. He stays buried for a slow count of twenty, then pulls out. If the timer ends first he keeps that exact rhythm going until he is done.",
+            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
+            acts = setOf("bottoming", "rough_anal", "pinning"), anal = true,
+            rCon = PartyConstraint.TOP, gCon = PartyConstraint.BOTTOM,
+            erection = PartyRef.RECEIVER,
+            equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing in", 60), tm("Until he finishes", 240), tm("Staying inside", 20))
+        ),
+        t(
+            id = "cx_top_inside_standing", level = 5, cats = setOf(CLIMAX, ANAL), climax = true,
+            title = "He finishes inside him, bent over the chair",
+            base = "{G} bends over #sturdy_chair# and {R} [v_enter] him with #lubricant#, holds him by the hips and fucks him [adv_thrust_hard] until he [v_come_in] him, then stays inside for a slow count of twenty. If the timer ends first the same rhythm continues until he finishes.",
+            explicit = "{G} bends over #sturdy_chair# and holds on. {R} [v_enter] him with #lubricant#, takes both hips and fucks him [adv_thrust_hard] until he [v_come_in] him, then stays buried for a slow count of twenty. If the timer ends first he does not change a thing until he is done.",
+            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
+            acts = setOf("bottoming"), anal = true,
+            rCon = PartyConstraint.TOP, gCon = PartyConstraint.BOTTOM,
+            erection = PartyRef.RECEIVER,
+            equip = setOf(Equipment.LUBRICANT, Equipment.STURDY_CHAIR),
+            timers = listOf(tm("Pushing in", 60), tm("Until he finishes", 240), tm("Staying inside", 20))
         )
     )
 }
