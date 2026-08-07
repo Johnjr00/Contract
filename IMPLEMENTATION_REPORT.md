@@ -12,15 +12,15 @@ Both APKs were built and verified.
 | --- | --- |
 | Debug APK | `app/build/outputs/apk/debug/app-debug.apk` |
 | | application id `com.thecontract.tv.debug` |
-| | SHA-256 `97b3db2639835ad4755df2a1541054288ab0afe7fb3f3f6811674e52903b7d02` |
+| | SHA-256 `54b643c92a6d76bc54e2475258dff978aec18bd088034bc9a978d884851ee60a` |
 | Release APK | `app/build/outputs/apk/release/app-release.apk` |
 | | application id `com.thecontract.tv`, minified and resource-shrunk by R8 |
-| | SHA-256 `0f08ce3d8e464f7f15862926037f5766f09543b9604aa9e3ac21f4867391110f` |
+| | SHA-256 `b8fa742eaa84136c9a7cfc48fcdf4f63771a40e61c7ad7e2409ea6490fc6b09a` |
 | Release signature | APK Signature Scheme v2, verified with `apksigner verify` |
 | | signer `CN=The Contract, OU=TheContract, O=TheContract, L=Unknown, ST=Unknown, C=US` |
 | | certificate SHA-256 `d460e29876eda8d73e6b1af100f78942b26ac8ab28d33aaa7f42ca605bef25e0` |
 
-These are the hashes as of the wording revision in section 4c below. The signing cert is unchanged from the previous fix (same keystore).
+These are the hashes as of the reconnect fix in section 4d below. The signing cert is unchanged from the previous fix (same keystore).
 
 Toolchain actually used: AGP 8.7.3, Kotlin 2.2.21, KSP 2.2.21-2.0.4, Compose BOM 2024.10.01,
 Room 2.6.1, Android SDK Platform 35, Build-Tools 35.0.0, Gradle 8.14.3, JDK 21 emitting Java 17
@@ -453,13 +453,16 @@ rejection) that the client simply never used. Fixed in two commits:
 All 53 automated tests still pass, and the shipped `controller.js` inside the release APK remains
 byte-identical to source with zero external URL references.
 
-Two further issues surfaced during this work and were **not** app bugs, recorded here so they are
-not re-investigated later. The auto-player harness had no case for the shared "Draft contract"
+One further issue surfaced during this work and was **not** an app bug, recorded here so it is
+not re-investigated later: the auto-player harness had no case for the shared "Draft contract"
 overlay — `draftReviewOpen` is global state either phone can enter, and the harness had no way
-out of it, so a run could park there indefinitely; the harness now closes it. Separately, the
-constant reconnect churn is a property of `adb forward` over a software-emulated network in this
-container, not of the app: on a real LAN the phones hold a stable socket. It was, however, exactly
-the condition that exposed the dropped-action bug, which is a genuine defect on any flaky Wi-Fi.
+out of it, so a run could park there indefinitely. The harness now closes it.
+
+> **Correction.** This section originally also attributed the constant connect/disconnect churn
+> seen throughout this run to `adb forward` over the container's software-emulated network, and
+> asserted that phones would hold a stable socket on a real LAN. **That was wrong.** It was a
+> real server defect, reproduced later on plain localhost with no emulator involved, and it is
+> fixed in section 4d below. The churn was never an artifact of the test environment.
 
 ### 4c. Wording revision: direct and specific throughout
 
@@ -499,6 +502,51 @@ Verified by rendering every term, closing term and consideration — instruction
 timer labels — in all four explicitness registers and grepping the rendered output rather than
 the source, then re-checking the same patterns against `classes.dex` inside the built release
 APK. All 53 tests pass.
+
+### 4d. Phones reconnecting every few seconds — root cause and fix
+
+Reported from real use: both phones disconnected and reconnected continuously, every few
+seconds, throughout a session. This had been visible during the emulator run in 4b and was
+wrongly written off there as an `adb forward` artifact. It was not. It reproduced on plain
+localhost with no emulator, no port forwarding and no Android involved at all.
+
+**Root cause.** `ContractServer.startWithFallback()` started the server with
+`start(SOCKET_READ_TIMEOUT, false)`. `SOCKET_READ_TIMEOUT` is NanoHTTPD's own constant and is
+**5000 ms**, and `NanoHTTPD.ServerRunnable` applies it as `SO_TIMEOUT` to *every* accepted
+socket. A WebSocket keeps using that same socket after the HTTP upgrade, and NanoWSD's read
+loop simply blocks on it — so five seconds of silence raised `SocketTimeoutException`, which
+NanoWSD treats as fatal (`onException` then `doClose`). The phone then reconnected, sat idle,
+and was killed again.
+
+The client's own heartbeat could never have prevented this: it pinged every 15 seconds, three
+times slower than the timeout that was killing it.
+
+**Fix**, in two parts:
+
+* `SOCKET_TIMEOUT_MS` (60 s) replaces the 5-second default. It is deliberately still finite —
+  a value of 0 blocks forever, so a half-open connection would pin its handler thread for the
+  life of the process.
+* The server now pings every open socket every 20 seconds (`WS_PING_INTERVAL_MS`) from a
+  daemon scheduler, shut down with the server. Driving the heartbeat from the server matters
+  because mobile browsers throttle and eventually suspend `setInterval` once a tab is
+  backgrounded or the screen locks — precisely when a phone sits idle mid-scene. A browser
+  answers a ping frame with a pong automatically, without waking page script, and that inbound
+  pong is what resets the socket's read timer. A `check()` in `startWithFallback` enforces that
+  the timeout always outlasts at least two missed pings, so the two constants cannot drift into
+  a broken relationship again.
+
+The client ping also moved from 15 s to 10 s as a second line of defence.
+
+**Measured, before and after**, against the real server:
+
+| | Before | After |
+| --- | --- | --- |
+| Silent raw WebSocket | closed after **5,319 ms** (code 1006) | still open at **95,082 ms** |
+| Real browser on the real controller page | — | **1 open, 0 closes in 95 s** |
+
+The "after" case survives well past the 60-second socket timeout, which is the specific
+evidence that the server-driven pings are resetting the read timer rather than merely delaying
+the failure.
 
 ---
 

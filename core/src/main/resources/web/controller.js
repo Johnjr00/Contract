@@ -159,9 +159,16 @@
     }
   }
 
+  /**
+   * Application-level heartbeat. The server also pings this socket on its own schedule, and the
+   * browser answers those automatically without waking any page script, so this is the second
+   * line of defence rather than the only one -- which matters because mobile browsers throttle
+   * setInterval hard once the tab is backgrounded or the screen locks. The interval must stay
+   * comfortably inside the server's socket read timeout (ContractServer.SOCKET_TIMEOUT_MS).
+   */
   function startPing() {
     stopPing();
-    S.pingTimer = setInterval(function () { send({ type: "PING", t: Date.now() }); }, 15000);
+    S.pingTimer = setInterval(function () { send({ type: "PING", t: Date.now() }); }, 10000);
   }
   function stopPing() { clearInterval(S.pingTimer); }
 

@@ -6,6 +6,8 @@ import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.NanoWSD
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
 /**
@@ -25,6 +27,7 @@ class ContractServer(
 
     private val sockets = ConcurrentHashMap<String, ContractSocket>()
     private val clientIds = AtomicLong(0)
+    private val PING_PAYLOAD = byteArrayOf()
 
     init {
         manager.transport = object : SessionManager.Transport {
@@ -74,6 +77,32 @@ class ContractServer(
     override fun openWebSocket(handshake: IHTTPSession): WebSocket {
         val clientId = "c${clientIds.incrementAndGet()}"
         return ContractSocket(clientId, handshake)
+    }
+
+    // ------------------------------------------------------------------ keep-alive
+
+    private val keepAlive = Executors.newSingleThreadScheduledExecutor { runnable ->
+        Thread(runnable, "contract-ws-keepalive").apply { isDaemon = true }
+    }
+
+    /**
+     * Pings every open socket on a fixed schedule so no connection ever sits silent long enough
+     * to hit the socket read timeout. A ping that fails means the phone is already gone; the
+     * read side raises that independently, so it is enough to drop the socket here and let the
+     * normal disconnect path run.
+     */
+    private fun startKeepAlive() {
+        keepAlive.scheduleWithFixedDelay({
+            sockets.values.forEach { socket ->
+                runCatching { socket.ping(PING_PAYLOAD) }
+                    .onFailure { runCatching { socket.close(WebSocketFrame.CloseCode.GoingAway, "ping failed", false) } }
+            }
+        }, WS_PING_INTERVAL_MS, WS_PING_INTERVAL_MS, TimeUnit.MILLISECONDS)
+    }
+
+    override fun stop() {
+        keepAlive.shutdownNow()
+        super.stop()
     }
 
     // ------------------------------------------------------------------ http
@@ -157,6 +186,32 @@ class ContractServer(
 
     companion object {
         /**
+         * How long an accepted socket may stay silent before the read times out and the
+         * connection is torn down.
+         *
+         * NanoHTTPD applies this as `SO_TIMEOUT` to *every* accepted socket, and a WebSocket
+         * keeps using the same socket after the upgrade. Its default, [SOCKET_READ_TIMEOUT],
+         * is 5 seconds — far shorter than any sane heartbeat — so an idle phone was guaranteed
+         * to be disconnected every five seconds and reconnect in a loop. This must always stay
+         * comfortably larger than [WS_PING_INTERVAL_MS]; the assertion below enforces that.
+         *
+         * It is deliberately still finite: a value of 0 would block forever, so a half-open
+         * connection would pin its handler thread for the lifetime of the process.
+         */
+        const val SOCKET_TIMEOUT_MS = 60_000
+
+        /**
+         * How often the server pings each open socket.
+         *
+         * The heartbeat is driven from the server rather than relying on the phone's own timer,
+         * because mobile browsers throttle (and eventually suspend) `setInterval` when the tab
+         * is backgrounded or the screen locks — exactly when a phone is sitting idle mid-scene.
+         * The browser answers a ping frame with a pong automatically, without waking any page
+         * script, and that inbound pong is what resets the socket's read timer.
+         */
+        const val WS_PING_INTERVAL_MS = 20_000L
+
+        /**
          * Starts on the preferred port, falling back through a small range if it is taken.
          * The actual port is reported so the QR code always advertises the real address.
          */
@@ -164,11 +219,15 @@ class ContractServer(
             manager: SessionManager,
             ports: List<Int> = SessionManager.FALLBACK_PORTS
         ): ContractServer {
+            check(SOCKET_TIMEOUT_MS > WS_PING_INTERVAL_MS * 2) {
+                "the socket timeout must outlast at least two missed pings"
+            }
             var lastError: Exception? = null
             for (port in ports) {
                 val server = ContractServer(manager, port)
                 try {
-                    server.start(SOCKET_READ_TIMEOUT, false)
+                    server.start(SOCKET_TIMEOUT_MS, false)
+                    server.startKeepAlive()
                     return server
                 } catch (e: IOException) {
                     lastError = e
