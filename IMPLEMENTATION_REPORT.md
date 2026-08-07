@@ -12,16 +12,15 @@ Both APKs were built and verified.
 | --- | --- |
 | Debug APK | `app/build/outputs/apk/debug/app-debug.apk` |
 | | application id `com.thecontract.tv.debug` |
-| | SHA-256 `2161f0e661c7683b28e677c2566721e7afa3b544ab156e784b7c5d9007dbb6e8` |
+| | SHA-256 `97b3db2639835ad4755df2a1541054288ab0afe7fb3f3f6811674e52903b7d02` |
 | Release APK | `app/build/outputs/apk/release/app-release.apk` |
 | | application id `com.thecontract.tv`, minified and resource-shrunk by R8 |
-| | SHA-256 `f821653b5d9703605f8301a46321aef55a01b5090dcc664d27b3ca9d0e44a6df` |
+| | SHA-256 `0f08ce3d8e464f7f15862926037f5766f09543b9604aa9e3ac21f4867391110f` |
 | Release signature | APK Signature Scheme v2, verified with `apksigner verify` |
 | | signer `CN=The Contract, OU=TheContract, O=TheContract, L=Unknown, ST=Unknown, C=US` |
 | | certificate SHA-256 `d460e29876eda8d73e6b1af100f78942b26ac8ab28d33aaa7f42ca605bef25e0` |
 
-These are the hashes as of the reconnect fix in "On-device quick round on the Android emulator"
-in section 4b below. The signing cert is unchanged from the previous fix (same keystore).
+These are the hashes as of the wording revision in section 4c below. The signing cert is unchanged from the previous fix (same keystore).
 
 Toolchain actually used: AGP 8.7.3, Kotlin 2.2.21, KSP 2.2.21-2.0.4, Compose BOM 2024.10.01,
 Room 2.6.1, Android SDK Platform 35, Build-Tools 35.0.0, Gradle 8.14.3, JDK 21 emitting Java 17
@@ -461,6 +460,45 @@ out of it, so a run could park there indefinitely; the harness now closes it. Se
 constant reconnect churn is a property of `adb forward` over a software-emulated network in this
 container, not of the app: on a real LAN the phones hold a stable socket. It was, however, exactly
 the condition that exposed the dropped-action bug, which is a genuine defect on any flaky Wi-Fi.
+
+### 4c. Wording revision: direct and specific throughout
+
+A review of the rendered content found three problems that ran through the whole library, all
+of which made instructions vaguer than they should be. All three are fixed.
+
+1. **"work" used as a catch-all verb** — "works him over", "works his ear", the term title
+   "Nipple work", the timer label "Working it in". It named no actual motion. All 351
+   occurrences in player-facing text are replaced with a verb that says what happens: sucks,
+   kneads, strokes, presses, pushes, rubs, grinds, jerks. This covered instruction text, term
+   titles and timer labels alike.
+
+2. **"filthy" everywhere** — it had leaked out of the lexicon into pacing, kissing, praise and
+   generic intensity, where it meant nothing: `adv_pace` at the top register was literally
+   `"hard and filthy"`, so terms rendered "at a hard and filthy pace". It now appears in no
+   generated text at all. The two explicitness *setting labels* ("Filthy", "Extremely filthy")
+   are unchanged, being the feature's own names rather than content.
+
+3. **Instructions that deferred to the players** — "at exactly the pace he calls", "does
+   whatever he likes to him", "wherever he decides", "as long as he comfortably can", "at his
+   own pace". Every one is now a stated, countable instruction anchored to the timers the term
+   already defines: named pace cycles with durations, a fixed order of body parts, a specific
+   number of positions, "slow to steady to hard to hardest" one minute each.
+
+Two lexicon bugs were found in the process. `v_edge` briefly embedded a count that collided
+with templates already stating one ("edges him three times over three separate times"), and
+`v_hold_back` was transitive ("makes him hold it") while both of its call sites use the
+submissive as the verb's *subject*, so it rendered "Chris makes him hold it" when Chris is the
+one holding back — a pre-existing defect of the same class as the section 4a lexicon fixes.
+Both are fixed.
+
+Constructions that are determinate rather than vague were deliberately left alone: those whose
+object is fixed by the action itself ("puts his mouth on whatever he uncovers") and emphatic
+prohibitions meaning "regardless" ("does not go in however much he pushes back").
+
+Verified by rendering every term, closing term and consideration — instruction text, titles and
+timer labels — in all four explicitness registers and grepping the rendered output rather than
+the source, then re-checking the same patterns against `classes.dex` inside the built release
+APK. All 53 tests pass.
 
 ---
 
