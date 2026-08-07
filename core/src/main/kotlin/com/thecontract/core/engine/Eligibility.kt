@@ -198,10 +198,17 @@ object EligibilityEngine {
         if (!ctx.setup.player(binding.giver).analRole.allowsAnyAnal) return false
         if (!ctx.setup.player(binding.receiver).analRole.allowsAnyAnal) return false
         if (term.analPenetration || term.activities.any { it in PENETRATIVE_ACTIVITIES }) {
-            // The party being penetrated must be able to bottom; the penetrating party must top.
-            if (!ctx.setup.player(binding.receiver).analRole.canBottom) return false
+            // Which party is penetrated depends on the term, and is not always the receiver.
+            // The activity names are written from the giver's side: "topping" means the giver
+            // penetrates the receiver, "bottoming" means the giver is the one taking it, so the
+            // receiver is the penetrating party. Assuming the receiver is always the penetrated
+            // one excluded a strict top from every "he finishes inside him" closing term — the
+            // player those terms exist for.
+            val receiverPenetrates = "bottoming" in term.activities
+            val penetrated = if (receiverPenetrates) binding.giver else binding.receiver
+            if (!ctx.setup.player(penetrated).analRole.canBottom) return false
             if (("topping" in term.activities) && !ctx.setup.player(binding.giver).analRole.canTop) return false
-            if (("bottoming" in term.activities) && !ctx.setup.player(binding.receiver).analRole.canTop) return false
+            if (receiverPenetrates && !ctx.setup.player(binding.receiver).analRole.canTop) return false
         }
         return true
     }
