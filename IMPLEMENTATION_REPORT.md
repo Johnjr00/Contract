@@ -12,15 +12,15 @@ Both APKs were built and verified.
 | --- | --- |
 | Debug APK | `app/build/outputs/apk/debug/app-debug.apk` |
 | | application id `com.thecontract.tv.debug` |
-| | SHA-256 `54b643c92a6d76bc54e2475258dff978aec18bd088034bc9a978d884851ee60a` |
+| | SHA-256 `3a4c5386dc42195e6ef1a3a5f8e8a9e097a7c9be29f2330c677bf0ef4bd5a42d` |
 | Release APK | `app/build/outputs/apk/release/app-release.apk` |
 | | application id `com.thecontract.tv`, minified and resource-shrunk by R8 |
-| | SHA-256 `b8fa742eaa84136c9a7cfc48fcdf4f63771a40e61c7ad7e2409ea6490fc6b09a` |
+| | SHA-256 `b0c19c3299bb0939ca46d07246f441900fdf1341a921416bff8da2466629a4aa` |
 | Release signature | APK Signature Scheme v2, verified with `apksigner verify` |
 | | signer `CN=The Contract, OU=TheContract, O=TheContract, L=Unknown, ST=Unknown, C=US` |
 | | certificate SHA-256 `d460e29876eda8d73e6b1af100f78942b26ac8ab28d33aaa7f42ca605bef25e0` |
 
-These are the hashes as of the reconnect fix in section 4d below. The signing cert is unchanged from the previous fix (same keystore).
+These are the hashes as of the content revision in section 4e below. The signing cert is unchanged from the previous fix (same keystore).
 
 Toolchain actually used: AGP 8.7.3, Kotlin 2.2.21, KSP 2.2.21-2.0.4, Compose BOM 2024.10.01,
 Room 2.6.1, Android SDK Platform 35, Build-Tools 35.0.0, Gradle 8.14.3, JDK 21 emitting Java 17
@@ -547,6 +547,66 @@ The client ping also moved from 15 s to 10 s as a second line of defence.
 The "after" case survives well past the 60-second socket timeout, which is the specific
 evidence that the server-driven pings are resetting the read timer rather than merely delaying
 the failure.
+
+### 4e. Content revision: sense, specificity, position and intensity
+
+A full read of the rendered game surfaced problems that only show up in the
+finished sentences, plus several gaps in how closing options were chosen.
+
+**Sentences that did not make sense.** Some possessives attached to the wrong
+man: "{R} fucks his mouth hard and {G} keeps up with it" rendered as "Jimmy
+fucks his mouth hard and John keeps up with it", where {R} is the one being
+sucked and {G} owns the mouth, so the roles read backwards and "his" had no
+antecedent. Six of these came from the previous wording pass and two predated
+it. Separately, that pass had replaced oral actions with kneading in places
+where the instrument is a mouth ("kneads his chest with his mouth"), and had
+given `v_talk_dirty` and `v_edge` values that collided with the very clause
+their templates already carried ("spells out ... spelling out in detail",
+"edges him three times over three separate times"). All corrected.
+
+**Remaining vague directions** — "until he is told to stop", "until he says
+stop", "sets the depth", "exactly where he wants it", "for a few seconds" —
+are now stated counts, durations or body parts.
+
+**Position.** `analRolesOk()` required the *receiver* to be able to bottom
+whenever a term involved penetration. In a closing term the receiver is the
+finisher, and in the "he finishes inside him" terms the finisher is the one
+penetrating — so a strict top was offered none of them. Which party is
+penetrated now comes from the term's own activities.
+
+Closing options are then chosen from the finisher's anal role rather than
+from whether the contract happened to contain penetration, with an explicit
+quota for how many options have something going into him, and a slot reserved
+for finishing inside his partner whenever he can top. Measured per role with
+a vers partner, as come-inside / penetrated-himself out of 8: TOP 1/0,
+VERS_TOP 1/1, VERS 1/4, VERS_BOTTOM 1/6, BOTTOM 0/8.
+
+**New content.** Preferences `fisting` and `rough_anal`, both registered as
+anal and penetrative activities so the existing role, preference and boundary
+machinery covers them with no special cases; `rough_anal` also counts as
+rough play. Added 4 fisting considerations, 4 fisting terms and 2 fisting
+closing terms; 5 rough anal considerations, 6 rough anal terms and 2 rough
+anal closing terms; and 2 further ways to finish inside him. The rough
+material is confined to anal insertion. Verified by measurement that all of
+it disappears when either player answers No, under NO_ANAL_PENETRATION, under
+NO_ROUGH_SEX for the rough items, and when neither player can bottom.
+
+**Options offered** at the closing step: terms 5 to 8, consideration actions
+6 to 9.
+
+**Intensity curve**, measured as eligible terms per act for an all-yes pair:
+acts 1 and 2 contain no penetrative terms at all, penetration enters at act 3
+(25 of 40), act 4 is the authority and bondage band, and act 5 is the hardest
+(20 of 50 penetrative, including all the new material). Every act has 40 to 50
+eligible terms, so no act falls back to a gentler one for lack of content.
+
+Library totals afterwards: 212 regular terms, 34 closing terms, 133
+consideration actions.
+
+Everything above was verified by rendering every term, closing term and
+consideration — instruction text, titles and timer labels — in all four
+explicitness registers and grepping the rendered output rather than the
+source. All 53 tests pass.
 
 ---
 
