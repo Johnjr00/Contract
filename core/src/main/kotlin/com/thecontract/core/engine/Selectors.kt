@@ -2,6 +2,7 @@ package com.thecontract.core.engine
 
 import com.thecontract.core.content.ContentLibrary
 import com.thecontract.core.model.Act
+import com.thecontract.core.model.AnalRole
 import com.thecontract.core.model.Answer
 import com.thecontract.core.model.Boundary
 import com.thecontract.core.model.ConsiderationAction
@@ -154,7 +155,7 @@ object ProposalSelector {
         state: GameState,
         ctx: GameContext,
         finisher: Slot,
-        limit: Int = 5
+        limit: Int = 8
     ): List<Selection> {
         val alreadyUsed = state.negotiation.signed.flatMap { s -> s.allTerms.map { it.termId } }.toSet()
         val anyPenetration = state.negotiation.signed.any { s -> s.allTerms.any { it.analPenetration } }
@@ -172,15 +173,39 @@ object ProposalSelector {
             }
         }
 
-        // Section 37: when the contract contains anal penetration, the penetrative finish is
-        // preferred for the player who tops; otherwise the non-penetrative options lead.
-        val (penetrative, other) = candidates.partition { it.term.analPenetration }
-        val ordered = if (anyPenetration && ctx.setup.player(finisher).analRole.canTop) {
-            penetrative.shuffled(rng) + other.shuffled(rng)
-        } else {
-            other.shuffled(rng) + penetrative.shuffled(rng)
+        // The mix is chosen from the finisher's own anal role, not just from whether the
+        // contract happens to contain penetration. "bottoming" is written from the giver's
+        // side, so a closing term carrying it is one where the finisher penetrates his partner.
+        val (finisherPenetrates, rest) = candidates.partition {
+            it.term.analPenetration && "bottoming" in it.term.activities
         }
-        return ordered.take(limit)
+        val (finisherTakes, noAnal) = rest.partition { it.term.analPenetration }
+        val role = ctx.setup.player(finisher).analRole
+
+        // How many of the offered options should have something going into the finisher.
+        // A strict top never sees one; a strict bottom sees as many as exist.
+        val takeQuota = when (role) {
+            AnalRole.TOP, AnalRole.NO_ANAL -> 0
+            AnalRole.VERS_TOP -> 1
+            AnalRole.VERS -> limit / 2
+            AnalRole.VERS_BOTTOM -> limit - 2
+            AnalRole.BOTTOM -> limit
+        }
+
+        val picked = LinkedHashSet<Selection>()
+        // Section 37 and the standing rule that finishing inside his partner is always on the
+        // table for whoever can top: reserve a slot for it before anything else competes.
+        if (finisherPenetrates.isNotEmpty()) picked += finisherPenetrates.shuffled(rng).first()
+        picked += finisherTakes.shuffled(rng).take(takeQuota)
+        // Fill the rest, preferring more penetrative finishes when the contract already has
+        // penetration in it, and keeping at least a couple of non-anal options otherwise.
+        val filler = if (anyPenetration && role.canTop) {
+            finisherPenetrates.shuffled(rng) + noAnal.shuffled(rng) + finisherTakes.shuffled(rng)
+        } else {
+            noAnal.shuffled(rng) + finisherPenetrates.shuffled(rng) + finisherTakes.shuffled(rng)
+        }
+        picked += filler
+        return picked.take(limit)
     }
 }
 
