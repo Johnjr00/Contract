@@ -67,7 +67,7 @@ internal object ConsiderationsSexual {
             id = "cs_oral_kneeling", intensity = 3, family = F_SEX, cats = setOf(ORAL, POWER),
             title = "On his knees",
             base = "{G} kneels in front of {R} and [v_suck] him with his hands behind his own back.",
-            explicit = "{G} goes down on his knees, locks his hands behind his back and [v_suck] {R} until he is told to stop.",
+            explicit = "{G} goes down on his knees, locks his hands behind his back and [v_suck] {R} for the full timer.",
             acts = setOf("oral", "kneeling"), timers = listOf(tm("On his knees", 120))
         ),
         c(
@@ -96,8 +96,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_oral_hard_pace", intensity = 4, family = F_SEX, cats = setOf(ORAL, ROUGH),
             title = "Harder oral",
-            base = "{R} fucks his mouth hard and {G} keeps his mouth on him through all of it without slowing.",
-            explicit = "{R} fucks his mouth hard and {G} takes it without slowing down once, for the whole timer.",
+            base = "{R} fucks {G+} mouth hard and {G} keeps his lips sealed around him through all of it.",
+            explicit = "{R} fucks {G+} mouth hard and {G} takes all of it for the whole timer, without pulling off once.",
             acts = setOf("oral", "harder_oral"), blocks = setOf(Boundary.NO_ROUGH_SEX),
             timers = listOf(tm("Hard pace", 90))
         ),
@@ -587,7 +587,7 @@ internal object ConsiderationsSexual {
         ),
         c(
             id = "cs_rough_manhandle", intensity = 4, family = F_SEX, cats = setOf(ROUGH, POWER),
-            title = "Moved where he wants him",
+            title = "Moved by the hips",
             base = "{G} [v_handle] {R} into three positions without asking, and {R} lets himself be moved.",
             explicit = "{G} [v_handle] {R} into three positions without warning, and {R} goes exactly where he is put.",
             acts = setOf("rough_handling"), blocks = setOf(Boundary.NO_ROUGH_SEX),

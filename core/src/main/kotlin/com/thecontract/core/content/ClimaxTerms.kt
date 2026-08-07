@@ -249,7 +249,7 @@ internal object ClimaxTerms {
             id = "cx_np_vibration", level = 5, cats = setOf(CLIMAX, TOYS), climax = true,
             title = "Vibration until he finishes",
             base = "{G} holds #vibrator# on {R} where he asks for it, at the setting he asks for, until he finishes. If the timer ends first, it stays exactly there until he does.",
-            explicit = "{G} pins #vibrator# exactly where {R} wants it at the setting he wants until he [v_come]. If the timer ends first it does not move until he is done.",
+            explicit = "{G} pins #vibrator# against {R+} perineum on the highest setting until he [v_come]. If the timer ends first it does not move until he is done.",
             benefit = RECEIVER, type = BenefitType.TOY_RECIPIENT,
             acts = setOf("vibration"),
             equip = setOf(Equipment.VIBRATOR),

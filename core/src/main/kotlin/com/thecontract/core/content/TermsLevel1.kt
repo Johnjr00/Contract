@@ -305,8 +305,8 @@ internal object TermsLevel1 {
         t(
             id = "l1_ear_neck_combo", level = 1, cats = setOf(EAR_PLAY, KISSING),
             title = "Ear and neck together",
-            base = "{G} alternates between {R+} ear and the side of his neck [adv_kiss], never spending more than a few seconds in one place.",
-            explicit = "{G} sucks {R+} ear then the side of his neck [adv_kiss] and keeps swapping, never more than a few seconds in one place, so he can never settle.",
+            base = "{G} alternates between {R+} ear and the side of his neck [adv_kiss], swapping every fifteen seconds, never settling in one place.",
+            explicit = "{G} sucks {R+} ear then the side of his neck [adv_kiss] and keeps swapping every fifteen seconds, never settling in one place, so he can never settle.",
             benefit = RECEIVER, type = BenefitType.EAR_PLAY_RECIPIENT,
             acts = setOf("ear_play", "neck_kissing"),
             timers = listOf(tm("Left ear and neck", 60), tm("Right ear and neck", 60))

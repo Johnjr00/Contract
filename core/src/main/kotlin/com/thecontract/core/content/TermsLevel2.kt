@@ -44,8 +44,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_oral_kneeling", level = 2, cats = setOf(ORAL, POWER),
             title = "On his knees",
-            base = "{R} stands. {G} kneels in front of him and [v_suck] his cock, hands behind his own back the whole time.",
-            explicit = "{R} stands and {G} goes down on his knees in front of him, hands locked behind his own back, and [v_suck] his cock until he is told to stop.",
+            base = "{R} stands. {G} kneels in front of him and [v_suck] {R+} cock, hands behind his own back the whole time.",
+            explicit = "{R} stands and {G} goes down on his knees in front of him, hands locked behind his own back, and [v_suck] {R+} cock for the full timer.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "kneeling"),
             timers = listOf(tm("On his knees", 120))
@@ -132,7 +132,7 @@ internal object TermsLevel2 {
         t(
             id = "l2_oral_ice", level = 2, cats = setOf(ORAL, SENSORY),
             title = "Cold then hot",
-            base = "{G} holds #ice# in his mouth for a few seconds, then [v_suck] {R+} cock, and repeats once the cold has gone.",
+            base = "{G} holds #ice# in his mouth for a slow count of ten, then [v_suck] {R+} cock, and repeats once the cold has gone.",
             explicit = "{G} holds #ice# in his mouth until it hurts, then [v_suck] {R+} cock cold, and does it again the moment his mouth is warm.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "cold_sensation"),
@@ -333,7 +333,7 @@ internal object TermsLevel2 {
             id = "l2_service_hold_position", level = 2, cats = setOf(POWER),
             title = "Holding position",
             base = "{DOM} puts {SUB} into a position of his choosing and {SUB} [v_hold_pos] while {DOM} touches him anywhere from the neck down.",
-            explicit = "{DOM} puts {SUB} where he wants him and {SUB} [v_hold_pos] while {DOM} uses his hands and mouth on him from the neck down.",
+            explicit = "{DOM} puts {SUB} face down with his knees apart and {SUB} [v_hold_pos] while {DOM} uses his hands and mouth on him from the neck down.",
             benefit = GIVER, type = BenefitType.COMMAND_AUTHORITY,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("commands"),
@@ -403,8 +403,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_oral_harder_intro", level = 2, cats = setOf(ORAL),
             title = "A harder pace",
-            base = "{R} fucks his mouth faster than usual and {G} keeps up with it for the full time without slowing down.",
-            explicit = "{R} fucks his mouth hard and {G} keeps up with it for the full time. He does not get to slow it down because it is difficult.",
+            base = "{R} fucks {G+} mouth faster than usual and {G} takes it for the full time without pulling off.",
+            explicit = "{R} fucks {G+} mouth hard and {G} takes all of it for the full time, without pulling off once.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "harder_oral"),
             blocks = setOf(Boundary.NO_ROUGH_SEX),
@@ -414,7 +414,7 @@ internal object TermsLevel2 {
             id = "l2_oral_hair_grip", level = 2, cats = setOf(ORAL, POWER),
             title = "A hand in his hair",
             base = "{G} [v_suck] {R+} cock while {R} keeps [v_pull_hair] his hair and uses it to guide him.",
-            explicit = "{G} [v_suck] {R+} cock and {R} keeps a fist in his hair the whole time, using it to move him exactly where he wants him.",
+            explicit = "{G} [v_suck] {R+} cock and {R} keeps a fist in his hair the whole time, using it to set how deep he goes on every stroke, all the wants him.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "hair_pulling"),
             timers = listOf(tm("Hand in his hair", 120))
