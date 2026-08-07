@@ -321,7 +321,7 @@ internal object TermsLevel4 {
         t(
             id = "l4_service_worship_on_command", level = 4, cats = setOf(POWER, BODY_WORSHIP),
             title = "Worship on command",
-            base = "{DOM} names a part of his body and {SUB} presses it with his mouth for a slow count of twenty, then {DOM} names the next.",
+            base = "{DOM} names a part of his body and {SUB} puts his mouth on it for a slow count of twenty, then {DOM} names the next.",
             explicit = "{DOM} names a part of himself and {SUB} puts his mouth on it and stays there for a slow count of twenty, then {DOM} names the next.",
             benefit = GIVER, type = BenefitType.SERVICE_RECIPIENT,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,

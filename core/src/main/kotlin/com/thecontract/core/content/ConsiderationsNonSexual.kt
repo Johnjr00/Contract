@@ -207,8 +207,8 @@ internal object ConsiderationsNonSexual {
         c(
             id = "cn_kiss_chest_nipples", intensity = 2, family = F_KISS, cats = setOf(KISSING, BODY_WORSHIP),
             title = "Chest and nipple worship",
-            base = "{G} kneads {R+} chest and each nipple with his mouth [adv_kiss], alternating between them.",
-            explicit = "{G} kneads {R+} chest and nipples with his mouth [adv_kiss], sucking one while his fingers pinch the other.",
+            base = "{G} kisses {R+} chest and sucks each nipple [adv_kiss], alternating between them.",
+            explicit = "{G} kisses {R+} chest and sucks his nipples [adv_kiss], sucking one while his fingers pinch the other.",
             acts = setOf("chest_nipple_kissing", "nipple_stimulation"),
             timers = listOf(tm("Left nipple", 60), tm("Right nipple", 60))
         ),

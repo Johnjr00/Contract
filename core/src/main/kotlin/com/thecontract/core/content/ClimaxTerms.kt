@@ -288,8 +288,8 @@ internal object ClimaxTerms {
         t(
             id = "cx_np_worship_and_kissing", level = 5, cats = setOf(CLIMAX, KISSING), climax = true,
             title = "Worshipped and kissed until he finishes",
-            base = "{G} kneads {R+} chest, neck and stomach with his mouth while he [v_stroke] him with #lubricant# until he finishes. If the timer ends first, both continue as they are until he does.",
-            explicit = "{G} kneads {R+} chest, neck and stomach with his mouth while he [v_stroke] him with #lubricant# until he [v_come]. If the timer ends first, both carry on exactly as they are until he is done.",
+            base = "{G} kisses and sucks {R+} chest, neck and stomach while he [v_stroke] him with #lubricant# until he finishes. If the timer ends first, both continue as they are until he does.",
+            explicit = "{G} kisses and sucks {R+} chest, neck and stomach while he [v_stroke] him with #lubricant# until he [v_come]. If the timer ends first, both carry on exactly as they are until he is done.",
             benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
             acts = setOf("body_worship", "neck_kissing"),
             equip = setOf(Equipment.LUBRICANT),
@@ -392,7 +392,7 @@ internal object ClimaxTerms {
         ),
         t(
             id = "cx_top_inside_standing", level = 5, cats = setOf(CLIMAX, ANAL), climax = true,
-            title = "He finishes inside him, bent over the chair",
+            title = "He finishes inside him, held by the hips",
             base = "{G} bends over #sturdy_chair# and {R} [v_enter] him with #lubricant#, holds him by the hips and fucks him [adv_thrust_hard] until he [v_come_in] him, then stays inside for a slow count of twenty. If the timer ends first the same rhythm continues until he finishes.",
             explicit = "{G} bends over #sturdy_chair# and holds on. {R} [v_enter] him with #lubricant#, takes both hips and fucks him [adv_thrust_hard] until he [v_come_in] him, then stays buried for a slow count of twenty. If the timer ends first he does not change a thing until he is done.",
             benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,

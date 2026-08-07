@@ -497,8 +497,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_serv_worship_thighs", intensity = 3, family = F_SEX, cats = setOf(POWER, BODY_WORSHIP),
             title = "Worship from the floor",
-            base = "{G} kneels and kneads {R+} thighs, stomach and hips with his mouth, avoiding his cock entirely.",
-            explicit = "{G} kneels and kneads {R+} thighs, stomach and hips with his mouth and stays well away from his cock.",
+            base = "{G} kneels and kisses {R+} thighs, stomach and hips, avoiding his cock entirely.",
+            explicit = "{G} kneels and kisses {R+} thighs, stomach and hips and stays well away from his cock.",
             acts = setOf("kneeling", "body_worship", "stomach_hip_kissing"),
             timers = listOf(tm("Thighs", 60), tm("Stomach", 45), tm("Hips", 45))
         ),

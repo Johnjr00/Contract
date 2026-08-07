@@ -342,8 +342,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_service_worship_on_knees", level = 2, cats = setOf(POWER, BODY_WORSHIP),
             title = "Worship from the floor",
-            base = "{SUB} kneels and kneads {DOM+} thighs, stomach and hips with his mouth, without touching {DOM+} cock at all.",
-            explicit = "{SUB} kneels and kneads {DOM+} thighs, stomach and hips with his mouth and is not allowed anywhere near his cock, however long it takes.",
+            base = "{SUB} kneels and kisses {DOM+} thighs, stomach and hips, without touching {DOM+} cock at all.",
+            explicit = "{SUB} kneels and kisses {DOM+} thighs, stomach and hips and is not allowed anywhere near his cock, however long it takes.",
             benefit = RECEIVER, type = BenefitType.SERVICE_RECIPIENT,
             gCon = PartyConstraint.SUBMISSIVE, rCon = PartyConstraint.DOMINANT,
             acts = setOf("kneeling", "body_worship", "stomach_hip_kissing"),
