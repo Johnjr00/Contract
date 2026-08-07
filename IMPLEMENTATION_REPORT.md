@@ -12,10 +12,10 @@ Both APKs were built and verified.
 | --- | --- |
 | Debug APK | `app/build/outputs/apk/debug/app-debug.apk` |
 | | application id `com.thecontract.tv.debug` |
-| | SHA-256 `3a4c5386dc42195e6ef1a3a5f8e8a9e097a7c9be29f2330c677bf0ef4bd5a42d` |
+| | SHA-256 `d1a1f6752278702a597bdda28a121d09b1da1895d4e9f1178af8fc926b869720` |
 | Release APK | `app/build/outputs/apk/release/app-release.apk` |
 | | application id `com.thecontract.tv`, minified and resource-shrunk by R8 |
-| | SHA-256 `b0c19c3299bb0939ca46d07246f441900fdf1341a921416bff8da2466629a4aa` |
+| | SHA-256 `862f9857d78d69fb9f3f732da4c3345428ba367ee6705d37b04056bd161499e7` |
 | Release signature | APK Signature Scheme v2, verified with `apksigner verify` |
 | | signer `CN=The Contract, OU=TheContract, O=TheContract, L=Unknown, ST=Unknown, C=US` |
 | | certificate SHA-256 `d460e29876eda8d73e6b1af100f78942b26ac8ab28d33aaa7f42ca605bef25e0` |
@@ -600,7 +600,14 @@ acts 1 and 2 contain no penetrative terms at all, penetration enters at act 3
 (20 of 50 penetrative, including all the new material). Every act has 40 to 50
 eligible terms, so no act falls back to a gentler one for lack of content.
 
-Library totals afterwards: 212 regular terms, 34 closing terms, 133
+Six further closing terms were then added that name the act plainly — his cock
+into his partner's ass, and him emptying himself inside it — because the
+existing "he finishes inside him" wording could be read as his mouth. They are
+closing terms only, and at least one is guaranteed to be offered in every one
+of the 36 anal-role pairings where the finisher can top and his partner can
+bottom.
+
+Library totals afterwards: 212 regular terms, 40 closing terms, 133
 consideration actions.
 
 Everything above was verified by rendering every term, closing term and
