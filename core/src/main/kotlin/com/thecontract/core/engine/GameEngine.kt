@@ -582,8 +582,12 @@ class GameEngine {
         val performer = beneficiary ?: current.term.giver
         val recipient = beneficiary?.other ?: current.term.receiver
 
+        // The closing step is the one players deliberate over most, so it offers a wider list.
         val options = ConsiderationSelector
-            .options(s, ctx, performer, recipient, mutualRequired = mutual, stronger = stronger)
+            .options(
+                s, ctx, performer, recipient, mutualRequired = mutual, stronger = stronger,
+                limit = if (current.term.climax) 9 else 6
+            )
             .map { Renderer.renderConsideration(it, performer, recipient, ctx) }
 
         val phase = if (current.term.climax) {
