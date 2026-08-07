@@ -26,7 +26,7 @@ internal object TermsLevel1 {
         t(
             id = "l1_massage_neck_shoulders", level = 1, cats = setOf(MASSAGE),
             title = "Neck and shoulders",
-            base = "{R} lies face down. {G} [v_massage] {R+} neck and shoulders [adv_pressure_firm], thumbs either side of the spine, working from the base of the skull out to the point of each shoulder.",
+            base = "{R} lies face down. {G} [v_massage] {R+} neck and shoulders [adv_pressure_firm], thumbs either side of the spine, moving from the base of the skull out to the point of each shoulder.",
             explicit = "{R} goes face down and stays there. {G} straddles his hips and [v_knead] his neck and shoulders [adv_pressure_firm], thumbs either side of the spine, from the base of the skull out to each shoulder, until the muscle stops fighting him.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_neck_shoulders"),
@@ -44,7 +44,7 @@ internal object TermsLevel1 {
         t(
             id = "l1_massage_lower_back", level = 1, cats = setOf(MASSAGE),
             title = "Lower back",
-            base = "{G} [v_massage] {R+} lower back [adv_pressure_firm] with the heels of both hands, working from the waist down to the top of the buttocks.",
+            base = "{G} [v_massage] {R+} lower back [adv_pressure_firm] with the heels of both hands, moving from the waist down to the top of the buttocks.",
             explicit = "{G} plants the heels of both hands on {R+} lower back and [v_knead] it [adv_pressure_deep], waist down to the top of his ass, until he is loose enough to make noise about it.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_lower_back"),
@@ -54,7 +54,7 @@ internal object TermsLevel1 {
             id = "l1_massage_scalp", level = 1, cats = setOf(MASSAGE),
             title = "Scalp and hair",
             base = "{R} lies with his head in {G+} lap. {G} [v_massage] {R+} scalp [adv_pressure_light] with his fingertips and draws his fingers slowly through {R+} hair.",
-            explicit = "{R} puts his head in {G+} lap and {G} works his scalp [adv_pressure_light] with his fingertips, then [v_pull_hair] his hair and holds it just long enough for him to feel it.",
+            explicit = "{R} puts his head in {G+} lap and {G} rubs his scalp [adv_pressure_light] with his fingertips, then [v_pull_hair] his hair and holds it just long enough for him to feel it.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_scalp"), gPrefs = setOf(), rPrefs = setOf(),
             timers = listOf(tm("Scalp", 90), tm("Hairline and temples", 45))
@@ -63,7 +63,7 @@ internal object TermsLevel1 {
             id = "l1_massage_jaw_face", level = 1, cats = setOf(MASSAGE),
             title = "Jaw and face",
             base = "{G} [v_massage] {R+} jaw, temples and the muscle in front of each ear [adv_pressure_light], holding {R+} face in both hands.",
-            explicit = "{G} takes {R+} face in both hands and works his jaw, temples and the muscle in front of each ear [adv_pressure_light], keeping eye contact the whole time.",
+            explicit = "{G} takes {R+} face in both hands and kneads his jaw, temples and the muscle in front of each ear [adv_pressure_light], keeping eye contact the whole time.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_jaw_face"),
             timers = listOf(tm("Jaw", 45), tm("Temples", 45), tm("In front of each ear", 30))
@@ -71,8 +71,8 @@ internal object TermsLevel1 {
         t(
             id = "l1_massage_arms_hands", level = 1, cats = setOf(MASSAGE),
             title = "Arms and hands",
-            base = "{G} [v_massage] each of {R+} arms from shoulder to wrist, then works the palm and every finger of each hand.",
-            explicit = "{G} takes each of {R+} arms in turn, works it from shoulder to wrist [adv_pressure_firm], then opens the palm and pulls on every finger until the joints give.",
+            base = "{G} [v_massage] each of {R+} arms from shoulder to wrist, then kneads the palm and every finger of each hand.",
+            explicit = "{G} takes each of {R+} arms in turn, kneads it from shoulder to wrist [adv_pressure_firm], then opens the palm and pulls on every finger until the joints give.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_arms_hands"),
             timers = listOf(tm("Left arm", 45), tm("Left hand", 30), tm("Right arm", 45), tm("Right hand", 30))
@@ -80,8 +80,8 @@ internal object TermsLevel1 {
         t(
             id = "l1_massage_calves_feet", level = 1, cats = setOf(MASSAGE),
             title = "Calves and feet",
-            base = "{G} [v_massage] each of {R+} calves [adv_pressure_firm], then works the arch and heel of each foot with both thumbs.",
-            explicit = "{G} works each of {R+} calves [adv_pressure_deep], then digs both thumbs into the arch and heel of each foot until he swears at him for it.",
+            base = "{G} [v_massage] each of {R+} calves [adv_pressure_firm], then presses the arch and heel of each foot with both thumbs.",
+            explicit = "{G} kneads each of {R+} calves [adv_pressure_deep], then digs both thumbs into the arch and heel of each foot until he swears at him for it.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_calves_feet"),
             blocks = setOf(Boundary.NO_FOOT_PLAY),
@@ -90,8 +90,8 @@ internal object TermsLevel1 {
         t(
             id = "l1_massage_buttocks_hips", level = 1, cats = setOf(MASSAGE),
             title = "Buttocks and hips",
-            base = "{G} [v_massage] {R+} buttocks and hips [adv_pressure_deep], working the outside of each hip and then the full muscle of each cheek.",
-            explicit = "{G} [v_knead] {R+} ass and hips [adv_pressure_deep], works the outside of each hip, then takes a full handful of each cheek and does not hurry.",
+            base = "{G} [v_massage] {R+} buttocks and hips [adv_pressure_deep], kneading the outside of each hip and then the full muscle of each cheek.",
+            explicit = "{G} [v_knead] {R+} ass and hips [adv_pressure_deep], rubs the outside of each hip, then takes a full handful of each cheek and does not hurry.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_buttocks_hips"),
             timers = listOf(tm("Left hip", 45), tm("Right hip", 45), tm("Left cheek", 45), tm("Right cheek", 45))
@@ -100,7 +100,7 @@ internal object TermsLevel1 {
             id = "l1_massage_inner_thighs", level = 1, cats = setOf(MASSAGE),
             title = "Inner thighs",
             base = "{R} lies on his back with his legs apart. {G} [v_massage] each inner thigh from the knee up, stopping short of the groin each time.",
-            explicit = "{R} lies on his back with his legs open. {G} works each inner thigh from the knee up [adv_pressure_firm], stopping just short of his groin every single time, until he is pushing his hips up for more.",
+            explicit = "{R} lies on his back with his legs open. {G} kneads each inner thigh from the knee up [adv_pressure_firm], stopping just short of his groin every single time, until he is pushing his hips up for more.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_inner_thighs"),
             timers = listOf(tm("Left inner thigh", 60), tm("Right inner thigh", 60))
@@ -108,8 +108,8 @@ internal object TermsLevel1 {
         t(
             id = "l1_massage_chest", level = 1, cats = setOf(MASSAGE),
             title = "Chest and pecs",
-            base = "{G} [v_massage] {R+} chest and pecs [adv_pressure_firm], working out from the breastbone to each shoulder.",
-            explicit = "{G} straddles {R+} waist and works his chest and pecs [adv_pressure_firm], out from the breastbone to each shoulder, dragging his thumbs across the nipples on every pass.",
+            base = "{G} [v_massage] {R+} chest and pecs [adv_pressure_firm], moving out from the breastbone to each shoulder.",
+            explicit = "{G} straddles {R+} waist and kneads his chest and pecs [adv_pressure_firm], out from the breastbone to each shoulder, dragging his thumbs across the nipples on every pass.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_chest"),
             timers = listOf(tm("Left pec", 45), tm("Right pec", 45), tm("Breastbone and collarbones", 30))
@@ -118,7 +118,7 @@ internal object TermsLevel1 {
             id = "l1_massage_oil_full", level = 1, cats = setOf(MASSAGE),
             title = "Oiled back sequence",
             base = "{G} warms #massage_oil# in his hands and [v_massage] {R+} whole back, moving from shoulders to lower back and back up in long strokes.",
-            explicit = "{G} warms #massage_oil# in his hands, pours it down {R+} spine and works his whole back in long, greedy strokes, shoulders to lower back and back up, until he is slick from neck to waist.",
+            explicit = "{G} warms #massage_oil# in his hands, pours it down {R+} spine and kneads his whole back in long, greedy strokes, shoulders to lower back and back up, until he is slick from neck to waist.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_general", "massage_oil"),
             equip = setOf(Equipment.MASSAGE_OIL),
@@ -128,7 +128,7 @@ internal object TermsLevel1 {
             id = "l1_massage_candle", level = 1, cats = setOf(MASSAGE, SENSORY),
             title = "Massage candle",
             base = "{G} drips warm wax from #massage_candle# along {R+} back and shoulders, then [v_massage] it in [adv_pressure_firm].",
-            explicit = "{G} tips #massage_candle# and drips the warm wax down {R+} spine and across his shoulders, listens to him react, then works it into the skin [adv_pressure_firm].",
+            explicit = "{G} tips #massage_candle# and drips the warm wax down {R+} spine and across his shoulders, listens to him react, then pushes it into the skin [adv_pressure_firm].",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("warm_wax", "massage_candle", "massage_general"),
             equip = setOf(Equipment.MASSAGE_CANDLE),
@@ -147,7 +147,7 @@ internal object TermsLevel1 {
         t(
             id = "l1_massage_light_full", level = 1, cats = setOf(MASSAGE, SENSORY),
             title = "Light-pressure full body",
-            base = "{G} works {R+} whole body [adv_pressure_light] with his fingertips only, from shoulders to feet, never pressing hard.",
+            base = "{G} kneads {R+} whole body [adv_pressure_light] with his fingertips only, from shoulders to feet, never pressing hard.",
             explicit = "{G} covers {R+} whole body with fingertips only [adv_pressure_light], shoulders down to his feet, deliberately too light, until he is asking for more pressure.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_light", "massage_general"),
@@ -156,7 +156,7 @@ internal object TermsLevel1 {
         t(
             id = "l1_massage_deep_back", level = 1, cats = setOf(MASSAGE),
             title = "Deep-pressure back",
-            base = "{G} uses forearms and elbows to work {R+} back [adv_pressure_deep], holding on each tight spot until it releases.",
+            base = "{G} uses forearms and elbows to knead {R+} back [adv_pressure_deep], holding on each tight spot until it releases.",
             explicit = "{G} puts his forearms and elbows into {R+} back [adv_pressure_deep] and leans on every knot until it lets go, whatever noise he makes about it.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_deep", "massage_upper_back"),
@@ -194,8 +194,8 @@ internal object TermsLevel1 {
         t(
             id = "l1_kiss_neck", level = 1, cats = setOf(KISSING),
             title = "Neck",
-            base = "{G} works {R+} neck with his mouth [adv_kiss], from behind the ear down to the collarbone and back up.",
-            explicit = "{G} gets behind {R}, holds him still and works his neck with his mouth [adv_kiss], behind the ear down to the collarbone and back, using teeth on the way up.",
+            base = "{G} kisses and sucks {R+} neck [adv_kiss], from behind the ear down to the collarbone and back up.",
+            explicit = "{G} gets behind {R}, holds him still and kisses and sucks his neck [adv_kiss], behind the ear down to the collarbone and back, using teeth on the way up.",
             benefit = RECEIVER, type = BenefitType.KISS_RECIPIENT,
             acts = setOf("neck_kissing"),
             timers = listOf(tm("Left side of the neck", 60), tm("Right side of the neck", 60))
@@ -203,8 +203,8 @@ internal object TermsLevel1 {
         t(
             id = "l1_kiss_chest_nipples", level = 1, cats = setOf(KISSING, BODY_WORSHIP),
             title = "Chest and nipples",
-            base = "{G} kisses {R+} chest and works each nipple with his mouth [adv_kiss], alternating between them.",
-            explicit = "{G} kisses down {R+} chest and works each nipple with his mouth [adv_kiss], sucking one while his fingers work the other, and swaps when he feels like it.",
+            base = "{G} kisses {R+} chest and sucks each nipple [adv_kiss], alternating between them.",
+            explicit = "{G} kisses down {R+} chest and sucks each nipple [adv_kiss], sucking one while his fingers pinch the other, and swaps every thirty seconds.",
             benefit = RECEIVER, type = BenefitType.KISS_RECIPIENT,
             acts = setOf("chest_nipple_kissing", "nipple_stimulation"),
             timers = listOf(tm("Left nipple", 60), tm("Right nipple", 60))
@@ -260,8 +260,8 @@ internal object TermsLevel1 {
         t(
             id = "l1_ear_one", level = 1, cats = setOf(EAR_PLAY),
             title = "One ear",
-            base = "{G} works one of {R+} ears with his mouth [adv_kiss] — lips along the outer edge, then the lobe.",
-            explicit = "{G} takes one of {R+} ears in his mouth [adv_kiss], works the outer edge with his lips, then sucks the lobe and does not let go early.",
+            base = "{G} sucks one of {R+} ear [adv_kiss] — lips along the outer edge, then the lobe.",
+            explicit = "{G} takes one of {R+} ears in his mouth [adv_kiss], rubs the outer edge with his lips, then sucks the lobe and does not let go early.",
             benefit = RECEIVER, type = BenefitType.EAR_PLAY_RECIPIENT,
             acts = setOf("ear_play"),
             timers = listOf(tm("Outer edge", 45), tm("Lobe", 45))
@@ -269,8 +269,8 @@ internal object TermsLevel1 {
         t(
             id = "l1_ear_both", level = 1, cats = setOf(EAR_PLAY),
             title = "Both ears",
-            base = "{G} works both of {R+} ears with his mouth in turn [adv_kiss], keeping his hands on {R+} jaw to hold his head still.",
-            explicit = "{G} holds {R+} head still by the jaw and works both ears in turn with his mouth [adv_kiss]. {R} is not allowed to turn away from either one.",
+            base = "{G} sucks both of {R+} ears in turn [adv_kiss], keeping his hands on {R+} jaw to hold his head still.",
+            explicit = "{G} holds {R+} head still by the jaw and sucks both ears in turn [adv_kiss]. {R} is not allowed to turn away from either one.",
             benefit = RECEIVER, type = BenefitType.EAR_PLAY_RECIPIENT,
             acts = setOf("ear_play"),
             timers = listOf(tm("Left ear", 60), tm("Right ear", 60))
@@ -287,8 +287,8 @@ internal object TermsLevel1 {
         t(
             id = "l1_ear_whispered_praise", level = 1, cats = setOf(EAR_PLAY, LANGUAGE),
             title = "Whispered praise in his ear",
-            base = "{G} works {R+} ear with his mouth and, between passes, [tone_whisper] into it and [v_praise].",
-            explicit = "{G} works {R+} ear with his mouth and, in the gaps, [tone_whisper] straight into it and [v_praise], close enough that he feels every word.",
+            base = "{G} sucks {R+} ear and, between passes, [tone_whisper] into it and [v_praise].",
+            explicit = "{G} sucks {R+} ear and, in the gaps, [tone_whisper] straight into it and [v_praise], close enough that he feels every word.",
             benefit = RECEIVER, type = BenefitType.EAR_PLAY_RECIPIENT,
             acts = setOf("ear_play", "explicit_praise"),
             timers = listOf(tm("Ear and whispering", 90))
@@ -306,7 +306,7 @@ internal object TermsLevel1 {
             id = "l1_ear_neck_combo", level = 1, cats = setOf(EAR_PLAY, KISSING),
             title = "Ear and neck together",
             base = "{G} alternates between {R+} ear and the side of his neck [adv_kiss], never spending more than a few seconds in one place.",
-            explicit = "{G} works {R+} ear then the side of his neck [adv_kiss] and keeps swapping, never more than a few seconds in one place, so he can never settle.",
+            explicit = "{G} sucks {R+} ear then the side of his neck [adv_kiss] and keeps swapping, never more than a few seconds in one place, so he can never settle.",
             benefit = RECEIVER, type = BenefitType.EAR_PLAY_RECIPIENT,
             acts = setOf("ear_play", "neck_kissing"),
             timers = listOf(tm("Left ear and neck", 60), tm("Right ear and neck", 60))
@@ -314,8 +314,8 @@ internal object TermsLevel1 {
         t(
             id = "l1_ear_reciprocal", level = 1, cats = setOf(EAR_PLAY),
             title = "Reciprocal ear play",
-            base = "{G} and {R} work each other's ears at the same time, lying face to face on their sides.",
-            explicit = "{G} and {R} lie face to face on their sides and work each other's ears at the same time, and neither one stops first.",
+            base = "{G} and {R} suck each other's ears at the same time, lying face to face on their sides.",
+            explicit = "{G} and {R} lie face to face on their sides and suck each other's ears at the same time, and neither one stops first.",
             benefit = MUTUAL, type = BenefitType.MUTUAL, mutual = true,
             acts = setOf("ear_play"),
             timers = listOf(tm("Both ears at once", 90))
@@ -323,8 +323,8 @@ internal object TermsLevel1 {
         t(
             id = "l1_ear_during_massage", level = 1, cats = setOf(EAR_PLAY, MASSAGE),
             title = "Ear play during a massage",
-            base = "{G} [v_massage] {R+} shoulders, then leans down and works his ear with his mouth without stopping his hands.",
-            explicit = "{G} keeps working {R+} shoulders [adv_pressure_firm] and leans down to work his ear with his mouth at the same time. His hands do not stop.",
+            base = "{G} [v_massage] {R+} shoulders, then leans down and sucks his ear without stopping his hands.",
+            explicit = "{G} keeps kneading {R+} shoulders [adv_pressure_firm] and leans down to suck his ear with his mouth at the same time. His hands do not stop.",
             benefit = RECEIVER, type = BenefitType.EAR_PLAY_RECIPIENT,
             acts = setOf("ear_play", "massage_neck_shoulders"),
             timers = listOf(tm("Shoulders only", 45), tm("Shoulders and ear together", 90))
@@ -334,17 +334,17 @@ internal object TermsLevel1 {
         t(
             id = "l1_worship_head_to_toe", level = 1, cats = setOf(BODY_WORSHIP),
             title = "Body worship",
-            base = "{G} works his way down {R+} body with hands and mouth and names one thing he likes about each part he reaches.",
-            explicit = "{G} works down {R+} body with hands and mouth and says out loud, part by part, exactly what he likes about it. He does not skip anything.",
+            base = "{G} moves his way down {R+} body with hands and mouth and names one thing he likes about each part he reaches.",
+            explicit = "{G} moves down {R+} body with hands and mouth and says out loud, part by part, exactly what he likes about it. He does not skip anything.",
             benefit = RECEIVER, type = BenefitType.SERVICE_RECIPIENT,
             acts = setOf("body_worship", "explicit_praise"),
             timers = listOf(tm("Chest and arms", 60), tm("Stomach", 45), tm("Thighs", 60))
         ),
         t(
             id = "l1_worship_nipples", level = 1, cats = setOf(BODY_WORSHIP),
-            title = "Nipple work",
-            base = "{G} works {R+} nipples with fingers and mouth [adv_pace], one at a time and then both.",
-            explicit = "{G} works {R+} nipples [adv_pace] with fingers and mouth, one at a time and then both together, and keeps going past the point where he starts pushing his chest up.",
+            title = "Nipples, sucked and pinched",
+            base = "{G} sucks and pinches {R+} nipples [adv_pace], one at a time and then both.",
+            explicit = "{G} sucks and pinches {R+} nipples [adv_pace] with fingers and mouth, one at a time and then both together, and keeps going past the point where he starts pushing his chest up.",
             benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
             acts = setOf("nipple_stimulation"),
             timers = listOf(tm("Left nipple", 45), tm("Right nipple", 45), tm("Both together", 45))
@@ -371,8 +371,8 @@ internal object TermsLevel1 {
         t(
             id = "l1_worship_feet", level = 1, cats = setOf(BODY_WORSHIP),
             title = "Feet",
-            base = "{G} works each of {R+} feet with his hands and then his mouth, arch first, then each toe.",
-            explicit = "{G} works each of {R+} feet with his hands and then his mouth, arch first, then every toe in turn, and takes his time over it.",
+            base = "{G} kneads each of {R+} feet with his hands and then his mouth, arch first, then each toe.",
+            explicit = "{G} kneads each of {R+} feet with his hands and then his mouth, arch first, then every toe in turn, and takes his time over it.",
             benefit = RECEIVER, type = BenefitType.SERVICE_RECIPIENT,
             acts = setOf("foot_stimulation", "foot_kissing"),
             blocks = setOf(Boundary.NO_FOOT_PLAY),

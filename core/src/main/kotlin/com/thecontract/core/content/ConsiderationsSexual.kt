@@ -52,7 +52,7 @@ internal object ConsiderationsSexual {
             id = "cs_oral_and_hand", intensity = 2, family = F_SEX, cats = setOf(ORAL, HANDS),
             title = "Mouth and hand",
             base = "{G} [v_suck] the head of {R+} cock and [v_stroke] the rest at the same rhythm.",
-            explicit = "{G} [v_suck] the head of {R+} cock and works the rest with his fist in the same rhythm.",
+            explicit = "{G} [v_suck] the head of {R+} cock and strokes the rest with his fist in the same rhythm.",
             acts = setOf("oral"), timers = listOf(tm("Mouth and hand", 150))
         ),
         c(
@@ -61,7 +61,7 @@ internal object ConsiderationsSexual {
             base = "{G} [v_deep] {R+} cock, going further on each pass and coming off to breathe as needed.",
             explicit = "{G} [v_deep] {R+} cock, further every pass, and only comes off when he actually has to.",
             acts = setOf("oral", "deep_oral"),
-            timers = listOf(tm("Working deeper", 90), tm("Held deep", 45))
+            timers = listOf(tm("Deeper", 90), tm("Held deep", 45))
         ),
         c(
             id = "cs_oral_kneeling", intensity = 3, family = F_SEX, cats = setOf(ORAL, POWER),
@@ -88,8 +88,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_oral_blindfolded", intensity = 3, family = F_SEX, cats = setOf(ORAL, SENSORY),
             title = "Blindfolded oral",
-            base = "{R} wears #blindfold# and {G} [v_suck] him, changing pace without warning.",
-            explicit = "{R} wears #blindfold# and gets no warning of anything. {G} [v_suck] him and changes pace whenever he likes.",
+            base = "{R} wears #blindfold# and {G} [v_suck] him, switching between slow and fast every thirty seconds.",
+            explicit = "{R} wears #blindfold# and gets no warning of anything. {G} [v_suck] him, switching between slow and fast every thirty seconds.",
             acts = setOf("oral", "blindfold"), equip = setOf(Equipment.BLINDFOLD),
             timers = listOf(tm("Blindfolded", 150))
         ),
@@ -121,9 +121,9 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_rim_deep", intensity = 4, family = F_SEX, cats = setOf(RIMMING, ANAL),
             title = "Deeper rimming",
-            base = "{G} [v_rim_hard] {R}, working his tongue in rather than only over the outside.",
-            explicit = "{G} [v_rim_hard] {R} and gets his tongue properly inside him, not just working the outside.",
-            acts = setOf("rimming"), timers = listOf(tm("Outside", 45), tm("Working in", 120))
+            base = "{G} [v_rim_hard] {R}, pushing his tongue in rather than only over the outside.",
+            explicit = "{G} [v_rim_hard] {R} and gets his tongue properly inside him, not just licking the outside.",
+            acts = setOf("rimming"), timers = listOf(tm("Outside", 45), tm("Pushing in", 120))
         ),
         c(
             id = "cs_rim_face_down", intensity = 3, family = F_SEX, cats = setOf(RIMMING, ANAL),
@@ -136,7 +136,7 @@ internal object ConsiderationsSexual {
             id = "cs_rim_and_stroke", intensity = 4, family = F_SEX, cats = setOf(RIMMING, HANDS, ANAL),
             title = "Rimming and stroking",
             base = "{G} [v_rim] {R} and reaches round to [v_stroke] his cock at the same rhythm.",
-            explicit = "{G} [v_rim] {R} and reaches round to work his cock in the same rhythm so he gets both at once.",
+            explicit = "{G} [v_rim] {R} and reaches round to stroke his cock in the same rhythm so he gets both at once.",
             acts = setOf("rimming"), timers = listOf(tm("Rimming", 60), tm("Both", 120))
         ),
         c(
@@ -155,12 +155,12 @@ internal object ConsiderationsSexual {
             acts = setOf("rimming"), mutual = true, timers = listOf(tm("Both at once", 180))
         ),
 
-        // ------------------------------------------------- cock and hand work (8)
+        // ------------------------------------------------- cock and hand (8)
         c(
             id = "cs_hand_cock_balls", intensity = 2, family = F_SEX, cats = setOf(HANDS),
             title = "Cock and balls",
-            base = "{G} works {R+} cock and balls with an open hand and #massage_oil#, unhurried.",
-            explicit = "{G} works {R+} cock and balls with an open, oiled hand and takes his time over both.",
+            base = "{G} strokes {R+} cock and balls with an open hand and #massage_oil#, unhurried.",
+            explicit = "{G} strokes {R+} cock and balls with an open, oiled hand and takes his time over both.",
             acts = setOf("massage_groin"), equip = setOf(Equipment.MASSAGE_OIL),
             blocks = setOf(Boundary.MASSAGE_NONSEXUAL),
             timers = listOf(tm("Cock", 60), tm("Balls", 60))
@@ -168,15 +168,15 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_hand_ball_worship", intensity = 3, family = F_SEX, cats = setOf(HANDS, ORAL),
             title = "Balls, hands and mouth",
-            base = "{G} works {R+} balls with his hand and then his mouth and does not touch the shaft at all.",
-            explicit = "{G} works {R+} balls with his hand and then his mouth and never once touches the shaft.",
+            base = "{G} rolls {R+} balls with his hand and then his mouth and does not touch the shaft at all.",
+            explicit = "{G} rolls {R+} balls with his hand and then his mouth and never once touches the shaft.",
             acts = setOf("oral"), timers = listOf(tm("Hand", 45), tm("Mouth", 90))
         ),
         c(
             id = "cs_hand_oiled", intensity = 2, family = F_SEX, cats = setOf(HANDS),
             title = "Oiled hand",
-            base = "{G} [v_stroke] {R} with #lubricant# [adv_grip] at whatever pace {R} calls out.",
-            explicit = "{G} works {R+} cock with #lubricant# [adv_grip] at exactly the pace he calls, changing the second he says.",
+            base = "{G} [v_stroke] {R} with #lubricant# [adv_grip], thirty seconds slow then thirty seconds fast, on repeat.",
+            explicit = "{G} strokes {R+} cock with #lubricant# [adv_grip], thirty seconds slow then thirty seconds fast, on repeat, without a break.",
             acts = setOf("massage_groin"), equip = setOf(Equipment.LUBRICANT),
             blocks = setOf(Boundary.MASSAGE_NONSEXUAL),
             timers = listOf(tm("Hand only", 150))
@@ -185,7 +185,7 @@ internal object ConsiderationsSexual {
             id = "cs_hand_two_handed", intensity = 3, family = F_SEX, cats = setOf(HANDS),
             title = "Both hands",
             base = "{G} uses both hands on {R} with #lubricant#, one on the shaft and one on the balls.",
-            explicit = "{G} uses both hands on {R} with #lubricant#, one working the shaft and one on his balls, and does not stop.",
+            explicit = "{G} uses both hands on {R} with #lubricant#, one stroking the shaft and one on his balls, and does not stop.",
             acts = setOf("massage_groin"), equip = setOf(Equipment.LUBRICANT),
             blocks = setOf(Boundary.MASSAGE_NONSEXUAL),
             timers = listOf(tm("Both hands", 150))
@@ -202,36 +202,36 @@ internal object ConsiderationsSexual {
             id = "cs_hand_sleeve", intensity = 3, family = F_SEX, cats = setOf(HANDS, TOYS),
             title = "The sleeve",
             base = "{G} uses #sleeve# on {R} with #lubricant#, swapping between slow and fast every thirty seconds.",
-            explicit = "{G} works #sleeve# down {R+} cock with #lubricant#, swapping slow and fast every thirty seconds.",
+            explicit = "{G} slides #sleeve# down {R+} cock with #lubricant#, swapping slow and fast every thirty seconds.",
             equip = setOf(Equipment.SLEEVE, Equipment.LUBRICANT), erection = PartyRef.RECEIVER,
             timers = listOf(tm("Slow", 30), tm("Fast", 30), tm("Slow", 30), tm("Fast", 30))
         ),
         c(
             id = "cs_hand_mutual", intensity = 2, family = F_SEX, cats = setOf(HANDS),
-            title = "Working each other",
-            base = "{G} and {R} lie face to face and work each other with #lubricant#, matching pace.",
-            explicit = "{G} and {R} lie face to face and work each other with #lubricant#, matching pace exactly.",
+            title = "Stroking each other",
+            base = "{G} and {R} lie face to face and stroke each other with #lubricant#, matching pace.",
+            explicit = "{G} and {R} lie face to face and stroke each other with #lubricant#, matching pace exactly.",
             acts = setOf("massage_groin"), mutual = true, equip = setOf(Equipment.LUBRICANT),
             blocks = setOf(Boundary.MASSAGE_NONSEXUAL),
             timers = listOf(tm("Both hands", 150))
         ),
         c(
             id = "cs_hand_porn", intensity = 2, family = F_SEX, cats = setOf(HANDS, VISUAL),
-            title = "Watching and working",
-            base = "{G} and {R} put on #porn# and work each other by hand, both watching the screen.",
-            explicit = "{G} and {R} put on #porn# and work each other by hand with their eyes on the screen the whole time.",
+            title = "Watching and stroking",
+            base = "{G} and {R} put on #porn# and stroke each other by hand, both watching the screen.",
+            explicit = "{G} and {R} put on #porn# and stroke each other by hand with their eyes on the screen the whole time.",
             acts = setOf("massage_groin"), mutual = true,
             pPrefs = setOf("watching_porn"), rPrefs = setOf("watching_porn"),
             equip = setOf(Equipment.PORN), blocks = setOf(Boundary.MASSAGE_NONSEXUAL),
-            timers = listOf(tm("Watching and working", 180))
+            timers = listOf(tm("Watching and stroking", 180))
         ),
 
         // ------------------------------------------------- external anal play (5)
         c(
             id = "cs_ext_tease", intensity = 3, family = F_SEX, cats = setOf(ANAL),
             title = "Outside only",
-            base = "{G} works {R+} [n_hole] from the outside with a slick thumb and does not go in.",
-            explicit = "{G} works {R+} [n_hole] from the outside with a slick thumb and does not go in however much he pushes back.",
+            base = "{G} rubs {R+} [n_hole] from the outside with a slick thumb and does not go in.",
+            explicit = "{G} rubs {R+} [n_hole] from the outside with a slick thumb and does not go in however much he pushes back.",
             acts = setOf("anal_external"), equip = setOf(Equipment.LUBRICANT),
             timers = listOf(tm("Outside only", 120))
         ),
@@ -245,17 +245,17 @@ internal object ConsiderationsSexual {
         ),
         c(
             id = "cs_ext_oiled_cheeks", intensity = 2, family = F_SEX, cats = setOf(ANAL, BODY_WORSHIP),
-            title = "Oiled and worked",
-            base = "{G} oils {R+} ass with #massage_oil# and works both cheeks and the crease between them.",
-            explicit = "{G} oils {R+} ass with #massage_oil# and works both cheeks and everything between them properly.",
+            title = "Oiled and stroked",
+            base = "{G} oils {R+} ass with #massage_oil# and kneads both cheeks and the crease between them.",
+            explicit = "{G} oils {R+} ass with #massage_oil# and kneads both cheeks and everything between them properly.",
             acts = setOf("massage_buttocks_hips", "anal_external"), equip = setOf(Equipment.MASSAGE_OIL),
             timers = listOf(tm("Cheeks", 60), tm("Between them", 60))
         ),
         c(
             id = "cs_ext_grind", intensity = 4, family = F_SEX, cats = setOf(ANAL),
             title = "Right up against him",
-            base = "{G} works himself against {R+} [n_hole] with #lubricant# and does not go in at all.",
-            explicit = "{G} slicks up and works himself against {R+} [n_hole] without once pushing in, until {R} is begging.",
+            base = "{G} grinds himself against {R+} [n_hole] with #lubricant# and does not go in at all.",
+            explicit = "{G} slicks up and grinds himself against {R+} [n_hole] without once pushing in, until {R} is begging.",
             acts = setOf("anal_external"), equip = setOf(Equipment.LUBRICANT),
             erection = PartyRef.GIVER, pCon = PartyConstraint.TOP,
             timers = listOf(tm("Against him", 150))
@@ -263,8 +263,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_ext_tongue_outside", intensity = 3, family = F_SEX, cats = setOf(ANAL, RIMMING),
             title = "Tongue on the outside",
-            base = "{G} works {R+} [n_hole] with his tongue over the outside only, and does not go in.",
-            explicit = "{G} works {R+} [n_hole] with his tongue over the outside only and refuses to go in.",
+            base = "{G} licks {R+} [n_hole] with his tongue over the outside only, and does not go in.",
+            explicit = "{G} licks {R+} [n_hole] with his tongue over the outside only and refuses to go in.",
             acts = setOf("rimming", "anal_external"),
             timers = listOf(tm("Outside only", 120))
         ),
@@ -281,15 +281,15 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_fing_two", intensity = 4, family = F_SEX, cats = setOf(ANAL),
             title = "Two fingers",
-            base = "{G} works up to two fingers with #lubricant# and [v_finger_deep] {R} until he is open.",
-            explicit = "{G} works up to two fingers with #lubricant# and [v_finger_deep] {R} until he is loose and pushing back.",
+            base = "{G} builds up to two fingers with #lubricant# and [v_finger_deep] {R} until he is open.",
+            explicit = "{G} builds up to two fingers with #lubricant# and [v_finger_deep] {R} until he is loose and pushing back.",
             acts = setOf("fingering"), anal = true, equip = setOf(Equipment.LUBRICANT),
             timers = listOf(tm("One finger", 60), tm("Two fingers", 120))
         ),
         c(
             id = "cs_fing_prostate", intensity = 4, family = F_SEX, cats = setOf(ANAL),
             title = "Steady pressure",
-            base = "{G} works two slick fingers into {R} and holds steady pressure on his prostate.",
+            base = "{G} presses two slick fingers into {R} and holds steady pressure on his prostate.",
             explicit = "{G} gets two slick fingers into {R}, finds his prostate and holds hard on it while he tries to stay still.",
             acts = setOf("fingering"), anal = true, equip = setOf(Equipment.LUBRICANT),
             timers = listOf(tm("Finding it", 45), tm("Holding", 90))
@@ -331,8 +331,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_toy_vibe_hole", intensity = 4, family = F_SEX, cats = setOf(TOYS, ANAL),
             title = "Vibrator on his hole",
-            base = "{G} holds #vibrator# against {R+} [n_hole] [adv_toy_pace] while working a slick finger into him.",
-            explicit = "{G} holds #vibrator# hard against {R+} [n_hole] [adv_toy_pace] and works a slick finger in at the same time.",
+            base = "{G} holds #vibrator# against {R+} [n_hole] [adv_toy_pace] while pushing a slick finger into him.",
+            explicit = "{G} holds #vibrator# hard against {R+} [n_hole] [adv_toy_pace] and presses a slick finger in at the same time.",
             acts = setOf("vibration", "anal_external", "fingering"), anal = true,
             equip = setOf(Equipment.VIBRATOR, Equipment.LUBRICANT),
             timers = listOf(tm("Outside", 60), tm("With a finger", 120))
@@ -340,8 +340,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_toy_vibe_nipples", intensity = 3, family = F_SEX, cats = setOf(TOYS),
             title = "Vibrator on his nipples",
-            base = "{G} works #vibrator# over each of {R+} nipples in turn and then down his stomach.",
-            explicit = "{G} works #vibrator# over each of {R+} nipples in turn and drags it down his stomach after.",
+            base = "{G} runs #vibrator# over each of {R+} nipples in turn and then down his stomach.",
+            explicit = "{G} runs #vibrator# over each of {R+} nipples in turn and drags it down his stomach after.",
             acts = setOf("vibration", "nipple_stimulation"), equip = setOf(Equipment.VIBRATOR),
             timers = listOf(tm("Left nipple", 45), tm("Right nipple", 45), tm("Stomach", 45))
         ),
@@ -349,42 +349,42 @@ internal object ConsiderationsSexual {
             id = "cs_toy_wand_body", intensity = 3, family = F_SEX, cats = setOf(TOYS),
             title = "Wand over his body",
             base = "{G} runs #massage_wand# over {R+} cock, balls and inner thighs, never more than fifteen seconds in one place.",
-            explicit = "{G} works #massage_wand# over {R+} cock, balls and inner thighs and never leaves it anywhere longer than fifteen seconds.",
+            explicit = "{G} runs #massage_wand# over {R+} cock, balls and inner thighs and never leaves it anywhere longer than fifteen seconds.",
             acts = setOf("massage_wand", "vibration"), equip = setOf(Equipment.MASSAGE_WAND),
             timers = listOf(tm("Cock", 45), tm("Balls", 45), tm("Inner thighs", 45))
         ),
         c(
             id = "cs_toy_plug", intensity = 4, family = F_SEX, cats = setOf(TOYS, ANAL),
             title = "Plugged",
-            base = "{G} works {R} open with #lubricant# and [v_insert] #anal_plug#, and it stays in.",
+            base = "{G} opens {R} up with #lubricant# and [v_insert] #anal_plug#, and it stays in.",
             explicit = "{G} opens {R} up with #lubricant# and [v_insert] #anal_plug#, and it stays exactly where it is.",
             acts = setOf("plug", "anal_toys"), anal = true,
             equip = setOf(Equipment.ANAL_PLUG, Equipment.LUBRICANT),
-            timers = listOf(tm("Opening him", 60), tm("Working it in", 45), tm("Wearing it", 120))
+            timers = listOf(tm("Opening him", 60), tm("Pushing it in", 45), tm("Wearing it", 120))
         ),
         c(
             id = "cs_toy_dildo_tease", intensity = 4, family = F_SEX, cats = setOf(TOYS, ANAL),
             title = "Teased with the dildo",
-            base = "{G} works #dildo# into {R} with #lubricant# [adv_thrust_slow] and refuses to go faster.",
-            explicit = "{G} works #dildo# into {R} with #lubricant# and fucks him with it [adv_thrust_slow], refusing to speed up.",
+            base = "{G} pushes #dildo# into {R} with #lubricant# [adv_thrust_slow] and refuses to go faster.",
+            explicit = "{G} pushes #dildo# into {R} with #lubricant# and fucks him with it [adv_thrust_slow], refusing to speed up.",
             acts = setOf("dildo", "anal_toys"), anal = true,
             equip = setOf(Equipment.DILDO, Equipment.LUBRICANT),
-            timers = listOf(tm("Working it in", 60), tm("Slow", 150))
+            timers = listOf(tm("Pushing it in", 60), tm("Slow", 150))
         ),
         c(
             id = "cs_toy_prostate", intensity = 4, family = F_SEX, cats = setOf(TOYS, ANAL),
             title = "Prostate toy",
-            base = "{G} [v_insert] #prostate_toy# with #lubricant# and leaves it working while he kisses {R}.",
-            explicit = "{G} [v_insert] #prostate_toy# with #lubricant#, leaves it working inside him and kisses him through it.",
+            base = "{G} [v_insert] #prostate_toy# with #lubricant# and leaves it running while he kisses {R}.",
+            explicit = "{G} [v_insert] #prostate_toy# with #lubricant#, leaves it running inside him and kisses him through it.",
             acts = setOf("anal_toys", "tongue_kissing"), anal = true,
             equip = setOf(Equipment.PROSTATE_TOY, Equipment.LUBRICANT),
-            timers = listOf(tm("Working it in", 45), tm("Left in", 150))
+            timers = listOf(tm("Pushing it in", 45), tm("Left in", 150))
         ),
         c(
             id = "cs_toy_clamps", intensity = 4, family = F_SEX, cats = setOf(TOYS, SENSORY),
             title = "Clamps",
-            base = "{G} works {R+} nipples with his mouth, then puts #nipple_clamps# on and kisses him through it.",
-            explicit = "{G} works {R+} nipples hard, puts #nipple_clamps# on and kisses him through the first minute of it.",
+            base = "{G} sucks and pinches {R+} nipples with his mouth, then puts #nipple_clamps# on and kisses him through it.",
+            explicit = "{G} sucks and pinches {R+} nipples hard, puts #nipple_clamps# on and kisses him through the first minute of it.",
             acts = setOf("nipple_clamps", "nipple_stimulation"), equip = setOf(Equipment.NIPPLE_CLAMPS),
             blocks = setOf(Boundary.NO_PAIN, Boundary.NO_MARKS),
             timers = listOf(tm("Mouth first", 60), tm("Clamps on", 90))
@@ -392,8 +392,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_toy_cock_ring", intensity = 3, family = F_SEX, cats = setOf(TOYS),
             title = "Cock ring",
-            base = "{G} puts #cock_ring# on {R} and works him with hand and mouth while it stays on.",
-            explicit = "{G} puts #cock_ring# on {R} and works him with hand and mouth while it stays exactly where it is.",
+            base = "{G} puts #cock_ring# on {R} and strokes and sucks him while it stays on.",
+            explicit = "{G} puts #cock_ring# on {R} and strokes and sucks him while it stays exactly where it is.",
             acts = setOf("cock_ring", "oral"), equip = setOf(Equipment.COCK_RING),
             erection = PartyRef.RECEIVER,
             timers = listOf(tm("Hand", 90), tm("Mouth", 90))
@@ -401,8 +401,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_toy_his_choice", intensity = 4, family = F_SEX, cats = setOf(TOYS),
             title = "A toy of his choosing",
-            base = "{G} picks #TOY# and uses it on {R} wherever he decides for the full time.",
-            explicit = "{G} picks #TOY# and works it on {R} wherever he decides, for the whole timer.",
+            base = "{G} picks #TOY# and uses it on {R+} nipples, cock and inner thighs in that order for the full time.",
+            explicit = "{G} picks #TOY# and runs it over {R+} nipples, cock and inner thighs in that order, for the whole timer.",
             toy = true, timers = listOf(tm("Toy", 150))
         ),
 
@@ -417,8 +417,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_serv_worship_thighs", intensity = 3, family = F_SEX, cats = setOf(POWER, BODY_WORSHIP),
             title = "Worship from the floor",
-            base = "{G} kneels and works {R+} thighs, stomach and hips with his mouth, avoiding his cock entirely.",
-            explicit = "{G} kneels and works {R+} thighs, stomach and hips with his mouth and stays well away from his cock.",
+            base = "{G} kneels and kneads {R+} thighs, stomach and hips with his mouth, avoiding his cock entirely.",
+            explicit = "{G} kneels and kneads {R+} thighs, stomach and hips with his mouth and stays well away from his cock.",
             acts = setOf("kneeling", "body_worship", "stomach_hip_kissing"),
             timers = listOf(tm("Thighs", 60), tm("Stomach", 45), tm("Hips", 45))
         ),
@@ -451,8 +451,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_blind_hands", intensity = 3, family = F_SEX, cats = setOf(SENSORY),
             title = "Blindfolded, hands only",
-            base = "{R} wears #blindfold# and {G} works his whole body with his hands, leaving deliberate gaps.",
-            explicit = "{R} wears #blindfold# and {G} works his whole body with his hands, leaving gaps on purpose so he never knows.",
+            base = "{R} wears #blindfold# and {G} kneads his whole body with his hands, leaving deliberate gaps.",
+            explicit = "{R} wears #blindfold# and {G} kneads his whole body with his hands, leaving gaps on purpose so he never knows.",
             acts = setOf("blindfold", "body_worship"), equip = setOf(Equipment.BLINDFOLD),
             timers = listOf(tm("Chest", 45), tm("Stomach", 45), tm("Thighs", 45))
         ),
@@ -468,7 +468,7 @@ internal object ConsiderationsSexual {
             id = "cs_blind_toy", intensity = 4, family = F_SEX, cats = setOf(SENSORY, TOYS),
             title = "Blindfolded with a toy",
             base = "{R} wears #blindfold# and {G} uses #TOY# on him without saying what it is.",
-            explicit = "{R} wears #blindfold# and {G} works #TOY# on him and tells him nothing about it.",
+            explicit = "{R} wears #blindfold# and {G} runs #TOY# on him and tells him nothing about it.",
             acts = setOf("blindfold"), toy = true, equip = setOf(Equipment.BLINDFOLD),
             timers = listOf(tm("Pass 1", 60), tm("Pass 2", 60))
         ),
@@ -501,18 +501,18 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_rest_held_wrists", intensity = 3, family = F_SEX, cats = setOf(BONDAGE, ROUGH),
             title = "Wrists held",
-            base = "{G} holds {R+} wrists above his head with one hand and works him with the other.",
-            explicit = "{G} pins {R+} wrists above his head with one hand and works him over with the other.",
+            base = "{G} holds {R+} wrists above his head with one hand and strokes him with the other.",
+            explicit = "{G} pins {R+} wrists above his head with one hand and uses his hands on him with the other.",
             acts = setOf("pinning"), blocks = setOf(Boundary.NO_ROUGH_SEX),
             timers = listOf(tm("Held", 120))
         ),
         c(
             id = "cs_rest_spreader", intensity = 4, family = F_SEX, cats = setOf(BONDAGE, ANAL),
             title = "Held open",
-            base = "{R} is put on #spreader_bar# so his legs stay apart and {G} works him with hands and mouth.",
-            explicit = "{R} is fixed onto #spreader_bar# so his legs cannot close and {G} works him over with hands and mouth.",
+            base = "{R} is put on #spreader_bar# so his legs stay apart and {G} strokes him with hands and mouth.",
+            explicit = "{R} is fixed onto #spreader_bar# so his legs cannot close and {G} uses his hands and mouth on him.",
             acts = setOf("restraint", "anal_external"), equip = setOf(Equipment.SPREADER_BAR),
-            blocks = setOf(Boundary.NO_RESTRAINTS), timers = listOf(tm("Set up", 45), tm("Worked", 150))
+            blocks = setOf(Boundary.NO_RESTRAINTS), timers = listOf(tm("Set up", 45), tm("Stroked", 150))
         ),
         c(
             id = "cs_rest_collar_service", intensity = 4, family = F_SEX, cats = setOf(BONDAGE, POWER),
@@ -544,7 +544,7 @@ internal object ConsiderationsSexual {
             id = "cs_imp_paddle", intensity = 4, family = F_SEX, cats = setOf(IMPACT),
             title = "Paddle",
             base = "{G} warms {R} up by hand and then uses #paddle# in two sets of five.",
-            explicit = "{G} warms {R+} ass up by hand and then works #paddle# across it in two sets of five.",
+            explicit = "{G} warms {R+} ass up by hand and then swings #paddle# across it in two sets of five.",
             acts = setOf("impact_toys", "spanking"), equip = setOf(Equipment.PADDLE),
             blocks = setOf(Boundary.NO_PAIN, Boundary.NO_MARKS),
             timers = listOf(tm("Warm-up", 60), tm("Set 1", 30), tm("Set 2", 30))
@@ -552,8 +552,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_imp_flogger", intensity = 4, family = F_SEX, cats = setOf(IMPACT),
             title = "Flogger",
-            base = "{G} works #flogger# over {R+} back and ass in two building rounds.",
-            explicit = "{G} works #flogger# across {R+} back and ass through two rounds, harder on the second.",
+            base = "{G} runs #flogger# over {R+} back and ass in two building rounds.",
+            explicit = "{G} swings #flogger# across {R+} back and ass through two rounds, harder on the second.",
             acts = setOf("impact_toys"), equip = setOf(Equipment.FLOGGER),
             blocks = setOf(Boundary.NO_PAIN, Boundary.NO_MARKS),
             timers = listOf(tm("Round 1", 60), tm("Round 2", 60))
@@ -562,7 +562,7 @@ internal object ConsiderationsSexual {
             id = "cs_imp_crop", intensity = 5, family = F_SEX, cats = setOf(IMPACT),
             title = "Crop",
             base = "{G} uses #crop# on {R+} thighs and ass one stroke at a time, naming each spot first.",
-            explicit = "{G} works #crop# over {R+} thighs and ass one stroke at a time, naming exactly where each lands before it does.",
+            explicit = "{G} runs #crop# over {R+} thighs and ass one stroke at a time, naming exactly where each lands before it does.",
             acts = setOf("impact_toys"), equip = setOf(Equipment.CROP),
             blocks = setOf(Boundary.NO_PAIN, Boundary.NO_MARKS),
             timers = listOf(tm("Thighs", 60), tm("Ass", 60))
@@ -612,8 +612,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_rough_firm_handling", intensity = 4, family = F_SEX, cats = setOf(ROUGH),
             title = "Firm handling",
-            base = "{G} works {R} over [adv_rough] with his hands, gripping and moving him as he likes.",
-            explicit = "{G} works {R} over [adv_rough] with his hands, gripping and moving him exactly as he likes.",
+            base = "{G} handles {R} [adv_rough] with his hands, gripping him by the arms, hips and jaw and moving him into three different positions.",
+            explicit = "{G} handles {R} [adv_rough] with his hands, gripping him by the arms, hips and jaw and shoving him into three different positions.",
             acts = setOf("rough_handling"), blocks = setOf(Boundary.NO_ROUGH_SEX),
             timers = listOf(tm("Handled", 120))
         ),
@@ -637,9 +637,9 @@ internal object ConsiderationsSexual {
         ),
         c(
             id = "cs_rough_held_worked", intensity = 4, family = F_SEX, cats = setOf(ROUGH),
-            title = "Held down and worked",
-            base = "{G} holds {R} face down with one hand between his shoulders and works him with the other.",
-            explicit = "{G} holds {R} face down with a hand between his shoulder blades and works him with the other until the timer ends.",
+            title = "Held down and stroked",
+            base = "{G} holds {R} face down with one hand between his shoulders and strokes him with the other.",
+            explicit = "{G} holds {R} face down with a hand between his shoulder blades and strokes him with the other until the timer ends.",
             acts = setOf("pinning", "rough_handling"), blocks = setOf(Boundary.NO_ROUGH_SEX),
             timers = listOf(tm("Held down", 150))
         ),
@@ -653,7 +653,7 @@ internal object ConsiderationsSexual {
             acts = setOf("topping", "hard_sex"), anal = true, erection = PartyRef.GIVER,
             pCon = PartyConstraint.TOP, equip = setOf(Equipment.LUBRICANT),
             blocks = setOf(Boundary.NO_ROUGH_SEX),
-            timers = listOf(tm("Working in", 45), tm("Hard", 120))
+            timers = listOf(tm("Pushing in", 45), tm("Hard", 120))
         ),
         c(
             id = "cs_sex_short_back", intensity = 5, family = F_SEX, cats = setOf(ANAL),
@@ -662,7 +662,7 @@ internal object ConsiderationsSexual {
             explicit = "{G} [v_enter] {R} with #lubricant# and [v_fuck] him [adv_thrust_slow] without looking away once.",
             acts = setOf("topping"), anal = true, erection = PartyRef.GIVER,
             pCon = PartyConstraint.TOP, equip = setOf(Equipment.LUBRICANT),
-            timers = listOf(tm("Working in", 45), tm("Slow", 120))
+            timers = listOf(tm("Pushing in", 45), tm("Slow", 120))
         ),
         c(
             id = "cs_sex_short_bent", intensity = 5, family = F_SEX, cats = setOf(ANAL, ROUGH),
@@ -672,7 +672,7 @@ internal object ConsiderationsSexual {
             acts = setOf("topping", "hard_sex"), anal = true, erection = PartyRef.GIVER,
             pCon = PartyConstraint.TOP, equip = setOf(Equipment.LUBRICANT, Equipment.STURDY_CHAIR),
             blocks = setOf(Boundary.NO_ROUGH_SEX),
-            timers = listOf(tm("Working in", 45), tm("Hard", 120))
+            timers = listOf(tm("Pushing in", 45), tm("Hard", 120))
         ),
         c(
             id = "cs_sex_short_ride", intensity = 5, family = F_SEX, cats = setOf(ANAL),
@@ -688,16 +688,16 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_other_body_trail", intensity = 2, family = F_SEX, cats = setOf(BODY_WORSHIP),
             title = "Worshipped head to hip",
-            base = "{G} works down {R+} body with hands and mouth and names what he likes about each part.",
-            explicit = "{G} works down {R+} body with hands and mouth and says out loud exactly what he likes about every part.",
+            base = "{G} moves down {R+} body with hands and mouth and names what he likes about each part.",
+            explicit = "{G} moves down {R+} body with hands and mouth and says out loud exactly what he likes about every part.",
             acts = setOf("body_worship", "explicit_praise"),
             timers = listOf(tm("Chest and arms", 60), tm("Stomach", 45), tm("Thighs", 60))
         ),
         c(
             id = "cs_other_nipples", intensity = 2, family = F_SEX, cats = setOf(BODY_WORSHIP),
-            title = "Nipple work",
-            base = "{G} works {R+} nipples with fingers and mouth, one at a time and then both.",
-            explicit = "{G} works {R+} nipples [adv_pace] with fingers and mouth, one at a time and then both together.",
+            title = "Nipples, sucked and pinched",
+            base = "{G} sucks and pinches {R+} nipples, one at a time and then both.",
+            explicit = "{G} sucks and pinches {R+} nipples [adv_pace] with fingers and mouth, one at a time and then both together.",
             acts = setOf("nipple_stimulation"),
             timers = listOf(tm("Left", 45), tm("Right", 45), tm("Both", 45))
         ),
@@ -720,16 +720,16 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_other_wax", intensity = 3, family = F_SEX, cats = setOf(SENSORY),
             title = "Warm wax",
-            base = "{G} drips warm wax from #massage_candle# over {R+} chest and stomach and works it in.",
-            explicit = "{G} drips warm wax from #massage_candle# over {R+} chest and stomach and works every bit of it in.",
+            base = "{G} drips warm wax from #massage_candle# over {R+} chest and stomach and presses it in.",
+            explicit = "{G} drips warm wax from #massage_candle# over {R+} chest and stomach and presses every bit of it in.",
             acts = setOf("warm_wax", "massage_candle"), equip = setOf(Equipment.MASSAGE_CANDLE),
-            timers = listOf(tm("Wax", 45), tm("Working it in", 90))
+            timers = listOf(tm("Wax", 45), tm("Pushing it in", 90))
         ),
         c(
             id = "cs_other_mirror", intensity = 3, family = F_SEX, cats = setOf(VISUAL),
             title = "In front of the mirror",
-            base = "{G} works {R} with his hands in front of #mirror# and makes him watch the reflection.",
-            explicit = "{G} works {R} over with his hands in front of #mirror# and does not let him look anywhere but the reflection.",
+            base = "{G} strokes {R} with his hands in front of #mirror# and makes him watch the reflection.",
+            explicit = "{G} handles {R} with his hands in front of #mirror# and does not let him look anywhere but the reflection.",
             pPrefs = setOf("mirror_play"), rPrefs = setOf("mirror_play"), equip = setOf(Equipment.MIRROR),
             timers = listOf(tm("Watching", 120))
         ),
@@ -744,8 +744,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_other_music_full_body", intensity = 2, family = F_SEX, cats = setOf(BODY_WORSHIP),
             title = "One track, hands only",
-            base = "{G} puts on #music# and works {R+} whole body with his hands for one track without speaking.",
-            explicit = "{G} puts on #music# and works {R+} whole body with his hands for a full track, and neither of them says a word.",
+            base = "{G} puts on #music# and kneads {R+} whole body with his hands for one track without speaking.",
+            explicit = "{G} puts on #music# and kneads {R+} whole body with his hands for a full track, and neither of them says a word.",
             acts = setOf("body_worship", "massage_general"), equip = setOf(Equipment.MUSIC),
             timers = listOf(tm("One track", 180))
         )

@@ -57,7 +57,7 @@ internal object TermsLevel2 {
             explicit = "{G} [v_deep] {R+} cock, further on every pass, and only comes off when he actually has to breathe.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "deep_oral"),
-            timers = listOf(tm("Working deeper", 90), tm("Holding him deep", 45))
+            timers = listOf(tm("Deeper", 90), tm("Holding him deep", 45))
         ),
         t(
             id = "l2_oral_plus_hand", level = 2, cats = setOf(ORAL, HANDS),
@@ -94,8 +94,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_oral_balls", level = 2, cats = setOf(ORAL),
             title = "Cock and balls",
-            base = "{G} works {R+} balls with his mouth first, then moves up the shaft and [v_suck] him properly.",
-            explicit = "{G} works {R+} balls with his mouth until he is squirming, drags his tongue up the shaft and only then [v_suck] him properly.",
+            base = "{G} rolls {R+} balls with his mouth first, then moves up the shaft and [v_suck] him properly.",
+            explicit = "{G} rolls {R+} balls with his mouth until he is squirming, drags his tongue up the shaft and only then [v_suck] him properly.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral"),
             timers = listOf(tm("Balls", 60), tm("Up the shaft", 30), tm("Cock", 90))
@@ -103,8 +103,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_oral_chair", level = 2, cats = setOf(ORAL, POWER),
             title = "In the chair",
-            base = "{R} sits in #sturdy_chair# with his legs open. {G} kneels between them and [v_suck] him at whatever pace {R} asks for.",
-            explicit = "{R} sits back in #sturdy_chair# with his legs wide open. {G} kneels between them and [v_suck] him at exactly the pace {R} calls for, and changes the second he is told.",
+            base = "{R} sits in #sturdy_chair# with his legs open. {G} kneels between them and [v_suck] him, thirty seconds slow then thirty seconds fast, on repeat.",
+            explicit = "{R} sits back in #sturdy_chair# with his legs wide open. {G} kneels between them and [v_suck] him, thirty seconds slow then thirty seconds fast, on repeat, without a break.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "kneeling"),
             equip = setOf(Equipment.STURDY_CHAIR),
@@ -113,8 +113,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_oral_blindfolded", level = 2, cats = setOf(ORAL, SENSORY),
             title = "Blindfolded oral",
-            base = "{R} wears #blindfold# throughout. {G} [v_suck] him and changes pace without warning.",
-            explicit = "{R} wears #blindfold# and gets no warning of anything. {G} [v_suck] him and changes pace whenever he feels like it.",
+            base = "{R} wears #blindfold# throughout. {G} [v_suck] him, alternating twenty seconds deep and twenty seconds shallow.",
+            explicit = "{R} wears #blindfold# and gets no warning of anything. {G} [v_suck] him, alternating twenty seconds deep and twenty seconds shallow.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "blindfold"),
             equip = setOf(Equipment.BLINDFOLD),
@@ -174,11 +174,11 @@ internal object TermsLevel2 {
         t(
             id = "l2_rim_deep", level = 2, cats = setOf(RIMMING, ANAL),
             title = "Deeper rimming",
-            base = "{G} [v_rim_hard] {R}, working his tongue in rather than only over the outside.",
-            explicit = "{G} [v_rim_hard] {R}, gets his tongue actually inside him and stays there, not just working the outside.",
+            base = "{G} [v_rim_hard] {R}, pushing his tongue in rather than only over the outside.",
+            explicit = "{G} [v_rim_hard] {R}, gets his tongue actually inside him and stays there, not just licking the outside.",
             benefit = RECEIVER, type = BenefitType.RIMMING_RECIPIENT,
             acts = setOf("rimming"),
-            timers = listOf(tm("Outside", 45), tm("Working in", 120))
+            timers = listOf(tm("Outside", 45), tm("Pushing in", 120))
         ),
         t(
             id = "l2_rim_on_back", level = 2, cats = setOf(RIMMING, ANAL),
@@ -212,7 +212,7 @@ internal object TermsLevel2 {
             id = "l2_rim_reciprocal", level = 2, cats = setOf(RIMMING, ANAL),
             title = "Both at once",
             base = "{G} and {R} get into a position where they can [v_rim] each other at the same time, and both keep going for the full time.",
-            explicit = "{G} and {R} get into position and [v_rim] each other at the same time. Neither one is allowed to stop working because the other is good at it.",
+            explicit = "{G} and {R} get into position and [v_rim] each other at the same time. Neither one is allowed to stop because the other is good at it.",
             benefit = MUTUAL, type = BenefitType.MUTUAL, mutual = true,
             acts = setOf("rimming"),
             timers = listOf(tm("Both at once", 180))
@@ -222,8 +222,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_hand_stroke", level = 2, cats = setOf(HANDS),
             title = "Hand only",
-            base = "{G} [v_stroke] {R+} cock [adv_grip] with #lubricant#, at a pace {R} calls out, and changes the moment he is told.",
-            explicit = "{G} [v_stroke] {R+} cock [adv_grip] with #lubricant#, at whatever pace {R} calls, and changes the second he says so.",
+            base = "{G} [v_stroke] {R+} cock [adv_grip] with #lubricant#, twenty seconds slow then twenty seconds fast, on repeat.",
+            explicit = "{G} [v_stroke] {R+} cock [adv_grip] with #lubricant#, twenty seconds slow then twenty seconds fast, on repeat, and does not break the cycle.",
             benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
             acts = setOf("massage_groin"),
             equip = setOf(Equipment.LUBRICANT),
@@ -245,7 +245,7 @@ internal object TermsLevel2 {
             id = "l2_hand_groin_massage", level = 2, cats = setOf(HANDS, BODY_WORSHIP),
             title = "Groin massage",
             base = "{G} [v_massage] the whole area around {R+} cock — hip creases, the base, the skin behind the balls — without touching the shaft at all.",
-            explicit = "{G} works the whole area around {R+} cock with #massage_oil# — hip creases, the base, the skin behind his balls — and deliberately never touches the shaft.",
+            explicit = "{G} kneads the whole area around {R+} cock with #massage_oil# — hip creases, the base, the skin behind his balls — and deliberately never touches the shaft.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_groin"),
             equip = setOf(Equipment.MASSAGE_OIL),
@@ -255,8 +255,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_hand_balls", level = 2, cats = setOf(HANDS),
             title = "Balls",
-            base = "{G} works {R+} balls with an open hand [adv_pressure_light], rolling and cupping them without any pressure that hurts.",
-            explicit = "{G} works {R+} balls with an open hand [adv_pressure_light], rolls them, cups them and tugs just enough for him to feel it.",
+            base = "{G} cups {R+} balls with an open hand [adv_pressure_light], rolling and cupping them without any pressure that hurts.",
+            explicit = "{G} cups {R+} balls with an open hand [adv_pressure_light], rolls them, cups them and tugs just enough for him to feel it.",
             benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
             acts = setOf("massage_groin"),
             blocks = setOf(Boundary.MASSAGE_NONSEXUAL),
@@ -266,7 +266,7 @@ internal object TermsLevel2 {
             id = "l2_hand_sleeve", level = 2, cats = setOf(HANDS, TOYS),
             title = "The sleeve",
             base = "{G} uses #sleeve# on {R+} cock, changing speed every thirty seconds between slow and fast.",
-            explicit = "{G} works #sleeve# down {R+} cock and swaps between slow and fast every thirty seconds, so he never gets to settle into either.",
+            explicit = "{G} slides #sleeve# down {R+} cock and swaps between slow and fast every thirty seconds, so he never gets to settle into either.",
             benefit = RECEIVER, type = BenefitType.TOY_RECIPIENT,
             acts = setOf("massage_groin"),
             equip = setOf(Equipment.SLEEVE, Equipment.LUBRICANT),
@@ -278,7 +278,7 @@ internal object TermsLevel2 {
             id = "l2_hand_oiled_massage_to_sexual", level = 2, cats = setOf(HANDS, BODY_WORSHIP),
             title = "Massage that turns",
             base = "{G} starts with a full-back massage using #massage_oil#, then moves down and turns it into sexual touch without stopping.",
-            explicit = "{G} starts on {R+} back with #massage_oil#, works his way down and turns the whole thing sexual without ever taking his hands off him.",
+            explicit = "{G} starts on {R+} back with #massage_oil#, moves his way down and turns the whole thing sexual without ever taking his hands off him.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_general", "massage_oil", "massage_to_sexual"),
             equip = setOf(Equipment.MASSAGE_OIL),
@@ -287,15 +287,15 @@ internal object TermsLevel2 {
         ),
         t(
             id = "l2_hand_porn_together", level = 2, cats = setOf(HANDS, VISUAL),
-            title = "Watching and working",
-            base = "{G} and {R} put on #porn# and work each other with their hands, both watching the screen rather than each other.",
-            explicit = "{G} and {R} put on #porn# and work each other with their hands, eyes on the screen the entire time, no looking at each other.",
+            title = "Watching and stroking",
+            base = "{G} and {R} put on #porn# and stroke each other with their hands, both watching the screen rather than each other.",
+            explicit = "{G} and {R} put on #porn# and stroke each other with their hands, eyes on the screen the entire time, no looking at each other.",
             benefit = MUTUAL, type = BenefitType.MUTUAL, mutual = true,
             acts = setOf("massage_groin"),
             gPrefs = setOf("watching_porn"), rPrefs = setOf("watching_porn"),
             equip = setOf(Equipment.PORN),
             blocks = setOf(Boundary.MASSAGE_NONSEXUAL),
-            timers = listOf(tm("Watching and working", 180))
+            timers = listOf(tm("Watching and stroking", 180))
         ),
 
         // ------------------------------------------------- service, power, permission (10)
@@ -332,8 +332,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_service_hold_position", level = 2, cats = setOf(POWER),
             title = "Holding position",
-            base = "{DOM} puts {SUB} into a position of his choosing and {SUB} [v_hold_pos] while {DOM} touches him however he likes.",
-            explicit = "{DOM} puts {SUB} where he wants him and {SUB} [v_hold_pos] while {DOM} does whatever he likes to him.",
+            base = "{DOM} puts {SUB} into a position of his choosing and {SUB} [v_hold_pos] while {DOM} touches him anywhere from the neck down.",
+            explicit = "{DOM} puts {SUB} where he wants him and {SUB} [v_hold_pos] while {DOM} uses his hands and mouth on him from the neck down.",
             benefit = GIVER, type = BenefitType.COMMAND_AUTHORITY,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("commands"),
@@ -342,8 +342,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_service_worship_on_knees", level = 2, cats = setOf(POWER, BODY_WORSHIP),
             title = "Worship from the floor",
-            base = "{SUB} kneels and works {DOM+} thighs, stomach and hips with his mouth, without touching {DOM+} cock at all.",
-            explicit = "{SUB} kneels and works {DOM+} thighs, stomach and hips with his mouth and is not allowed anywhere near his cock, however long it takes.",
+            base = "{SUB} kneels and kneads {DOM+} thighs, stomach and hips with his mouth, without touching {DOM+} cock at all.",
+            explicit = "{SUB} kneels and kneads {DOM+} thighs, stomach and hips with his mouth and is not allowed anywhere near his cock, however long it takes.",
             benefit = RECEIVER, type = BenefitType.SERVICE_RECIPIENT,
             gCon = PartyConstraint.SUBMISSIVE, rCon = PartyConstraint.DOMINANT,
             acts = setOf("kneeling", "body_worship", "stomach_hip_kissing"),
@@ -362,8 +362,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_power_praise", level = 2, cats = setOf(POWER, LANGUAGE),
             title = "Told exactly how good he is",
-            base = "While he works him with his hands, {G} [v_praise] out loud and does not stop talking.",
-            explicit = "{G} works him with his hands and [v_praise] out loud the whole time, and does not go quiet once.",
+            base = "While he strokes him with his hands, {G} [v_praise] out loud and does not stop talking.",
+            explicit = "{G} strokes him with his hands and [v_praise] out loud the whole time, and does not go quiet once.",
             benefit = RECEIVER, type = BenefitType.SERVICE_RECIPIENT,
             acts = setOf("explicit_praise"),
             timers = listOf(tm("Talking and touching", 120))
@@ -380,8 +380,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_anal_external", level = 2, cats = setOf(ANAL),
             title = "Outside only",
-            base = "{G} works {R+} [n_hole] from the outside with a slick thumb, circling and pressing, and does not go in.",
-            explicit = "{G} works {R+} [n_hole] from the outside with a slick thumb, circling and pressing, and does not put anything inside him no matter how much he pushes back.",
+            base = "{G} rubs {R+} [n_hole] from the outside with a slick thumb, circling and pressing, and does not go in.",
+            explicit = "{G} rubs {R+} [n_hole] from the outside with a slick thumb, circling and pressing, and does not put anything inside him no matter how much he pushes back.",
             benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
             acts = setOf("anal_external"),
             equip = setOf(Equipment.LUBRICANT),
@@ -389,14 +389,14 @@ internal object TermsLevel2 {
         ),
         t(
             id = "l2_anal_massage_hole", level = 2, cats = setOf(ANAL, MASSAGE),
-            title = "Working him open from the outside",
+            title = "Opening him up from the outside",
             base = "{G} uses #lubricant# and [v_massage] the ring of muscle itself [adv_pressure_light] until it starts to give, then stops there.",
-            explicit = "{G} slicks him with #lubricant# and works the ring of muscle itself [adv_pressure_light] until it actually starts to open, then stops right there and leaves him wanting it.",
+            explicit = "{G} slicks him with #lubricant# and rubs the ring of muscle itself [adv_pressure_light] until it actually starts to open, then stops right there and leaves him wanting it.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_anus", "anal_external"),
             equip = setOf(Equipment.LUBRICANT),
             blocks = setOf(Boundary.MASSAGE_NONSEXUAL),
-            timers = listOf(tm("Working the muscle", 120))
+            timers = listOf(tm("Rubbing the muscle", 120))
         ),
 
         // ---------------------------------------------------------------- extras (4)
@@ -423,7 +423,7 @@ internal object TermsLevel2 {
             id = "l2_kiss_after_oral", level = 2, cats = setOf(ORAL, KISSING),
             title = "Back up to his mouth",
             base = "{G} [v_suck] {R} for two minutes, then comes all the way back up his body with [n_kiss_trail] and kisses him [adv_kiss_deep].",
-            explicit = "{G} [v_suck] {R} for two minutes, then works all the way back up his body with [n_kiss_trail] and kisses him [adv_kiss_deep] so he tastes himself.",
+            explicit = "{G} [v_suck] {R} for two minutes, then kisses all the way back up his body with [n_kiss_trail] and kisses him [adv_kiss_deep] so he tastes himself.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "tongue_kissing"),
             timers = listOf(tm("Oral", 120), tm("Back up his body", 45), tm("Kissing", 45))
@@ -431,8 +431,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_service_music", level = 2, cats = setOf(POWER, BODY_WORSHIP),
             title = "One track",
-            base = "{G} puts on #music# and works {R+} whole body with his hands for the length of one track without speaking.",
-            explicit = "{G} puts on #music#, works {R+} whole body with his hands for one full track and neither of them says a word the entire time.",
+            base = "{G} puts on #music# and kneads {R+} whole body with his hands for the length of one track without speaking.",
+            explicit = "{G} puts on #music#, kneads {R+} whole body with his hands for one full track and neither of them says a word the entire time.",
             benefit = RECEIVER, type = BenefitType.SERVICE_RECIPIENT,
             acts = setOf("body_worship", "massage_general"),
             equip = setOf(Equipment.MUSIC),

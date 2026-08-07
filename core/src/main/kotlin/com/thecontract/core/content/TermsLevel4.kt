@@ -33,8 +33,8 @@ internal object TermsLevel4 {
         t(
             id = "l4_bond_blindfold_scene", level = 4, cats = setOf(BONDAGE, SENSORY),
             title = "Blindfolded and used",
-            base = "{DOM} puts #blindfold# on {SUB} and works him with hands and mouth for the full time without saying what comes next.",
-            explicit = "{DOM} puts #blindfold# on {SUB} and works him over with hands and mouth, telling him nothing, changing whenever he wants.",
+            base = "{DOM} puts #blindfold# on {SUB} and strokes him with hands and mouth for the full time without saying what comes next.",
+            explicit = "{DOM} puts #blindfold# on {SUB} and uses his hands and mouth on him, telling him nothing and switching between the two every thirty seconds.",
             benefit = GIVER, type = BenefitType.COMMAND_AUTHORITY,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("blindfold", "commands"),
@@ -44,14 +44,14 @@ internal object TermsLevel4 {
         t(
             id = "l4_bond_cuffs_wrists", level = 4, cats = setOf(BONDAGE),
             title = "Cuffed",
-            base = "{DOM} puts #cuffs# on {SUB+} wrists in front of him and keeps him there while he works him over.",
-            explicit = "{DOM} locks #cuffs# on {SUB+} wrists, keeps him exactly where he wants him and works him over while he cannot do a thing about it.",
+            base = "{DOM} puts #cuffs# on {SUB+} wrists in front of him and keeps him there while he uses his hands on him.",
+            explicit = "{DOM} locks #cuffs# on {SUB+} wrists, keeps him exactly where he wants him and uses his hands on him while he cannot do a thing about it.",
             benefit = GIVER, type = BenefitType.RESTRAINT_CONTROL,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("restraint"),
             equip = setOf(Equipment.CUFFS),
             blocks = setOf(Boundary.NO_RESTRAINTS),
-            timers = listOf(tm("Cuffed and worked", 180))
+            timers = listOf(tm("Cuffed and stroked", 180))
         ),
         t(
             id = "l4_bond_cuffs_furniture", level = 4, cats = setOf(BONDAGE),
@@ -63,31 +63,31 @@ internal object TermsLevel4 {
             acts = setOf("restraint"),
             equip = setOf(Equipment.CUFFS, Equipment.STURDY_CHAIR),
             blocks = setOf(Boundary.NO_RESTRAINTS),
-            timers = listOf(tm("Secured and teased", 120), tm("Worked properly", 120))
+            timers = listOf(tm("Secured and teased", 120), tm("Stroked hard", 120))
         ),
         t(
             id = "l4_bond_rope_wrists", level = 4, cats = setOf(BONDAGE),
             title = "Rope on his wrists",
             base = "{DOM} binds {SUB+} wrists with #rope# and checks the tension before he starts on him.",
-            explicit = "{DOM} binds {SUB+} wrists with #rope#, checks it is right, and then works him over while he can do nothing but take it.",
+            explicit = "{DOM} binds {SUB+} wrists with #rope#, checks it is right, and then uses his hands on him while he can do nothing but take it.",
             benefit = GIVER, type = BenefitType.RESTRAINT_CONTROL,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("restraint"),
             equip = setOf(Equipment.ROPE),
             blocks = setOf(Boundary.NO_RESTRAINTS),
-            timers = listOf(tm("Tying him", 60), tm("Working him", 180))
+            timers = listOf(tm("Tying him", 60), tm("Stroking him", 180))
         ),
         t(
             id = "l4_bond_spreader", level = 4, cats = setOf(BONDAGE, ANAL),
             title = "Held open",
-            base = "{DOM} puts {SUB} on #spreader_bar# so his legs stay apart, then works him with his hands and mouth.",
+            base = "{DOM} puts {SUB} on #spreader_bar# so his legs stay apart, then strokes him with his hands and mouth.",
             explicit = "{DOM} fixes {SUB} onto #spreader_bar# so his legs cannot close, then takes his time with hands and mouth wherever he likes.",
             benefit = GIVER, type = BenefitType.RESTRAINT_CONTROL,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("restraint", "anal_external"),
             equip = setOf(Equipment.SPREADER_BAR),
             blocks = setOf(Boundary.NO_RESTRAINTS),
-            timers = listOf(tm("Set up", 45), tm("Worked open", 180))
+            timers = listOf(tm("Set up", 45), tm("Opened up", 180))
         ),
         t(
             id = "l4_bond_collar", level = 4, cats = setOf(BONDAGE, POWER),
@@ -115,8 +115,8 @@ internal object TermsLevel4 {
         t(
             id = "l4_bond_restrained_oral", level = 4, cats = setOf(BONDAGE, ORAL),
             title = "Tied and sucked",
-            base = "{SUB} is restrained with #cuffs# and {DOM} [v_suck] him at whatever pace he chooses, ignoring what {SUB} asks for.",
-            explicit = "{SUB} is locked in #cuffs# and {DOM} [v_suck] him at exactly the pace he feels like, and ignores every single thing {SUB} asks for.",
+            base = "{SUB} is restrained with #cuffs# and {DOM} [v_suck] him, ninety seconds slow then two minutes hard, ignoring what {SUB} asks for.",
+            explicit = "{SUB} is locked in #cuffs# and {DOM} [v_suck] him, ninety seconds slow then two minutes hard, and ignores every single thing {SUB} asks for.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("restraint", "oral"),
@@ -126,9 +126,9 @@ internal object TermsLevel4 {
         ),
         t(
             id = "l4_bond_restrained_toy", level = 4, cats = setOf(BONDAGE, TOYS),
-            title = "Tied and worked with a toy",
+            title = "Tied and fucked with a toy",
             base = "{SUB} is restrained with #rope# and {DOM} uses #TOY# on him for the whole term.",
-            explicit = "{SUB} is tied down with #rope# and {DOM} works #TOY# on him for the entire term, moving it wherever he wants.",
+            explicit = "{SUB} is tied down with #rope# and {DOM} runs #TOY# on him for the entire term, moving it wherever he wants.",
             benefit = GIVER, type = BenefitType.RESTRAINT_CONTROL,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("restraint"), toy = true,
@@ -176,7 +176,7 @@ internal object TermsLevel4 {
             id = "l4_impact_paddle", level = 4, cats = setOf(IMPACT),
             title = "Paddle",
             base = "{DOM} warms {SUB} up by hand first, then uses #paddle# on him in sets of five with a pause between each set.",
-            explicit = "{DOM} warms {SUB+} ass up by hand, then works #paddle# across it in sets of five, pausing between sets to let him feel each one land.",
+            explicit = "{DOM} warms {SUB+} ass up by hand, then swings #paddle# across it in sets of five, pausing between sets to let him feel each one land.",
             benefit = GIVER, type = BenefitType.COMMAND_AUTHORITY,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("impact_toys", "spanking"),
@@ -187,8 +187,8 @@ internal object TermsLevel4 {
         t(
             id = "l4_impact_flogger", level = 4, cats = setOf(IMPACT),
             title = "Flogger",
-            base = "{DOM} works #flogger# across {SUB+} back, ass and thighs in a steady rhythm, building over three rounds.",
-            explicit = "{DOM} works #flogger# across {SUB+} back, ass and thighs in a steady, building rhythm over three rounds and does not let up between them.",
+            base = "{DOM} swings #flogger# across {SUB+} back, ass and thighs in a steady rhythm, building over three rounds.",
+            explicit = "{DOM} swings #flogger# across {SUB+} back, ass and thighs in a steady, building rhythm over three rounds and does not let up between them.",
             benefit = GIVER, type = BenefitType.COMMAND_AUTHORITY,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("impact_toys"),
@@ -200,7 +200,7 @@ internal object TermsLevel4 {
             id = "l4_impact_crop", level = 4, cats = setOf(IMPACT),
             title = "Crop",
             base = "{DOM} uses #crop# on {SUB+} thighs and ass, one stroke at a time, and names the next spot before each one.",
-            explicit = "{DOM} works #crop# over {SUB+} thighs and ass one stroke at a time, naming exactly where the next one is landing before it does.",
+            explicit = "{DOM} runs #crop# over {SUB+} thighs and ass one stroke at a time, naming exactly where the next one is landing before it does.",
             benefit = GIVER, type = BenefitType.COMMAND_AUTHORITY,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("impact_toys"),
@@ -211,7 +211,7 @@ internal object TermsLevel4 {
         t(
             id = "l4_impact_warmup_sequence", level = 4, cats = setOf(IMPACT),
             title = "Full warm-up",
-            base = "{DOM} works {SUB} through a full warm-up: open hand, then #paddle#, then #flogger#, one minute each.",
+            base = "{DOM} takes {SUB} through a full warm-up: open hand, then #paddle#, then #flogger#, one minute each.",
             explicit = "{DOM} takes {SUB} through the whole set — open hand, then #paddle#, then #flogger# — a minute each and harder every time.",
             benefit = GIVER, type = BenefitType.COMMAND_AUTHORITY,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
@@ -233,7 +233,7 @@ internal object TermsLevel4 {
         ),
         t(
             id = "l4_impact_during_oral", level = 4, cats = setOf(IMPACT, ORAL),
-            title = "Spanked while he works",
+            title = "Spanked while he sucks",
             base = "{SUB} [v_suck] {DOM} on his knees and {DOM} [v_spank] him whenever the pace drops.",
             explicit = "{SUB} stays on his knees and [v_suck] {DOM}, and every time the pace drops {DOM} [v_spank] him for it.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
@@ -291,7 +291,7 @@ internal object TermsLevel4 {
         t(
             id = "l4_service_hands_behind", level = 4, cats = setOf(POWER),
             title = "Hands behind his back",
-            base = "{SUB} keeps his hands behind his back for the whole term while {DOM} does whatever he likes to him.",
+            base = "{SUB} keeps his hands behind his back for the whole term while {DOM} uses his hands and mouth on him from the neck down.",
             explicit = "{SUB} keeps his hands behind his back for the entire term and does not move them once, whatever {DOM} does to him.",
             benefit = GIVER, type = BenefitType.COMMAND_AUTHORITY,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
@@ -321,7 +321,7 @@ internal object TermsLevel4 {
         t(
             id = "l4_service_worship_on_command", level = 4, cats = setOf(POWER, BODY_WORSHIP),
             title = "Worship on command",
-            base = "{DOM} names a part of his body and {SUB} works it with his mouth until he is told to move on.",
+            base = "{DOM} names a part of his body and {SUB} presses it with his mouth until he is told to move on.",
             explicit = "{DOM} names a part of himself and {SUB} puts his mouth on it and stays there until he is told to move.",
             benefit = GIVER, type = BenefitType.SERVICE_RECIPIENT,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
@@ -365,8 +365,8 @@ internal object TermsLevel4 {
         t(
             id = "l4_own_marking_kisses", level = 4, cats = setOf(POWER, BODY_WORSHIP),
             title = "Claimed",
-            base = "{DOM} works his mouth over {SUB+} neck, chest and hips, naming each place as his as he goes.",
-            explicit = "{DOM} works his mouth over {SUB+} neck, chest and hips and names every single place as his while he does it.",
+            base = "{DOM} kisses his way over {SUB+} neck, chest and hips, naming each place as his as he goes.",
+            explicit = "{DOM} kisses his way over {SUB+} neck, chest and hips and names every single place as his while he does it.",
             benefit = GIVER, type = BenefitType.OWNERSHIP,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("ownership_language", "neck_kissing", "chest_nipple_kissing"),
@@ -375,13 +375,13 @@ internal object TermsLevel4 {
         t(
             id = "l4_own_degradation", level = 4, cats = setOf(LANGUAGE, POWER),
             title = "Talked down to",
-            base = "{DOM} talks {SUB} down while working him with his hand, in the terms they have already agreed on.",
-            explicit = "{DOM} talks {SUB} down the whole time he works him with his hand, in exactly the terms they have already agreed on.",
+            base = "{DOM} talks {SUB} down while stroking him with his hand, in the terms they have already agreed on.",
+            explicit = "{DOM} talks {SUB} down the whole time he strokes him with his hand, in exactly the terms they have already agreed on.",
             benefit = GIVER, type = BenefitType.OWNERSHIP,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("degradation", "dirty_talk"),
             blocks = setOf(Boundary.NO_DEGRADATION),
-            timers = listOf(tm("Talking and working him", 150))
+            timers = listOf(tm("Talking and stroking him", 150))
         ),
         t(
             id = "l4_own_praise_protocol", level = 4, cats = setOf(LANGUAGE, POWER),
@@ -463,9 +463,9 @@ internal object TermsLevel4 {
         ),
         t(
             id = "l4_control_toy_pace", level = 4, cats = setOf(POWER, TOYS),
-            title = "He decides the setting",
-            base = "{DOM} uses #TOY# on {SUB} and picks the setting himself. {SUB} may ask, but {DOM} decides.",
-            explicit = "{DOM} works #TOY# on {SUB} and sets it where he wants it. {SUB} can ask all he likes; {DOM} decides.",
+            title = "Three settings, one minute each",
+            base = "{DOM} uses #TOY# on {SUB} through all three settings, one minute on each, lowest to highest. {SUB} may ask for a change, but the order does not alter.",
+            explicit = "{DOM} runs #TOY# on {SUB} through all three settings, one minute on each, lowest to highest. {SUB} can ask all he likes; the order does not alter.",
             benefit = GIVER, type = BenefitType.COMMAND_AUTHORITY,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("commands"), toy = true,
@@ -474,15 +474,15 @@ internal object TermsLevel4 {
         t(
             id = "l4_control_capture_scene", level = 4, cats = setOf(ROLEPLAY, BONDAGE),
             title = "Caught",
-            base = "{DOM} and {SUB} run a consensual capture scene: {SUB} is restrained with #rope# and worked over in character.",
-            explicit = "{DOM} and {SUB} run the capture scene properly: {SUB} ends up tied with #rope# and worked over in character until the timer ends.",
+            base = "{DOM} and {SUB} run a consensual capture scene: {SUB} is restrained with #rope# and used in character.",
+            explicit = "{DOM} and {SUB} run the capture scene properly: {SUB} ends up tied with #rope# and used in character until the timer ends.",
             benefit = GIVER, type = BenefitType.RESTRAINT_CONTROL,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("restraint", "roleplay_lead"),
             gPrefs = setOf("capture_roleplay"), rPrefs = setOf("capture_roleplay"),
             equip = setOf(Equipment.ROPE),
             blocks = setOf(Boundary.NO_ROLEPLAY, Boundary.NO_RESTRAINTS),
-            timers = listOf(tm("The capture", 60), tm("Tied and worked", 180))
+            timers = listOf(tm("The capture", 60), tm("Tied and stroked", 180))
         )
     )
 }

@@ -75,9 +75,9 @@ internal object TermsLevel5 {
         ),
         t(
             id = "l5_rough_held_down_worked", level = 5, cats = setOf(ROUGH),
-            title = "Held down and worked",
-            base = "{G} holds {R} face down by the back of the shoulders and works him with his free hand for the full time.",
-            explicit = "{G} holds {R} face down with a hand between his shoulder blades and works him with the other hand until the timer ends.",
+            title = "Held down and stroked",
+            base = "{G} holds {R} face down by the back of the shoulders and strokes him with his free hand for the full time.",
+            explicit = "{G} holds {R} face down with a hand between his shoulder blades and strokes him with the other hand until the timer ends.",
             benefit = GIVER, type = BenefitType.COMMAND_AUTHORITY,
             acts = setOf("pinning", "rough_handling"),
             blocks = setOf(Boundary.NO_ROUGH_SEX),
@@ -97,7 +97,7 @@ internal object TermsLevel5 {
             id = "l5_rough_grip_and_kiss", level = 5, cats = setOf(ROUGH, KISSING),
             title = "Held by the jaw",
             base = "{G} [v_grip] {R+} jaw, holds his face still and kisses him [adv_kiss] until he is done.",
-            explicit = "{G} [v_grip] {R+} jaw, holds his face exactly where he wants it and kisses him [adv_kiss] until he decides to stop.",
+            explicit = "{G} [v_grip] {R+} jaw, holds his face exactly where he wants it and kisses him [adv_kiss] until the timer ends.",
             benefit = GIVER, type = BenefitType.COMMAND_AUTHORITY,
             acts = setOf("rough_handling", "hard_kissing"),
             blocks = setOf(Boundary.NO_ROUGH_SEX),
@@ -106,8 +106,8 @@ internal object TermsLevel5 {
         t(
             id = "l5_rough_scratch_and_bite", level = 5, cats = setOf(ROUGH, SENSORY),
             title = "Nails and teeth",
-            base = "{G} works {R+} shoulders and chest with nails and teeth [adv_rough], stopping short of anything that lasts.",
-            explicit = "{G} works {R+} shoulders and chest over with nails and teeth [adv_rough] and stops just short of leaving anything behind.",
+            base = "{G} kneads {R+} shoulders and chest with nails and teeth [adv_rough], stopping short of anything that lasts.",
+            explicit = "{G} kneads {R+} shoulders and chest over with nails and teeth [adv_rough] and stops just short of leaving anything behind.",
             benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
             acts = setOf("scratching", "rough_handling"),
             blocks = setOf(Boundary.NO_ROUGH_SEX, Boundary.NO_MARKS, Boundary.NO_PAIN),
@@ -167,8 +167,8 @@ internal object TermsLevel5 {
         t(
             id = "l5_oral_kneeling_hard", level = 5, cats = setOf(ORAL, POWER, ROUGH),
             title = "Kneeling and taking it",
-            base = "{SUB} kneels with his hands behind his back and takes whatever pace {DOM} sets for the full time.",
-            explicit = "{SUB} kneels with his hands locked behind his back and takes exactly the pace {DOM} sets, for the whole term.",
+            base = "{SUB} kneels with his hands behind his back while {DOM} fucks his mouth, one minute steady then two minutes hard.",
+            explicit = "{SUB} kneels with his hands locked behind his back while {DOM} fucks his mouth, one minute steady then two minutes hard, and does not pull off.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             gCon = PartyConstraint.SUBMISSIVE, rCon = PartyConstraint.DOMINANT,
             acts = setOf("oral", "kneeling", "harder_oral"),
@@ -190,8 +190,8 @@ internal object TermsLevel5 {
         t(
             id = "l5_oral_spit_rough", level = 5, cats = setOf(ORAL, ROUGH),
             title = "Wet and hard",
-            base = "{G} keeps {R+} cock [adj_wet] with his own spit and works him at a hard pace throughout.",
-            explicit = "{G} keeps {R+} cock soaked with his own spit and works him at a hard pace the entire way through.",
+            base = "{G} keeps {R+} cock [adj_wet] with his own spit and strokes him at a hard pace throughout.",
+            explicit = "{G} keeps {R+} cock soaked with his own spit and strokes him at a hard pace the entire way through.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "spit", "harder_oral"),
             blocks = setOf(Boundary.NO_SPIT_PLAY, Boundary.NO_ROUGH_SEX),
@@ -210,7 +210,7 @@ internal object TermsLevel5 {
             erection = PartyRef.GIVER,
             equip = setOf(Equipment.LUBRICANT),
             blocks = setOf(Boundary.NO_ROUGH_SEX),
-            timers = listOf(tm("Working in", 45), tm("Hard", 180))
+            timers = listOf(tm("Pushing in", 45), tm("Hard", 180))
         ),
         t(
             id = "l5_sex_hard_on_back", level = 5, cats = setOf(ANAL, ROUGH),
@@ -223,7 +223,7 @@ internal object TermsLevel5 {
             erection = PartyRef.GIVER,
             equip = setOf(Equipment.LUBRICANT),
             blocks = setOf(Boundary.NO_ROUGH_SEX),
-            timers = listOf(tm("Working in", 45), tm("Hard", 180))
+            timers = listOf(tm("Pushing in", 45), tm("Hard", 180))
         ),
         t(
             id = "l5_sex_hard_bent_over", level = 5, cats = setOf(ANAL, ROUGH),
@@ -236,7 +236,7 @@ internal object TermsLevel5 {
             erection = PartyRef.GIVER,
             equip = setOf(Equipment.LUBRICANT, Equipment.STURDY_CHAIR),
             blocks = setOf(Boundary.NO_ROUGH_SEX),
-            timers = listOf(tm("Working in", 45), tm("Hard", 180))
+            timers = listOf(tm("Pushing in", 45), tm("Hard", 180))
         ),
         t(
             id = "l5_sex_hard_hair", level = 5, cats = setOf(ANAL, ROUGH),
@@ -249,7 +249,7 @@ internal object TermsLevel5 {
             erection = PartyRef.GIVER,
             equip = setOf(Equipment.LUBRICANT),
             blocks = setOf(Boundary.NO_ROUGH_SEX),
-            timers = listOf(tm("Working in", 45), tm("Hard", 180))
+            timers = listOf(tm("Pushing in", 45), tm("Hard", 180))
         ),
         t(
             id = "l5_sex_hard_spanked", level = 5, cats = setOf(ANAL, ROUGH, IMPACT),
@@ -262,7 +262,7 @@ internal object TermsLevel5 {
             erection = PartyRef.GIVER,
             equip = setOf(Equipment.LUBRICANT),
             blocks = setOf(Boundary.NO_ROUGH_SEX, Boundary.NO_PAIN),
-            timers = listOf(tm("Working in", 45), tm("Hard", 180))
+            timers = listOf(tm("Pushing in", 45), tm("Hard", 180))
         ),
         t(
             id = "l5_sex_hard_restrained", level = 5, cats = setOf(ANAL, ROUGH, BONDAGE),
@@ -334,8 +334,8 @@ internal object TermsLevel5 {
         t(
             id = "l5_bdsm_full_flogging", level = 5, cats = setOf(IMPACT, BONDAGE),
             title = "Full flogging",
-            base = "{SUB} is restrained with #rope# and {DOM} works #flogger# over his back, ass and thighs in four building rounds.",
-            explicit = "{SUB} is tied with #rope# and {DOM} works #flogger# across his back, ass and thighs through four rounds, harder every round.",
+            base = "{SUB} is restrained with #rope# and {DOM} runs #flogger# over his back, ass and thighs in four building rounds.",
+            explicit = "{SUB} is tied with #rope# and {DOM} swings #flogger# across his back, ass and thighs through four rounds, harder every round.",
             benefit = GIVER, type = BenefitType.COMMAND_AUTHORITY,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("impact_toys", "restraint"),
@@ -347,7 +347,7 @@ internal object TermsLevel5 {
             id = "l5_bdsm_paddle_series", level = 5, cats = setOf(IMPACT),
             title = "Paddle series",
             base = "{DOM} uses #paddle# on {SUB} in four sets of ten, and {SUB} counts every stroke and thanks him after each set.",
-            explicit = "{DOM} works #paddle# across {SUB+} ass in four sets of ten. He counts every stroke and thanks him after each set, or the set starts again.",
+            explicit = "{DOM} swings #paddle# across {SUB+} ass in four sets of ten. He counts every stroke and thanks him after each set, or the set starts again.",
             benefit = GIVER, type = BenefitType.COMMAND_AUTHORITY,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("impact_toys", "spanking", "commands"),
@@ -358,8 +358,8 @@ internal object TermsLevel5 {
         t(
             id = "l5_bdsm_crop_precision", level = 5, cats = setOf(IMPACT, SENSORY),
             title = "Crop, blindfolded",
-            base = "{SUB} wears #blindfold# and {DOM} works #crop# over his thighs, ass and chest with uneven timing.",
-            explicit = "{SUB} wears #blindfold# and {DOM} works #crop# over his thighs, ass and chest with deliberately uneven timing so nothing can be braced for.",
+            base = "{SUB} wears #blindfold# and {DOM} runs #crop# over his thighs, ass and chest with uneven timing.",
+            explicit = "{SUB} wears #blindfold# and {DOM} runs #crop# over his thighs, ass and chest with deliberately uneven timing so nothing can be braced for.",
             benefit = GIVER, type = BenefitType.COMMAND_AUTHORITY,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("impact_toys", "blindfold"),
@@ -370,8 +370,8 @@ internal object TermsLevel5 {
         t(
             id = "l5_bdsm_full_restraint", level = 5, cats = setOf(BONDAGE, SENSORY),
             title = "Tied down completely",
-            base = "{DOM} restrains {SUB} with #rope# and #spreader_bar# and works him over with hands, mouth and #TOY# while he stays with him throughout.",
-            explicit = "{DOM} ties {SUB} down with #rope# and #spreader_bar# so he cannot move at all, then works him over with hands, mouth and #TOY# and never leaves his side.",
+            base = "{DOM} restrains {SUB} with #rope# and #spreader_bar# and uses his hands on him, mouth and #TOY# while he stays with him throughout.",
+            explicit = "{DOM} ties {SUB} down with #rope# and #spreader_bar# so he cannot move at all, then uses his hands on him, mouth and #TOY# and never leaves his side.",
             benefit = GIVER, type = BenefitType.RESTRAINT_CONTROL,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("restraint"), toy = true,
