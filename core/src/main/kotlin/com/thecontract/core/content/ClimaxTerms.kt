@@ -128,8 +128,8 @@ internal object ClimaxTerms {
         t(
             id = "cx_bottom_self_while_filled", level = 5, cats = setOf(CLIMAX, ANAL, HANDS), climax = true,
             title = "His own hand while he is filled",
-            base = "{R} strokes himself with his own hand while {G} takes him as deep as he can with a well-slicked hand, going only as far as {R} asks for and no further. If the timer ends first, {G} holds still and lets {R} finish at his own pace.",
-            explicit = "{R} strokes his own cock while {G} takes him with a well-slicked hand, as deep as {R} asks for and not an inch further. If the timer ends first, {G} holds completely still and lets {R} finish at his own pace.",
+            base = "{R} strokes himself with his own hand while {G} takes him with a well-slicked hand, one finger for the first two minutes and two fingers after that. If the timer ends first, {G} holds still and {R} finishes himself.",
+            explicit = "{R} strokes his own cock while {G} takes him with a well-slicked hand, one finger for the first two minutes and two fingers after that. If the timer ends first, {G} holds completely still and {R} finishes himself.",
             benefit = RECEIVER, type = BenefitType.FINGERING_RECIPIENT,
             acts = setOf("fingering", "anal_toys"), anal = true,
             equip = setOf(Equipment.LUBRICANT),

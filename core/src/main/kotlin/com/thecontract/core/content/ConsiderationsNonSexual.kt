@@ -176,7 +176,7 @@ internal object ConsiderationsNonSexual {
             id = "cn_kiss_tongue", intensity = 1, family = F_KISS, cats = setOf(KISSING),
             title = "Tongue-heavy making out",
             base = "{G} kisses {R} [adv_kiss_deep], leading with his tongue throughout.",
-            explicit = "{G} kisses {R} [adv_kiss_deep], all tongue, and sets the whole pace himself.",
+            explicit = "{G} kisses {R} [adv_kiss_deep], all tongue, and leads throughout while {R} follows.",
             acts = setOf("tongue_kissing"),
             timers = listOf(tm("Kissing", 120))
         ),

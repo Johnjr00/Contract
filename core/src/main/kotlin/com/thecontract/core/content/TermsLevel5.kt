@@ -137,9 +137,9 @@ internal object TermsLevel5 {
         // ----------------------------------------------------------- hard oral (6)
         t(
             id = "l5_oral_hard_pace", level = 5, cats = setOf(ORAL, ROUGH),
-            title = "His pace, not yours",
-            base = "{R} sets a hard pace and {G} keeps his mouth on him through the whole of it without slowing down.",
-            explicit = "{R} sets a hard pace and {G} takes it without once slowing down, for as long as the timer runs.",
+            title = "Hard, no slowing down",
+            base = "{R} fucks his mouth hard and {G} keeps his mouth on him through the whole of it without slowing down.",
+            explicit = "{R} fucks his mouth hard and {G} takes it without once slowing down, for as long as the timer runs.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "harder_oral"),
             blocks = setOf(Boundary.NO_ROUGH_SEX),
@@ -148,18 +148,18 @@ internal object TermsLevel5 {
         t(
             id = "l5_oral_hands_in_hair", level = 5, cats = setOf(ORAL, ROUGH),
             title = "Both hands in his hair",
-            base = "{R} keeps both hands in {G+} hair and sets depth and pace himself. {G} taps his thigh whenever he needs a break.",
-            explicit = "{R} keeps both hands buried in {G+} hair and runs the depth and pace himself. {G} taps his thigh when he needs a break and gets one.",
+            base = "{R} keeps both hands in {G+} hair and pulls him down onto his cock in a steady rhythm. {G} keeps his hands flat on the floor throughout.",
+            explicit = "{R} keeps both hands buried in {G+} hair and pulls him down onto his cock in a steady rhythm, all the way each time. {G} keeps his hands flat on the floor and does not push back.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "deep_oral", "harder_oral", "rough_hair_pulling"),
             blocks = setOf(Boundary.NO_ROUGH_SEX),
-            timers = listOf(tm("His hands, his pace", 120))
+            timers = listOf(tm("His hands, steady rhythm", 120))
         ),
         t(
             id = "l5_oral_deep_hold", level = 5, cats = setOf(ORAL),
             title = "Held deep",
-            base = "{G} [v_deep] {R} and stays down as long as he comfortably can, three times over, coming up between each.",
-            explicit = "{G} [v_deep] {R} and holds there as long as he can manage, three times over, coming up properly between each one.",
+            base = "{G} [v_deep] {R} and stays down for a slow count of ten, three times over, coming up between each.",
+            explicit = "{G} [v_deep] {R} and holds there for a slow count of ten, three times over, coming up properly between each one.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "deep_oral"),
             timers = listOf(tm("Round 1", 45), tm("Round 2", 45), tm("Round 3", 45))
@@ -178,8 +178,8 @@ internal object TermsLevel5 {
         t(
             id = "l5_oral_restrained_hard", level = 5, cats = setOf(ORAL, BONDAGE, ROUGH),
             title = "Tied and used",
-            base = "{SUB} is restrained with #cuffs# and {DOM} uses his mouth at his own pace for the full time.",
-            explicit = "{SUB} is locked in #cuffs# and {DOM} uses his mouth entirely at his own pace until the timer runs out.",
+            base = "{SUB} is restrained with #cuffs# and {DOM} uses his mouth, one minute slow then ninety seconds hard.",
+            explicit = "{SUB} is locked in #cuffs# and {DOM} uses his mouth, one minute slow then ninety seconds hard, until the timer runs out.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             gCon = PartyConstraint.SUBMISSIVE, rCon = PartyConstraint.DOMINANT,
             acts = setOf("oral", "restraint", "harder_oral"),
@@ -292,9 +292,9 @@ internal object TermsLevel5 {
         ),
         t(
             id = "l5_sex_escalating", level = 5, cats = setOf(ANAL, ROUGH),
-            title = "Building to the hardest he can take",
-            base = "{G} starts [adv_thrust_slow] and moves up a level every minute until he is going as hard as {R} can take.",
-            explicit = "{G} starts [adv_thrust_slow] and goes up a level every minute until he is fucking him as hard as {R} can actually take.",
+            title = "Slow to hardest, a minute each",
+            base = "{G} starts [adv_thrust_slow] and moves up a level every minute, slow to steady to hard to hardest.",
+            explicit = "{G} starts [adv_thrust_slow] and goes up a level every minute, slow to steady to hard to hardest, without ever dropping back down.",
             benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
             acts = setOf("topping", "hard_sex"), anal = true,
             gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
@@ -394,8 +394,8 @@ internal object TermsLevel5 {
         t(
             id = "l5_bdsm_collar_leash_service", level = 5, cats = setOf(POWER, BONDAGE, ORAL),
             title = "On the leash",
-            base = "{SUB} wears #collar# and #leash# and serves {DOM} with his mouth wherever he is led, for the whole term.",
-            explicit = "{SUB} wears #collar# and #leash# and serves {DOM} with his mouth wherever he is pulled, for the entire term.",
+            base = "{SUB} wears #collar# and #leash# and serves {DOM} with his mouth for the whole term, following the leash without resistance.",
+            explicit = "{SUB} wears #collar# and #leash# and serves {DOM} with his mouth for the entire term, following the leash without a word of complaint.",
             benefit = GIVER, type = BenefitType.OWNERSHIP,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("collaring", "oral", "sexual_service", "ownership_language"),
@@ -483,8 +483,8 @@ internal object TermsLevel5 {
         t(
             id = "l5_rule_report_state", level = 5, cats = setOf(POWER, LANGUAGE),
             title = "Says it out loud",
-            base = "For the rest of the night {SUB} says out loud how close he is whenever {DOM} asks, in plain words.",
-            explicit = "For the rest of the night {SUB} says out loud exactly how close he is the second {DOM} asks, in plain words, every time.",
+            base = "For the rest of the night {SUB} says out loud how close he is at the end of every term, in plain words.",
+            explicit = "For the rest of the night {SUB} says out loud exactly how close he is at the end of every term, in plain words, every time.",
             benefit = GIVER, type = BenefitType.PERMISSION_CONTROL,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("permission_control", "dirty_talk"),

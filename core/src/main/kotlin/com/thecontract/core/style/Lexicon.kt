@@ -81,7 +81,7 @@ object Lexicon {
         // --- Toys -------------------------------------------------------------------------
         k("v_use_toy", "uses", "uses", "uses", "drives")
         k("v_insert", "eases in", "slides in", "pushes in", "shoves in")
-        k("adv_toy_pace", "on a low setting", "on a low setting", "on a high setting", "on the highest setting he can take")
+        k("adv_toy_pace", "on a low setting", "on a low setting", "on a high setting", "on the highest setting")
 
         // --- Rough play -------------------------------------------------------------------
         k("v_pin", "holds", "pins", "presses", "clamps")
@@ -115,13 +115,13 @@ object Lexicon {
         k("v_come_in", "finishes inside", "comes inside", "comes inside", "unloads inside")
         k("n_orgasm", "release", "orgasm", "orgasm", "load")
         k("n_load", "what he has", "what he has", "his load", "every drop of his load")
-        k("v_edge", "brings him close and eases off", "edges him", "edges him", "edges him until he is begging")
-        k("v_hold_back", "asks him to hold back", "makes him hold back", "makes him hold it", "makes him hold it until he is shaking")
+        k("v_edge", "brings him close and eases off", "edges him", "edges him", "edges him hard")
+        k("v_hold_back", "holds back", "holds back", "holds it", "does not let himself come")
 
         // --- Pace, tone and general intensity ---------------------------------------------
         k("adv_pace", "slowly", "steadily", "hard", "hard and fast")
         k("adv_slow", "unhurriedly", "slowly", "slowly", "torturously slowly")
-        k("adv_hard", "firmly", "hard", "hard", "as hard as he can take")
+        k("adv_hard", "firmly", "hard", "hard", "at full force")
         k("adj_wet", "slick", "wet", "wet", "sloppy")
         k("adj_intense", "intense", "intense", "rough", "brutal")
         k("v_tease", "teases", "teases", "teases", "torments")

@@ -227,7 +227,7 @@ internal object TermsLevel3 {
             id = "l3_toy_blindfold_tease", level = 3, cats = setOf(TOYS, SENSORY),
             title = "Blindfolded with a toy",
             base = "{R} wears #blindfold#. {G} uses #TOY# on him and does not tell him what it is or where it is going next.",
-            explicit = "{R} wears #blindfold# and gets told nothing. {G} uses #TOY# on him and moves it wherever he wants without warning.",
+            explicit = "{R} wears #blindfold# and gets told nothing. {G} uses #TOY# on him and moves it to a new spot every thirty seconds without warning.",
             benefit = RECEIVER, type = BenefitType.TOY_RECIPIENT,
             acts = setOf("blindfold"), toy = true,
             equip = setOf(Equipment.BLINDFOLD),
@@ -261,15 +261,15 @@ internal object TermsLevel3 {
         ),
         t(
             id = "l3_pen_riding", level = 3, cats = setOf(ANAL),
-            title = "He sets the pace",
-            base = "{G} lies on his back and {R} lowers himself onto him with #lubricant#, setting his own pace for the whole term.",
-            explicit = "{G} lies flat and {R} sinks down onto him with #lubricant# and rides him at whatever pace he wants, with {G} keeping his hands off his hips.",
+            title = "All the way down, then hard",
+            base = "{G} lies on his back and {R} lowers himself onto him with #lubricant#, taking him all the way in over the first minute, then riding him hard for the rest of the term.",
+            explicit = "{G} lies flat and {R} sinks down onto him with #lubricant#, all the way down inside the first minute, then rides him hard for the rest, with {G} keeping his hands off his hips.",
             benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
             acts = setOf("topping"), anal = true,
             gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
             erection = PartyRef.GIVER,
             equip = setOf(Equipment.LUBRICANT),
-            timers = listOf(tm("Taking him in", 60), tm("His pace", 180))
+            timers = listOf(tm("Taking him in", 60), tm("Riding him hard", 180))
         ),
         t(
             id = "l3_pen_over_furniture", level = 3, cats = setOf(ANAL),
@@ -361,8 +361,8 @@ internal object TermsLevel3 {
         t(
             id = "l3_orgasm_edge", level = 3, cats = setOf(ORGASM_CONTROL),
             title = "Edging",
-            base = "{G} [v_edge] three times with his hand, backing off each time {R} says he is close.",
-            explicit = "{G} [v_edge] three separate times and pulls his hand away the second {R} tells him he is close, every time.",
+            base = "{G} [v_edge] three times with his hand, stopping dead at the end of each ninety-second run and waiting out the full thirty seconds before the next.",
+            explicit = "{G} [v_edge] three separate times and pulls his hand away the moment each ninety-second run ends, waiting out the full thirty seconds before starting again.",
             benefit = GIVER, type = BenefitType.ORGASM_CONTROL,
             acts = setOf("edging"),
             erection = PartyRef.RECEIVER,
@@ -402,8 +402,8 @@ internal object TermsLevel3 {
         t(
             id = "l3_orgasm_edge_mutual", level = 3, cats = setOf(ORGASM_CONTROL, HANDS),
             title = "Edging each other",
-            base = "{G} and {R} stroke each other with their hands and both stop the moment either one says he is close. Two rounds each.",
-            explicit = "{G} and {R} stroke each other and both hands stop dead the second either one says he is close. Two rounds each, no cheating.",
+            base = "{G} and {R} stroke each other with their hands and both stop dead at the end of each ninety-second round. Two rounds each.",
+            explicit = "{G} and {R} stroke each other and both hands stop dead at the end of each ninety-second round. Two rounds each, no cheating.",
             benefit = MUTUAL, type = BenefitType.MUTUAL, mutual = true,
             acts = setOf("edging"),
             erection = PartyRef.BOTH,

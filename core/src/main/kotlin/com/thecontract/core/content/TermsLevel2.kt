@@ -53,8 +53,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_oral_deep", level = 2, cats = setOf(ORAL),
             title = "Deep oral",
-            base = "{G} [v_deep] {R+} cock in stages, going a little further on each pass, and comes off to breathe whenever he needs to.",
-            explicit = "{G} [v_deep] {R+} cock, further on every pass, and only comes off when he actually has to breathe.",
+            base = "{G} [v_deep] {R+} cock in stages, going a little further on each pass, and comes up for air between each pass.",
+            explicit = "{G} [v_deep] {R+} cock, further on every pass, and comes up for air between each pass and not during one.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "deep_oral"),
             timers = listOf(tm("Deeper", 90), tm("Holding him deep", 45))
@@ -403,8 +403,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_oral_harder_intro", level = 2, cats = setOf(ORAL),
             title = "A harder pace",
-            base = "{R} sets a faster pace than usual and {G} keeps up with it for the full time without slowing down.",
-            explicit = "{R} sets a hard pace and {G} keeps up with it for the full time. He does not get to slow it down because it is difficult.",
+            base = "{R} fucks his mouth faster than usual and {G} keeps up with it for the full time without slowing down.",
+            explicit = "{R} fucks his mouth hard and {G} keeps up with it for the full time. He does not get to slow it down because it is difficult.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "harder_oral"),
             blocks = setOf(Boundary.NO_ROUGH_SEX),

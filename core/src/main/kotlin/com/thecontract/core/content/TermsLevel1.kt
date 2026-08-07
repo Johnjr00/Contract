@@ -137,7 +137,7 @@ internal object TermsLevel1 {
         t(
             id = "l1_massage_wand_back", level = 1, cats = setOf(MASSAGE),
             title = "Wand on the back",
-            base = "{G} runs #massage_wand# over {R+} shoulders, spine and lower back [adv_toy_pace], holding it in place wherever {R} tells him it helps.",
+            base = "{G} runs #massage_wand# over {R+} shoulders, spine and lower back [adv_toy_pace], holding it in place on each knot for a slow count of ten.",
             explicit = "{G} runs #massage_wand# over {R+} shoulders, down his spine and into his lower back [adv_toy_pace], and holds it hard against every spot that makes him swear.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_wand", "massage_general"),
@@ -176,8 +176,8 @@ internal object TermsLevel1 {
         t(
             id = "l1_kiss_tongue", level = 1, cats = setOf(KISSING),
             title = "Tongue-heavy kissing",
-            base = "{G} kisses {R} [adv_kiss_deep], leading with his tongue and setting the pace throughout.",
-            explicit = "{G} kisses {R} [adv_kiss_deep], all tongue, and sets the pace. {R} takes it and does not try to take over.",
+            base = "{G} kisses {R} [adv_kiss_deep], leading with his tongue the whole time while {R} follows.",
+            explicit = "{G} kisses {R} [adv_kiss_deep], all tongue, and leads throughout. {R} takes it and does not try to take over.",
             benefit = RECEIVER, type = BenefitType.KISS_RECIPIENT,
             acts = setOf("tongue_kissing"),
             timers = listOf(tm("Kissing", 120))
