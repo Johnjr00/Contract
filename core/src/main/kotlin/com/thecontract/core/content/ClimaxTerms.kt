@@ -401,6 +401,80 @@ internal object ClimaxTerms {
             erection = PartyRef.RECEIVER,
             equip = setOf(Equipment.LUBRICANT, Equipment.STURDY_CHAIR),
             timers = listOf(tm("Pushing in", 60), tm("Until he finishes", 240), tm("Staying inside", 20))
+        ),
+
+        // --- explicit: he finishes with his cock in his partner's ass ----------------
+        t(
+            id = "cx_top_inside_ass_spooning", level = 5, cats = setOf(CLIMAX, ANAL), climax = true,
+            title = "He comes in his ass, on their sides",
+            base = "{G} and {R} lie on their sides and {R} pushes his cock into {G+} ass with #lubricant#. He fucks him [adv_thrust_slow], then [adv_thrust_hard], and comes inside his ass. He stays in him for a slow count of twenty. If the timer ends first he keeps the same rhythm until he finishes.",
+            explicit = "{G} and {R} lie on their sides and {R} shoves his cock into {G+} ass with #lubricant#. He fucks him [adv_thrust_slow], then [adv_thrust_hard], and empties himself inside his ass. He stays buried in him for a slow count of twenty. If the timer ends first he does not change a thing until he is done.",
+            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
+            acts = setOf("bottoming"), anal = true,
+            rCon = PartyConstraint.TOP, gCon = PartyConstraint.BOTTOM,
+            erection = PartyRef.RECEIVER,
+            equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing into his ass", 60), tm("Until he comes in him", 240), tm("Staying inside", 20))
+        ),
+        t(
+            id = "cx_top_inside_ass_shoulders", level = 5, cats = setOf(CLIMAX, ANAL), climax = true,
+            title = "He comes in his ass with his legs over his shoulders",
+            base = "{G} lies on his back and puts both legs over {R+} shoulders. {R} pushes his cock into his ass with #lubricant# and fucks him [adv_thrust_hard] until he comes inside his ass, then stays in him for a slow count of twenty. If the timer ends first he keeps going at that pace until he finishes.",
+            explicit = "{G} lies on his back and hooks both legs over {R+} shoulders. {R} shoves his cock into his ass with #lubricant# and fucks him [adv_thrust_hard] until he empties himself inside his ass, then stays buried for a slow count of twenty. If the timer ends first he keeps that exact pace until he is done.",
+            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
+            acts = setOf("bottoming"), anal = true,
+            rCon = PartyConstraint.TOP, gCon = PartyConstraint.BOTTOM,
+            erection = PartyRef.RECEIVER,
+            equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing into his ass", 60), tm("Until he comes in him", 240), tm("Staying inside", 20))
+        ),
+        t(
+            id = "cx_top_inside_ass_lap", level = 5, cats = setOf(CLIMAX, ANAL), climax = true,
+            title = "He comes in his ass, sat in his lap",
+            base = "{R} sits on #sturdy_chair# and {G} lowers his ass onto his cock with #lubricant#, facing him. {R} holds him by the hips and fucks up into his ass until he comes inside him, then holds him down for a slow count of twenty. If the timer ends first he keeps the same rhythm until he finishes.",
+            explicit = "{R} sits on #sturdy_chair# and {G} lowers his ass onto his cock with #lubricant#, face to face. {R} takes both hips and fucks up into his ass until he empties himself inside him, then holds him down on it for a slow count of twenty. If the timer ends first he does not change a thing until he is done.",
+            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
+            acts = setOf("bottoming"), anal = true,
+            rCon = PartyConstraint.TOP, gCon = PartyConstraint.BOTTOM,
+            erection = PartyRef.RECEIVER,
+            equip = setOf(Equipment.LUBRICANT, Equipment.STURDY_CHAIR),
+            timers = listOf(tm("Taking his cock", 60), tm("Until he comes in him", 240), tm("Held down on it", 20))
+        ),
+        t(
+            id = "cx_top_inside_ass_edge", level = 5, cats = setOf(CLIMAX, ANAL), climax = true,
+            title = "He comes in his ass on the edge of the bed",
+            base = "{G} lies back on the edge of the bed and {R} stands and pushes his cock into his ass with #lubricant#. He fucks him [adv_thrust_hard] until he comes inside his ass, then stays in him for a slow count of twenty. If the timer ends first he keeps that rhythm until he finishes.",
+            explicit = "{G} lies back on the edge of the bed and {R} stands and shoves his cock into his ass with #lubricant#. He fucks him [adv_thrust_hard] until he empties himself inside his ass, then stays buried for a slow count of twenty. If the timer ends first he keeps that exact rhythm until he is done.",
+            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
+            acts = setOf("bottoming"), anal = true,
+            rCon = PartyConstraint.TOP, gCon = PartyConstraint.BOTTOM,
+            erection = PartyRef.RECEIVER,
+            equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing into his ass", 60), tm("Until he comes in him", 240), tm("Staying inside", 20))
+        ),
+        t(
+            id = "cx_top_inside_ass_slow", level = 5, cats = setOf(CLIMAX, ANAL), climax = true,
+            title = "He comes in his ass, slow and deep the whole way",
+            base = "{R} pushes his cock into {G+} ass with #lubricant# and fucks him [adv_thrust_slow] the entire time, never speeding up once, until he comes inside his ass. He stays in him for a slow count of twenty. If the timer ends first he holds that same slow pace until he finishes.",
+            explicit = "{R} shoves his cock into {G+} ass with #lubricant# and fucks him [adv_thrust_slow] the entire time, never once speeding up, until he empties himself inside his ass. He stays buried for a slow count of twenty. If the timer ends first he holds that same slow pace until he is done.",
+            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
+            acts = setOf("bottoming"), anal = true,
+            rCon = PartyConstraint.TOP, gCon = PartyConstraint.BOTTOM,
+            erection = PartyRef.RECEIVER,
+            equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing into his ass", 60), tm("Slow and deep", 240), tm("Staying inside", 20))
+        ),
+        t(
+            id = "cx_top_inside_ass_buried", level = 5, cats = setOf(CLIMAX, ANAL, ROUGH), climax = true,
+            title = "He comes in his ass, buried to the base",
+            base = "{R} pushes his cock all the way into {G+} ass with #lubricant# and keeps it buried to the base, moving in short hard strokes without pulling out, until he comes inside his ass. He stays in him for a slow count of twenty. If the timer ends first he keeps the same short strokes until he finishes.",
+            explicit = "{R} shoves his cock all the way into {G+} ass with #lubricant# and keeps it buried to the base, driving in short brutal strokes and never pulling out, until he empties himself inside his ass. He stays buried for a slow count of twenty. If the timer ends first he keeps those same strokes until he is done.",
+            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
+            acts = setOf("bottoming", "rough_anal"), anal = true,
+            rCon = PartyConstraint.TOP, gCon = PartyConstraint.BOTTOM,
+            erection = PartyRef.RECEIVER,
+            equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("All the way in", 60), tm("Until he comes in him", 240), tm("Staying inside", 20))
         )
     )
 }
