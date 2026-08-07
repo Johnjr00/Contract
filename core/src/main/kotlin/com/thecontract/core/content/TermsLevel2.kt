@@ -36,7 +36,7 @@ internal object TermsLevel2 {
             id = "l2_oral_slow", level = 2, cats = setOf(ORAL),
             title = "Slow oral",
             base = "{G} [v_suck_slow] {R+} cock [adv_oral_pace], keeping one hand flat on {R+} stomach so he stays where he is.",
-            explicit = "{G} gets between {R+} legs and [v_suck] his cock [adv_oral_pace], one hand pinning his stomach down so he cannot chase it.",
+            explicit = "{G} gets between {R+} legs and [v_suck] him [adv_oral_pace], one hand pinning his stomach down so he cannot chase it.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral"),
             timers = listOf(tm("Slow oral", 120))
@@ -123,8 +123,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_oral_head_held", level = 2, cats = setOf(ORAL, POWER),
             title = "Hands on his head",
-            base = "{G} [v_suck] {R+} cock while {R} rests both hands on {G+} head and sets the depth.",
-            explicit = "{G} [v_suck] {R+} cock and {R} keeps both hands on his head, setting the depth himself. {G} takes what he is given.",
+            base = "{G} [v_suck] {R+} cock while {R} rests both hands on {G+} head and pulls him all the way down every fifth stroke.",
+            explicit = "{G} [v_suck] {R+} cock and {R} keeps both hands on {G+} head, pulling him all the way down every fifth stroke. {G} takes what he is given.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "deep_oral"), rPrefs = setOf("commands_give"),
             timers = listOf(tm("Hands on his head", 120))

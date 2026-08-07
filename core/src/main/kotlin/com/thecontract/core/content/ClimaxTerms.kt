@@ -329,8 +329,8 @@ internal object ClimaxTerms {
         t(
             id = "cx_bottom_self_while_fisted", level = 5, cats = setOf(CLIMAX, ANAL), climax = true,
             title = "His own hand while he takes his partner's",
-            base = "{R} strokes himself with his own hand while {G} pushes as much of his hand into him as he takes, with #lubricant#, and holds it there until he finishes. If the timer ends first, {G} keeps his hand exactly where it is until he does.",
-            explicit = "{R} strokes his own cock while {G} pushes as much of his hand into him as he takes, with #lubricant#, and holds it buried until he [v_come]. If the timer ends first {G} keeps his hand exactly where it is until he is done.",
+            base = "{R} strokes himself with his own hand while {G} pushes as much of his hand into him as he will take, with #lubricant#, and holds it there until he finishes. If the timer ends first, {G} keeps his hand exactly where it is until he does.",
+            explicit = "{R} strokes his own cock while {G} pushes as much of his hand into him as he will take, with #lubricant#, and holds it buried until he [v_come]. If the timer ends first {G} keeps his hand exactly where it is until he is done.",
             benefit = RECEIVER, type = BenefitType.FINGERING_RECIPIENT,
             acts = setOf("fisting"), anal = true,
             rCon = PartyConstraint.BOTTOM,
@@ -341,8 +341,8 @@ internal object ClimaxTerms {
         t(
             id = "cx_bottom_fisted_and_sucked", level = 5, cats = setOf(CLIMAX, ANAL, ORAL), climax = true,
             title = "Sucked with his partner's hand inside him",
-            base = "{G} pushes as much of his hand into {R} as he takes with #lubricant#, keeps it there and [v_suck] him until he finishes. If the timer ends first, nothing changes until he does.",
-            explicit = "{G} pushes as much of his hand into {R} as he takes with #lubricant#, keeps it buried and [v_suck] him until he [v_come]. If the timer ends first, nothing changes at all until he is done.",
+            base = "{G} pushes as much of his hand into {R} as he will take with #lubricant#, keeps it there and [v_suck] him until he finishes. If the timer ends first, nothing changes until he does.",
+            explicit = "{G} pushes as much of his hand into {R} as he will take with #lubricant#, keeps it buried and [v_suck] him until he [v_come]. If the timer ends first, nothing changes at all until he is done.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("fisting", "oral"), anal = true,
             rCon = PartyConstraint.BOTTOM,

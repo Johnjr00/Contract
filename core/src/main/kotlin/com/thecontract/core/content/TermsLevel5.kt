@@ -318,9 +318,9 @@ internal object TermsLevel5 {
         ),
         t(
             id = "l5_sex_hard_until_told", level = 5, cats = setOf(ANAL, ROUGH, POWER),
-            title = "Until he says stop",
-            base = "{G} [v_fuck_hard] {R} and does not change anything until {R} tells him to, whatever that takes.",
-            explicit = "{G} [v_fuck_hard] {R} and changes nothing at all until {R} actually says so, however long that takes.",
+            title = "Four minutes, no change of pace",
+            base = "{G} [v_fuck_hard] {R} for the full four minutes and does not change depth or pace once.",
+            explicit = "{G} [v_fuck_hard] {R} for the full four minutes and does not change depth or pace once, start to finish.",
             benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
             acts = setOf("topping", "hard_sex"), anal = true,
             gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,

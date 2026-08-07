@@ -105,7 +105,7 @@ object Lexicon {
 
         // --- Language ---------------------------------------------------------------------
         k("v_praise", "tells him how good he is", "tells him how good he is", "tells him what a good boy he is", "tells him what a good boy he is for taking it")
-        k("v_talk_dirty", "murmurs to him", "talks to him", "talks dirty to him", "spells out exactly what he is doing to him")
+        k("v_talk_dirty", "murmurs to him", "talks to him", "talks dirty to him", "talks him through it")
         k("tone_whisper", "murmurs", "whispers", "whispers", "growls")
         k("tone_moan", "breathes", "breathes hard", "moans", "moans and growls")
         k("n_dirty_talk", "quiet, explicit words", "explicit words", "crude, explicit talk", "the crudest talk he has")

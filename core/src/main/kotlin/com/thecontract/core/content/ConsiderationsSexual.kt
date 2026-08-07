@@ -37,7 +37,7 @@ internal object ConsiderationsSexual {
             id = "cs_oral_slow", intensity = 2, family = F_SEX, cats = setOf(ORAL),
             title = "Slow oral",
             base = "{G} [v_suck_slow] {R+} cock [adv_oral_pace] with one hand flat on his stomach.",
-            explicit = "{G} gets between {R+} legs and [v_suck] his cock [adv_oral_pace], pinning his stomach so he cannot chase it.",
+            explicit = "{G} gets between {R+} legs and [v_suck] him [adv_oral_pace], pinning his stomach so he cannot chase it.",
             acts = setOf("oral"), timers = listOf(tm("Slow oral", 120))
         ),
         c(
