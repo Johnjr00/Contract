@@ -19,6 +19,7 @@ import com.thecontract.tv.R
 import com.thecontract.tv.ServerHolder
 import com.thecontract.tv.data.RoomStateStore
 import com.thecontract.tv.net.AndroidNetworkMonitor
+import com.thecontract.tv.ui.ChimePlayer
 import com.thecontract.tv.ui.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -43,6 +44,8 @@ class ContractService : Service() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var tickJob: Job? = null
+    private var chimeJob: Job? = null
+    private var chime: ChimePlayer? = null
     private var server: ContractServer? = null
     private var monitor: AndroidNetworkMonitor? = null
     private var wakeLock: PowerManager.WakeLock? = null
@@ -56,6 +59,8 @@ class ContractService : Service() {
         private const val CHANNEL_ID = "session"
         private const val NOTIFICATION_ID = 1001
         private const val TICK_MS = 500L
+        private const val RUNNING_STATE = "RUNNING"
+        private const val COMPLETED_STATE = "COMPLETED"
 
         fun start(context: Context, resumeUnfinished: Boolean = false) {
             val intent = Intent(context, ContractService::class.java).apply {
@@ -80,6 +85,8 @@ class ContractService : Service() {
         super.onCreate()
         createChannel()
         startForegroundCompat()
+
+        chime = ChimePlayer(applicationContext)
 
         val store = RoomStateStore(applicationContext)
         manager = SessionManager(store, GameEngine())
@@ -111,6 +118,20 @@ class ContractService : Service() {
             while (isActive) {
                 delay(TICK_MS)
                 runCatching { manager.tick() }
+            }
+        }
+
+        // Sound the chime the moment a timer stops running, watching the same published view
+        // the screen renders so the two can never disagree about when a timer ended.
+        chimeJob = scope.launch {
+            var previous = emptyMap<String, String>()
+            ServerHolder.tvView.collect { view ->
+                val current = view.timers.associate { it.id to it.state }
+                val justFinished = current.any { (id, state) ->
+                    state == COMPLETED_STATE && previous[id] == RUNNING_STATE
+                }
+                if (justFinished) runCatching { chime?.play() }
+                previous = current
             }
         }
     }
@@ -153,6 +174,9 @@ class ContractService : Service() {
         // main-thread-blocking-but-IO-executing shape as onTaskRemoved, for the same reason.
         runBlocking(Dispatchers.IO) { runCatching { manager.persistNow() } }
         tickJob?.cancel()
+        chimeJob?.cancel()
+        chime?.release()
+        chime = null
         monitor?.stop()
         runCatching { server?.stop() }
         server = null

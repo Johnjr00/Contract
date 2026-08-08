@@ -36,13 +36,30 @@ object ServerHolder {
     var manager: SessionManager? = null
         private set
 
-    @Volatile
-    var boundPort: Int = 0
-        internal set
+    /** Whether the local server is listening, and on which port. */
+    data class ServerStatus(val running: Boolean, val port: Int)
 
-    @Volatile
-    var serverRunning: Boolean = false
-        internal set
+    private val _server = MutableStateFlow(ServerStatus(running = false, port = 0))
+
+    /**
+     * Observable, because the server binds its port a second or two after the screen first
+     * draws. Reading a plain field during composition left the header saying "Server offline"
+     * for as long as nothing else happened to trigger a recomposition, which on the idle start
+     * screen is forever.
+     */
+    val server: StateFlow<ServerStatus> = _server.asStateFlow()
+
+    var boundPort: Int
+        get() = _server.value.port
+        internal set(value) {
+            _server.value = _server.value.copy(port = value)
+        }
+
+    var serverRunning: Boolean
+        get() = _server.value.running
+        internal set(value) {
+            _server.value = _server.value.copy(running = value)
+        }
 
     internal fun attach(sessionManager: SessionManager) {
         manager = sessionManager

@@ -12,15 +12,15 @@ Both APKs were built and verified.
 | --- | --- |
 | Debug APK | `app/build/outputs/apk/debug/app-debug.apk` |
 | | application id `com.thecontract.tv.debug` |
-| | SHA-256 `d1a1f6752278702a597bdda28a121d09b1da1895d4e9f1178af8fc926b869720` |
+| | SHA-256 `b74af218b97aeb102903f1b906a34a4c495f2169988b483b2862e6901e11e313` |
 | Release APK | `app/build/outputs/apk/release/app-release.apk` |
 | | application id `com.thecontract.tv`, minified and resource-shrunk by R8 |
-| | SHA-256 `862f9857d78d69fb9f3f732da4c3345428ba367ee6705d37b04056bd161499e7` |
+| | SHA-256 `5d350c82b9e77847b7db1ec1c1b50eca461879ac7fb2f75856819fa4117db635` |
 | Release signature | APK Signature Scheme v2, verified with `apksigner verify` |
 | | signer `CN=The Contract, OU=TheContract, O=TheContract, L=Unknown, ST=Unknown, C=US` |
 | | certificate SHA-256 `d460e29876eda8d73e6b1af100f78942b26ac8ab28d33aaa7f42ca605bef25e0` |
 
-These are the hashes as of the content revision in section 4e below. The signing cert is unchanged from the previous fix (same keystore).
+These are the hashes as of the television timer and chime in section 4f below. The signing cert is unchanged from the previous fix (same keystore).
 
 Toolchain actually used: AGP 8.7.3, Kotlin 2.2.21, KSP 2.2.21-2.0.4, Compose BOM 2024.10.01,
 Room 2.6.1, Android SDK Platform 35, Build-Tools 35.0.0, Gradle 8.14.3, JDK 21 emitting Java 17
@@ -614,6 +614,69 @@ Everything above was verified by rendering every term, closing term and
 consideration — instruction text, titles and timer labels — in all four
 explicitness registers and grepping the rendered output rather than the
 source. All 53 tests pass.
+
+---
+
+### 4f. The running timer on the television, and the end-of-timer chime
+
+The television now shows the running timer as the hero of the screen, and
+plays a soft tone the moment a timer finishes.
+
+**The panel.** `ActiveTimerPanel` sits directly under the header, above
+everything else, and is pinned outside the scrolling area so it can never be
+below the fold. It shows one timer only — the running one, or a paused one, so
+that a paused clock does not read as a crash — with its label, its name, the
+remaining time at 74sp, a progress bar, and `segment N of M` when a term
+carries several. Nothing at all is drawn while every timer is idle or
+finished, so negotiation screens are unchanged.
+
+**The chime.** `app/src/main/res/raw/timer_chime.wav` is a 1.6-second E5 bell
+generated offline: three partials at a 0.22 peak, a 30 ms attack rather than a
+click, and an exponential decay into a quadratic tail. `ChimePlayer` plays it
+through `SoundPool` at a further 0.45 gain. It is deliberately quiet and slow
+to start, because it sounds in a room where two people are mid-scene. It uses
+`USAGE_MEDIA` so it rides the volume the room already set for music, and it
+**does not request audio focus**: a one-second tone is not worth ducking a
+track for. `ContractService` watches the same published view the screen
+renders and plays the tone on a `RUNNING -> COMPLETED` transition, so the
+sound and the screen can never disagree about when a timer ended.
+
+**Verified on the emulator** against the packaged release APK: the timer
+panel renders correctly and fits the screen whole, and audio playback was
+observed from the app's own process (`AudioTrack: createTrack_l`, pid
+confirmed as `com.thecontract.tv`) at the instant the `Making out` timer went
+to completed, with no crashes and no `SoundPool` errors.
+
+Four television layout defects were found while testing this and fixed:
+
+* **The header spaced itself five times.** `Header` emitted five children
+  straight into a column arranged with `spacedBy(20.dp)`, so every one of them
+  collected another 40 px. The header occupied 429 px of screen for 277 px of
+  content and pushed the clock off the bottom. It is now a single column: 233
+  px, and the clock fits with room to spare.
+* **The join code never rendered.** The QR code was a fixed 320 dp and the
+  card interior in the left column is exactly 320 dp, so the details beside it
+  were measured at zero width, every word wrapped to one letter per line, the
+  row grew to thousands of pixels and the code itself was centred far below
+  the screen. The card looked simply empty — on the one screen whose entire
+  purpose is showing a code to scan. The panel is now sized from the space
+  actually available, and the join URL sits full width beneath the code rather
+  than in a side column. Confirmed by decoding the QR out of a screenshot of
+  the running app: it reads back the correct join URL.
+* **"Server offline" while the server was serving.** `ServerHolder.boundPort`
+  and `serverRunning` were plain fields read during composition. The port binds
+  a second or two after the screen first draws, and on the idle start screen
+  nothing else ever triggers a recomposition, so the header said offline
+  forever. They are now backed by a `StateFlow` the activity collects.
+* **Player pills wrapped one character per line.** The title and three pills
+  shared a single row, so the pills were squeezed to a few pixels wide. The
+  header is now two rows, and pill text does not wrap.
+
+Nothing in this column is focusable, so a remote cannot scroll it: anything
+below the fold there is invisible on a real television. That is why the timer
+is pinned, and why the join code is placed above the prose card while pairing
+and dropped once play starts, when the term on offer is what has to be up
+there instead.
 
 ---
 

@@ -46,6 +46,9 @@ object TvType {
     val muted = TextStyle(color = TvColors.muted, fontSize = 19.sp, lineHeight = 28.sp)
     val label = TextStyle(color = TvColors.muted, fontSize = 16.sp, fontWeight = FontWeight.Medium)
     val clock = TextStyle(color = TvColors.ink, fontSize = 44.sp, fontWeight = FontWeight.Bold)
+
+    /** The running-timer readout. Sized to be legible from a sofa, not from a desk. */
+    val hero = TextStyle(color = TvColors.ink, fontSize = 74.sp, fontWeight = FontWeight.Bold)
 }
 
 @Composable
