@@ -48,14 +48,16 @@ class MainActivity : ComponentActivity() {
         setContent {
             val view by ServerHolder.tvView.collectAsState()
             val server by ServerHolder.server.collectAsState()
-            Box(Modifier.fillMaxSize()) {
-                TvApp(
-                    view = view,
-                    joinPort = server.port,
-                    serverRunning = server.running,
-                    onChoice = ::onChoice,
-                    onRemoteAction = ::onRemoteAction
-                )
+            TvCanvas {
+                Box(Modifier.fillMaxSize()) {
+                    TvApp(
+                        view = view,
+                        joinPort = server.port,
+                        serverRunning = server.running,
+                        onChoice = ::onChoice,
+                        onRemoteAction = ::onRemoteAction
+                    )
+                }
             }
         }
     }

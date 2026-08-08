@@ -12,15 +12,15 @@ Both APKs were built and verified.
 | --- | --- |
 | Debug APK | `app/build/outputs/apk/debug/app-debug.apk` |
 | | application id `com.thecontract.tv.debug` |
-| | SHA-256 `b74af218b97aeb102903f1b906a34a4c495f2169988b483b2862e6901e11e313` |
+| | SHA-256 `864b7f345eb9f177f90db0069d0ea45171efea027dcb89b368874d51d664aea8` |
 | Release APK | `app/build/outputs/apk/release/app-release.apk` |
 | | application id `com.thecontract.tv`, minified and resource-shrunk by R8 |
-| | SHA-256 `5d350c82b9e77847b7db1ec1c1b50eca461879ac7fb2f75856819fa4117db635` |
+| | SHA-256 `068cc6eecc95bbd02593e95478842f23d33d97e315b8f0cee7a2e3e1759ade10` |
 | Release signature | APK Signature Scheme v2, verified with `apksigner verify` |
 | | signer `CN=The Contract, OU=TheContract, O=TheContract, L=Unknown, ST=Unknown, C=US` |
 | | certificate SHA-256 `d460e29876eda8d73e6b1af100f78942b26ac8ab28d33aaa7f42ca605bef25e0` |
 
-These are the hashes as of the television timer and chime in section 4f below. The signing cert is unchanged from the previous fix (same keystore).
+These are the hashes as of the density-independent layout in section 4g below. The signing cert is unchanged from the previous fix (same keystore).
 
 Toolchain actually used: AGP 8.7.3, Kotlin 2.2.21, KSP 2.2.21-2.0.4, Compose BOM 2024.10.01,
 Room 2.6.1, Android SDK Platform 35, Build-Tools 35.0.0, Gradle 8.14.3, JDK 21 emitting Java 17
@@ -677,6 +677,60 @@ below the fold there is invisible on a real television. That is why the timer
 is pinned, and why the join code is placed above the prose card while pairing
 and dropped once play starts, when the term on offer is what has to be up
 there instead.
+
+---
+
+### 4g. One layout on every television, whatever density it reports
+
+Every size in the television UI is written in `dp` against a 960 x 540 canvas,
+which is what a 1080p set at xhdpi reports. Televisions do not agree on that.
+A 4K set is usually xxxhdpi and lands on the same 960 x 540 dp, but plenty of
+sets, boxes and sticks report something else — tvdpi, 4K pixels at xhdpi,
+1080p at xxhdpi — and the same `48.dp` is then a different fraction of the
+screen on each of them. The fixed 460 dp remote column is the sharp edge: on a
+set reporting a 480 x 270 dp canvas it is wider than the whole screen, so the
+left column is squeezed to nothing and everything else runs off the edges.
+
+`TvCanvas` removes the variable. It ignores the reported density, measures the
+window in **pixels**, and derives a density that makes those pixels come out as
+960 x 540 design units, keeping whatever is left over on the long axis if the
+panel is not 16:9. The layout is therefore expressed purely in fractions of the
+screen it is actually on: 1080p and 2160p produce the same layout, the 4K one
+simply drawn with four times the pixels, and no set can be too small for the
+design because the design is measured against that set.
+
+The accessibility text scale is deliberately not carried through. On a canvas
+fitted this tightly a 1.3x text scale is the difference between a clock that
+fits and a clock cut off at the bezel, and the type here is already sized for
+a ten-foot viewing distance.
+
+**Measured.** The same build was rendered at four reported densities on a
+1920 x 1080 panel — 160, 213, 320 and 480 dpi, i.e. device canvases from
+1920 x 1080 dp down to 640 x 360 dp, a threefold range — and the rendered node
+bounds are identical to the pixel at every one of them:
+
+| Device density | Canvas the device reports | "The Contract" | "Remote" | "Start a new game" |
+| --- | --- | --- | --- | --- |
+| 160 dpi | 1920 x 1080 dp | x 96..442, y 96..167 | x 904..1015 | x 952..1330, y 355..412 |
+| 213 dpi | 1442 x 811 dp | x 96..442, y 96..167 | x 904..1015 | x 952..1330, y 355..412 |
+| 320 dpi | 960 x 540 dp | x 96..442, y 96..167 | x 904..1015 | x 952..1330, y 355..412 |
+| 480 dpi | 640 x 360 dp | x 96..442, y 96..167 | x 904..1015 | x 952..1330, y 355..412 |
+
+The 320 dpi row is also identical to the layout before this change, so the
+standard case is untouched.
+
+A before-and-after was captured at 640 dpi (a 480 x 270 dp canvas) on the same
+device: the previous build drew only its remote column, overflowing both edges
+with the left column squeezed off screen entirely, while this build is
+indistinguishable from its own 1080p render.
+
+**Not verified:** a literal 3840 x 2160 framebuffer. Rebuilding the virtual
+device with a 4K panel did not produce one — the Android TV system image pins
+the logical display to 1920 x 1080 regardless, which is what many real 4K
+television devices also do, rendering the UI at 1080p and upscaling in
+hardware — and a wiped 4K emulator was too slow to drive in this CPU-only
+sandbox. The scale is derived from the framebuffer, so 2160p is the same
+arithmetic with a factor of four, but it has not been rendered on one.
 
 ---
 
