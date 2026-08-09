@@ -170,6 +170,59 @@ h3 { font-size: 14px; margin: 16px 0 6px; color: var(--muted); text-transform: u
 .btn-nav { background: transparent; color: var(--muted); min-height: 44px; }
 .btn small { display: block; font-weight: 400; color: inherit; opacity: .8; margin-top: 2px; }
 
+/* ------------------------------------------------- help beside a choice */
+
+.choice-help { display: flex; flex-direction: column; gap: 8px; }
+.choice-row { display: flex; gap: 8px; align-items: center; }
+.choice-row .btn { flex: 1 1 auto; width: auto; }
+
+.help-btn {
+  appearance: none;
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  font: inherit;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--muted);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.help-btn:active { transform: translateY(1px); }
+.help-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.help-btn[aria-expanded="true"] { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
+
+.bubble {
+  position: relative;
+  margin-top: 2px;
+  padding: 12px 14px;
+  background: var(--panel-2);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* The tail, pointing up at the "?" it came from. */
+.bubble::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  right: 17px;
+  width: 12px;
+  height: 12px;
+  background: var(--panel-2);
+  border-left: 1px solid var(--accent);
+  border-top: 1px solid var(--accent);
+  transform: rotate(45deg);
+}
+
 .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .btn-row .btn { width: auto; flex: 1 1 auto; min-width: 96px; text-align: center; min-height: 44px; }
 

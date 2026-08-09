@@ -12,15 +12,15 @@ Both APKs were built and verified.
 | --- | --- |
 | Debug APK | `app/build/outputs/apk/debug/app-debug.apk` |
 | | application id `com.thecontract.tv.debug` |
-| | SHA-256 `ac0baddd0d9d19a9bd253542c74e698b2a0c0b987f86ac3e6b192270e96d68b9` |
+| | SHA-256 `c44c62d3aa54dd3e5730b5b3e583ddab63e5df9c8c8387511ba1a32623c89927` |
 | Release APK | `app/build/outputs/apk/release/app-release.apk` |
 | | application id `com.thecontract.tv`, minified and resource-shrunk by R8 |
-| | SHA-256 `48275c621f3d627a5dbaa5414bb520c37a743869023c22235b16326df26a7172` |
+| | SHA-256 `5f1c86b4fa676564e69432aedaf8c906b04e8da3b370512d74813b6b9fcadfab` |
 | Release signature | APK Signature Scheme v2, verified with `apksigner verify` |
 | | signer `CN=The Contract, OU=TheContract, O=TheContract, L=Unknown, ST=Unknown, C=US` |
 | | certificate SHA-256 `d460e29876eda8d73e6b1af100f78942b26ac8ab28d33aaa7f42ca605bef25e0` |
 
-These are the hashes as of the consideration and escalation rework in section 4i below. The signing cert is unchanged from the previous fix (same keystore).
+These are the hashes as of the on-phone help bubbles in section 4j below. The signing cert is unchanged from the previous fix (same keystore).
 
 Toolchain actually used: AGP 8.7.3, Kotlin 2.2.21, KSP 2.2.21-2.0.4, Compose BOM 2024.10.01,
 Room 2.6.1, Android SDK Platform 35, Build-Tools 35.0.0, Gradle 8.14.3, JDK 21 emitting Java 17
@@ -40,7 +40,7 @@ Verified on the built artifacts rather than asserted from source:
   `FOREGROUND_SERVICE_SPECIAL_USE`, `RECEIVE_BOOT_COMPLETED`, `WAKE_LOCK`,
   `POST_NOTIFICATIONS` — with no analytics, advertising or tracking permission of any kind.
 * The phone controller survives R8 intact inside the release APK: `web/controller.html` (1,084 B),
-  `web/controller.css` (7,802 B) and `web/controller.js` (33,078 B) are present and byte-identical
+  `web/controller.css` (9,149 B) and `web/controller.js` (37,388 B) are present and byte-identical
   to source, and a grep across all three finds **zero** occurrences of `http://`, `https://`,
   `cdn` or `googleapis`. Nothing is fetched from outside the APK.
 * Release `classes.dex` carries 15,355 method references — no multidex needed.
@@ -837,6 +837,47 @@ renders every term, closing term and consideration in all four registers and
 fails on a pronoun that arrives before any name, a doubled word, a double
 space or a missing full stop. It flags zero. `ConsiderationFairnessTest`
 holds the three rules above over a whole game. 57 tests pass.
+
+---
+
+### 4j. Help bubbles on the two answers nobody understands
+
+A proposal offers four answers: sign, counteroffer, trade, reject. Two of them
+explain themselves and two do not, and an answer a player does not understand
+is one he never uses — which is most of why the trade mechanic went unused.
+
+Each of those two now carries a round **?** beside it on the phone. Tapping it
+opens a bubble under the button, with a tail pointing back at the **?**:
+
+* **Counteroffer** — "Changes this term instead of killing it. You pick one
+  change to it — gentler, shorter, roles swapped, no toys — and then you both
+  vote on the new version. If you both say yes it goes in the contract. If
+  either of you says no, the term is gone for good."
+* **Trade** — "Puts a second term in alongside this one, and you pick that
+  second term yourself from a short list — everywhere else the game chooses
+  for you. Both go in together or neither does, it uses two of your term
+  slots, and a single consideration pays for the pair instead of two. The
+  other player has to agree to it."
+
+Tapping anywhere else puts the bubble away, as does tapping the same **?**
+again, or Escape. The **?** and the bubble stop the event before it reaches
+the document handler, so a tap on either does not dismiss it. A bubble left
+open does not survive a change of screen — the open state is keyed to the
+phase and the term on offer, so the next proposal starts clean — but it does
+survive the ordinary re-renders that a state update causes, which would
+otherwise have snatched it away mid-read.
+
+One wrinkle worth recording: the Pause bar is stuck over the bottom of the
+screen, and a bubble opened near it had its last line hidden underneath.
+`scrollIntoView` is no help, because as far as it is concerned the bubble is
+already on screen. The overlap is measured against the bar's own height and
+the page scrolled by exactly that.
+
+Exercised in a real mobile-sized browser against the dev server, tapping
+rather than clicking: both bubbles open with the right text, a tap away
+closes, a second tap on the same **?** closes, a tap inside the bubble does
+not, and the button underneath still does its job — tapping Counteroffer
+through the open bubble sent the answer.
 
 ---
 

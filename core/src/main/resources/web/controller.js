@@ -261,9 +261,47 @@
     main.appendChild(card);
   }
 
+  // ------------------------------------------------------------------ choice help
+
+  /*
+   * Two of the four answers to a proposal are not self-explanatory, and a player who does not
+   * understand them simply never uses them. Each gets a "?" beside it that opens a bubble.
+   * Plain words only: this is read by someone mid-scene, not studying.
+   */
+  var HELP = {
+    counteroffer:
+      "Changes this term instead of killing it. You pick one change to it \u2014 gentler, " +
+      "shorter, roles swapped, no toys \u2014 and then you both vote on the new version. " +
+      "If you both say yes it goes in the contract. If either of you says no, the term is " +
+      "gone for good.",
+    bundle:
+      "Puts a second term in alongside this one, and you pick that second term yourself from " +
+      "a short list \u2014 everywhere else the game chooses for you. Both go in together or " +
+      "neither does, it uses two of your term slots, and a single consideration pays for the " +
+      "pair instead of two. The other player has to agree to it."
+  };
+
+  var openHelp = null;       // id of the choice whose bubble is showing
+  var openHelpKey = "";      // what was on screen when it was opened
+  var helpJustOpened = false; // scroll it clear of the Pause bar, but only on the opening tap
+
+  /* A new proposal, or any new screen, closes a bubble left open on the last one. */
+  function helpKey(v) {
+    return (v.phase || "") + "|" + ((v.term && v.term.termId) || "");
+  }
+
+  function closeHelp() {
+    if (openHelp === null) return false;
+    openHelp = null;
+    render();
+    return true;
+  }
+
   function render() {
     var v = S.view;
     if (!v) return;
+
+    if (helpKey(v) !== openHelpKey) { openHelp = null; openHelpKey = helpKey(v); }
 
     $("who").textContent = (v.names && v.names[v.slot] ? v.names[v.slot] : v.slot === "PLAYER_1" ? "Player 1" : "Player 2") +
       (v.roles && v.roles[v.slot] ? " · " + (v.roles[v.slot] === "DOMINANT" ? "Dominant" : "submissive") : "");
@@ -332,7 +370,46 @@
         b.appendChild(document.createTextNode(c.label));
         if (c.detail) b.appendChild(el("small", null, c.detail));
         b.addEventListener("click", function () { dispatchChoice(c.id); });
-        list.appendChild(b);
+
+        if (!HELP[c.id]) { list.appendChild(b); return; }
+
+        var wrap = el("div", "choice-help");
+        var row = el("div", "choice-row");
+        row.appendChild(b);
+
+        var q = el("button", "help-btn", "?");
+        q.type = "button";
+        q.setAttribute("aria-label", "What does \u201c" + c.label + "\u201d do?");
+        q.setAttribute("aria-expanded", openHelp === c.id ? "true" : "false");
+        // Without this the document handler below would close the bubble in the same tap.
+        q.addEventListener("click", function (ev) {
+          ev.stopPropagation();
+          openHelp = openHelp === c.id ? null : c.id;
+          helpJustOpened = openHelp !== null;
+          render();
+        });
+        row.appendChild(q);
+        wrap.appendChild(row);
+
+        if (openHelp === c.id) {
+          var bubble = el("div", "bubble", HELP[c.id]);
+          bubble.setAttribute("role", "note");
+          bubble.addEventListener("click", function (ev) { ev.stopPropagation(); });
+          wrap.appendChild(bubble);
+          // The Pause bar is stuck over the bottom of the screen and can cover the last line of
+          // a bubble opened near it. scrollIntoView will not help — as far as it is concerned
+          // the bubble is already on screen — so measure the overlap and scroll by exactly that.
+          if (helpJustOpened) {
+            helpJustOpened = false;
+            setTimeout(function () {
+              var foot = document.getElementById("foot");
+              var covered = foot ? foot.getBoundingClientRect().height : 0;
+              var over = bubble.getBoundingClientRect().bottom - (window.innerHeight - covered - 8);
+              if (over > 0) window.scrollBy(0, over);
+            }, 0);
+          }
+        }
+        list.appendChild(wrap);
       });
       box.appendChild(list);
       main.appendChild(box);
@@ -863,6 +940,13 @@
     try { S.resume = JSON.parse(load(KEY_RESUME) || "null"); } catch (e) { S.resume = null; }
 
     $("pauseBtn").addEventListener("click", function () { act({ type: "global_pause" }); });
+
+    // Tapping the screen away from the bubble puts it away. The bubble and its "?" stop the
+    // event before it gets here, so only a tap somewhere else counts.
+    document.addEventListener("click", function () { closeHelp(); });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" || e.key === "Esc") closeHelp();
+    });
 
     // A phone that comes back from lock or from another app reconnects immediately.
     document.addEventListener("visibilitychange", function () {
