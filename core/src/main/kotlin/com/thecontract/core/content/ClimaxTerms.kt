@@ -50,8 +50,8 @@ internal object ClimaxTerms {
         t(
             id = "cx_top_inside_from_behind", level = 5, cats = setOf(CLIMAX, ANAL), climax = true,
             title = "He finishes inside him from behind",
-            base = "{G} gets on his hands and knees. {R} [v_enter] him with #lubricant# and moves up from [adv_thrust_slow] to [adv_thrust_hard] until he [v_come_in] him, then stays inside for a slow count of twenty before withdrawing. If the timer ends first, he holds the hard rhythm until he finishes.",
-            explicit = "{G} gets on his hands and knees and stays there. {R} [v_enter] him with #lubricant#, builds from [adv_thrust_slow] to [adv_thrust_hard] and [v_come_in] him, then stays buried for a slow count of twenty before he pulls out. If the timer ends first he keeps going at that pace until he is done.",
+            base = "{G} gets on his hands and knees. {R} [v_enter] him with #lubricant# and starts [adv_thrust_slow] and builds to [adv_thrust_hard] until he [v_come_in] him, then stays inside for a slow count of twenty before withdrawing. If the timer ends first, he holds the hard rhythm until he finishes.",
+            explicit = "{G} gets on his hands and knees and stays there. {R} [v_enter] him with #lubricant#, starts [adv_thrust_slow], builds to [adv_thrust_hard] and [v_come_in] him, then stays buried for a slow count of twenty before he pulls out. If the timer ends first he keeps going at that pace until he is done.",
             benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
             acts = setOf("bottoming"), anal = true,
             rCon = PartyConstraint.TOP, gCon = PartyConstraint.BOTTOM,

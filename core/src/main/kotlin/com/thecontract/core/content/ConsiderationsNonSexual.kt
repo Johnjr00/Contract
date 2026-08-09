@@ -31,7 +31,7 @@ internal object ConsiderationsNonSexual {
             id = "cn_mass_scalp", intensity = 1, family = F_MASSAGE, cats = setOf(MASSAGE),
             title = "Scalp massage",
             base = "{G} rubs {R+} scalp with his fingertips [adv_pressure_light], covering the whole head.",
-            explicit = "{G} takes {R+} head in both hands and rubs his scalp [adv_pressure_light] until he goes loose.",
+            explicit = "{G} takes {R+} head in both hands and rubs his scalp [adv_pressure_light] for the full timer.",
             acts = setOf("massage_scalp"),
             timers = listOf(tm("Scalp", 90))
         ),
@@ -47,7 +47,7 @@ internal object ConsiderationsNonSexual {
             id = "cn_mass_neck_shoulders", intensity = 1, family = F_MASSAGE, cats = setOf(MASSAGE),
             title = "Neck and shoulders",
             base = "{G} kneads {R+} neck and both shoulders [adv_pressure_firm], thumbs either side of the spine.",
-            explicit = "{G} [v_knead] {R+} neck and shoulders [adv_pressure_firm], thumbs either side of the spine, until the muscle gives.",
+            explicit = "{G} [v_knead] {R+} neck and shoulders [adv_pressure_firm], thumbs either side of the spine, for the full timer.",
             acts = setOf("massage_neck_shoulders"),
             timers = listOf(tm("Neck", 60), tm("Left shoulder", 45), tm("Right shoulder", 45))
         ),
@@ -87,7 +87,7 @@ internal object ConsiderationsNonSexual {
             id = "cn_mass_anus", intensity = 3, family = F_MASSAGE, cats = setOf(MASSAGE),
             title = "Opening him up from the outside",
             base = "{G} uses #lubricant# and rubs the ring of muscle around {R+} hole [adv_pressure_light], without going in.",
-            explicit = "{G} slicks {R} with #lubricant# and rubs the muscle around his hole [adv_pressure_light] until it starts to give, and still does not go in.",
+            explicit = "{G} slicks {R} with #lubricant# and rubs the muscle around his hole [adv_pressure_light] for the full timer, and still does not go in.",
             acts = setOf("massage_anus", "anal_external"),
             equip = setOf(Equipment.LUBRICANT),
             blocks = setOf(Boundary.MASSAGE_NONSEXUAL),
@@ -141,7 +141,7 @@ internal object ConsiderationsNonSexual {
             id = "cn_mass_wand", intensity = 2, family = F_MASSAGE, cats = setOf(MASSAGE),
             title = "Massage wand",
             base = "{G} runs #massage_wand# over {R+} shoulders, spine and lower back [adv_toy_pace].",
-            explicit = "{G} runs #massage_wand# over {R+} shoulders, spine and lower back [adv_toy_pace] and holds it on every spot that makes him swear.",
+            explicit = "{G} runs #massage_wand# over {R+} shoulders, spine and lower back [adv_toy_pace] and holds it for a slow count of ten on each spot he reacts hardest to.",
             acts = setOf("massage_wand"),
             equip = setOf(Equipment.MASSAGE_WAND),
             timers = listOf(tm("Shoulders", 60), tm("Spine", 45), tm("Lower back", 60))
@@ -184,7 +184,7 @@ internal object ConsiderationsNonSexual {
             id = "cn_kiss_hard", intensity = 2, family = F_KISS, cats = setOf(KISSING),
             title = "Hard kissing",
             base = "{G} takes {R+} face in both hands and kisses him [adv_kiss] without letting him pull back.",
-            explicit = "{G} takes {R+} face in both hands, kisses him [adv_kiss] and does not let him pull away until he is finished.",
+            explicit = "{G} takes {R+} face in both hands, kisses him [adv_kiss] and does not let him pull away until the timer ends.",
             acts = setOf("hard_kissing"),
             timers = listOf(tm("Kissing", 90))
         ),

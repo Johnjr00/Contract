@@ -335,10 +335,7 @@ private fun TermPanel(term: TermCard, label: String) {
         }
         if (term.timers.isNotEmpty()) {
             Spacer(Modifier.height(10.dp))
-            BasicText(
-                "Timed: " + term.timers.joinToString(" · ") { "${it.label} ${it.totalSeconds}s" },
-                style = TvType.muted
-            )
+            BasicText(timingLine(term.timers), style = TvType.muted)
         }
         if (term.benefitExplanation.isNotBlank()) {
             Spacer(Modifier.height(14.dp))
@@ -355,6 +352,10 @@ private fun ConsiderationPanel(consideration: ConsiderationCard) {
         BasicText(consideration.title, style = TvType.title)
         Spacer(Modifier.height(12.dp))
         BasicText(consideration.instruction, style = TvType.body)
+        if (consideration.timers.isNotEmpty()) {
+            Spacer(Modifier.height(10.dp))
+            BasicText(timingLine(consideration.timers), style = TvType.muted)
+        }
         Spacer(Modifier.height(12.dp))
         BasicText(
             if (consideration.mutual) {
@@ -492,6 +493,17 @@ private val EARNING_PHASES = setOf(
     GamePhase.CONSIDERATION_PUBLIC_EXECUTION,
     GamePhase.WAITING_FOR_SIGNATURE_CONFIRMATION
 )
+
+/**
+ * "Timed: Left ear 0:45 · Right ear 0:45 · 1:30 in total". Shown wherever a term or a
+ * consideration is offered, because choosing between two actions without knowing whether one
+ * runs for forty-five seconds or four minutes is choosing blind.
+ */
+private fun timingLine(timers: List<TimerView>): String {
+    val parts = timers.joinToString(" · ") { "${it.label} ${formatClock(it.totalSeconds * 1000L)}" }
+    val total = timers.sumOf { it.totalSeconds }
+    return "Timed: " + parts + if (timers.size > 1) " · ${formatClock(total * 1000L)} in total" else ""
+}
 
 /** The screens whose whole purpose is getting a phone connected. */
 private val PAIRING_PHASES = setOf(

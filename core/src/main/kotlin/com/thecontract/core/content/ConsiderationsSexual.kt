@@ -143,15 +143,15 @@ internal object ConsiderationsSexual {
             id = "cs_rim_over_edge", intensity = 4, family = F_SEX, cats = setOf(RIMMING, ANAL),
             title = "Over the edge",
             base = "{R} bends over #sturdy_chair# and {G} kneels behind him and [v_rim] him from there.",
-            explicit = "{R} bends over #sturdy_chair# and holds on while {G} kneels behind him and [v_rim] him until his legs go.",
+            explicit = "{R} bends over #sturdy_chair# and holds on while {G} kneels behind him and [v_rim] him for the full timer.",
             acts = setOf("rimming"), equip = setOf(Equipment.STURDY_CHAIR),
             timers = listOf(tm("Over the edge", 150))
         ),
         c(
             id = "cs_rim_reciprocal", intensity = 4, family = F_SEX, cats = setOf(RIMMING, ANAL),
             title = "Rimming each other",
-            base = "{G} and {R} get into position and [v_rim] each other at the same time for the full time.",
-            explicit = "{G} and {R} get into position and [v_rim] each other at once, and neither one stops early.",
+            base = "{G} and {R} get into position and use their tongues on each other at the same time for the full time.",
+            explicit = "{G} and {R} get into position and use their tongues on each other at once, and neither one stops early.",
             acts = setOf("rimming"), mutual = true, timers = listOf(tm("Both at once", 180))
         ),
 
@@ -193,8 +193,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_hand_slow_tease", intensity = 3, family = F_SEX, cats = setOf(HANDS),
             title = "Slow tease",
-            base = "{G} [v_tease] {R} with the lightest possible touch and deliberately never gives him enough.",
-            explicit = "{G} [v_tease] {R} with the lightest touch he can manage and deliberately never gives him anything like enough.",
+            base = "{G} [v_tease] {R} with the lightest possible touch and never once strokes him hard enough to get him off.",
+            explicit = "{G} [v_tease] {R} with the lightest touch he can manage and never once grips him hard enough to get him off.",
             acts = setOf("massage_groin"), blocks = setOf(Boundary.MASSAGE_NONSEXUAL),
             timers = listOf(tm("Teasing", 150))
         ),
@@ -255,7 +255,7 @@ internal object ConsiderationsSexual {
             id = "cs_ext_grind", intensity = 4, family = F_SEX, cats = setOf(ANAL),
             title = "Right up against him",
             base = "{G} grinds himself against {R+} [n_hole] with #lubricant# and does not go in at all.",
-            explicit = "{G} slicks up and grinds himself against {R+} [n_hole] without once pushing in, until {R} is begging.",
+            explicit = "{G} slicks up and grinds himself against {R+} [n_hole] without once pushing in, for the full timer.",
             acts = setOf("anal_external"), equip = setOf(Equipment.LUBRICANT),
             erection = PartyRef.GIVER, pCon = PartyConstraint.TOP,
             timers = listOf(tm("Against him", 150)),
@@ -358,15 +358,15 @@ internal object ConsiderationsSexual {
             id = "cs_fing_one", intensity = 3, family = F_SEX, cats = setOf(ANAL),
             title = "One finger",
             base = "{G} slicks up with #lubricant# and [v_finger] {R} with one finger for the whole time.",
-            explicit = "{G} slicks up with #lubricant# and [v_finger] {R} with one finger only, and does not give him a second.",
+            explicit = "{G} slicks up with #lubricant# and [v_finger] {R} with one finger only, and does not add a second at any point.",
             acts = setOf("fingering"), anal = true, equip = setOf(Equipment.LUBRICANT),
             timers = listOf(tm("One finger", 120))
         ),
         c(
             id = "cs_fing_two", intensity = 4, family = F_SEX, cats = setOf(ANAL),
             title = "Two fingers",
-            base = "{G} builds up to two fingers with #lubricant# and [v_finger_deep] {R} until he is open.",
-            explicit = "{G} builds up to two fingers with #lubricant# and [v_finger_deep] {R} until he is loose and pushing back.",
+            base = "{G} builds up to two fingers with #lubricant# and [v_finger_deep] {R} for the full timer.",
+            explicit = "{G} builds up to two fingers with #lubricant# and [v_finger_deep] {R} for the full timer.",
             acts = setOf("fingering"), anal = true, equip = setOf(Equipment.LUBRICANT),
             timers = listOf(tm("One finger", 60), tm("Two fingers", 120))
         ),
@@ -612,7 +612,7 @@ internal object ConsiderationsSexual {
             id = "cs_imp_hand", intensity = 3, family = F_SEX, cats = setOf(IMPACT),
             title = "Spanked by hand",
             base = "{G} [v_spank] {R} by hand, starting light and building over the timer.",
-            explicit = "{G} [v_spank] {R+} ass by hand, starting light and building until it is hot.",
+            explicit = "{G} [v_spank] {R+} ass by hand, starting light and building over the full timer.",
             acts = setOf("spanking"), blocks = setOf(Boundary.NO_PAIN),
             timers = listOf(tm("Warm-up", 60), tm("Building", 60))
         ),

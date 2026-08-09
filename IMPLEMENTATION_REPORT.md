@@ -12,15 +12,15 @@ Both APKs were built and verified.
 | --- | --- |
 | Debug APK | `app/build/outputs/apk/debug/app-debug.apk` |
 | | application id `com.thecontract.tv.debug` |
-| | SHA-256 `0597e6ca19a10067a512fa243d7f4c0fbc19df5a9dd187de65e7268d041edb15` |
+| | SHA-256 `d1211a2b1085a17aeb369b8ed4e7329eb2249aa94071f7c3f1ef2d38566ec595` |
 | Release APK | `app/build/outputs/apk/release/app-release.apk` |
 | | application id `com.thecontract.tv`, minified and resource-shrunk by R8 |
-| | SHA-256 `02f6a941e6f00f074216ba8f34275b157b700de299c2028d34e05bee1f88a055` |
+| | SHA-256 `07cc88aa6b8e30586076e5443065f378207d23cf9204ed6b1d0370eb958627b8` |
 | Release signature | APK Signature Scheme v2, verified with `apksigner verify` |
 | | signer `CN=The Contract, OU=TheContract, O=TheContract, L=Unknown, ST=Unknown, C=US` |
 | | certificate SHA-256 `d460e29876eda8d73e6b1af100f78942b26ac8ab28d33aaa7f42ca605bef25e0` |
 
-These are the hashes as of the on-device playthrough in section 4k below. The signing cert is unchanged from the previous fix (same keystore).
+These are the hashes as of the vagueness sweep in section 4l below. The APK now carries a real versionCode (commit count), so successive builds differ. The signing cert is unchanged from the previous fix (same keystore).
 
 Toolchain actually used: AGP 8.7.3, Kotlin 2.2.21, KSP 2.2.21-2.0.4, Compose BOM 2024.10.01,
 Room 2.6.1, Android SDK Platform 35, Build-Tools 35.0.0, Gradle 8.14.3, JDK 21 emitting Java 17
@@ -934,6 +934,62 @@ launch is fine. And the driver's own clicks were being lost until it stopped
 re-clicking timer controls and started pressing buttons inside a single page
 evaluation — the phone rebuilds its DOM on a state change, which is correct
 behaviour and not something a human thumb races.
+
+---
+
+### 4l. Every build shipped as versionCode 1, and a sweep for judgement calls
+
+**The launcher tile went blank again.** The artwork was not the problem: the
+vectors are byte-identical to the build where it was verified, the packaged
+`res/FL.xml` is a full 10 KB rather than a shrunk stub, and on the emulator
+the banner draws correctly in both the apps drawer and the home favourites
+row. The problem was `versionCode = 1`, hard-coded, on every build shipped so
+far. A launcher caches an app's banner, icon and label keyed by package and
+re-reads them when the version changes; half a dozen different APKs all
+claiming to be version 1 left the television showing whichever artwork it saw
+first, which was the original placeholder — dark bars on near-black, i.e. a
+blank tile. `versionCode` now derives from the commit count and `versionName`
+follows it, so no two builds can ever again claim to be the same version.
+
+**Vague completion conditions, swept rather than picked off.** Three more were
+reported by hand — "until he swears at him for it", "until he goes loose",
+"until the muscle stops fighting him" — so the whole library was catalogued by
+its `until` clauses instead. Twenty-seven were judgement calls about how the
+other man was feeling; all are now anchored to the timer, a count, or a spoken
+cue. `RenderSweepTest` now fails any instruction that ends on anything except
+a timer, a count, an orgasm, a spoken instruction or a plain physical fact.
+
+**Then every one of the 385 rendered instructions was read.** That turned up
+fifteen more defects, most of them invisible in the source:
+
+* `{G} and {R} [v_rim] each other` rendered as "Marcus and Dan **eats** each
+  other" — the lexicon only knows the third person singular, so four
+  reciprocal actions had a singular verb on two subjects.
+* "using it to set how deep he goes on every stroke, **all the wants him**" —
+  a garbled fragment.
+* `from [adv_thrust_slow] to [adv_thrust_hard]` gave "from **in** long, deep
+  strokes to **in** brutal, fast strokes", in three places.
+* "clips the leash onto **Dan's the collar**", from a possessive in front of an
+  equipment name that already carries its own article.
+* "has him **swallows** him", twice — a conjugated verb after "has him".
+* "kneads his shoulders and chest **over** with nails and teeth"; "Dan is
+  **blindfolded with the blindfold**"; "agrees to being his property for the
+  night **for the rest of the night**".
+* Vague: "until he is done with him", "until he is finished", "every spot that
+  makes him swear" (twice), "past the point where he starts pushing his chest
+  up", "however long it takes", "does not give him a second", and two
+  roleplay terms that asked the players to "run the capture scene properly"
+  without saying what that is.
+
+Three more rules went into the sweep for the classes that can recur: a plural
+subject with a singular verb, a possessive followed by "the", and a conjugated
+verb after "has him". The sweep flags zero across all four registers.
+
+**Consideration options now show their timing.** Choosing between actions
+without knowing whether one runs forty-five seconds or four minutes is
+choosing blind. Each option carries `Timed: Mouth 1:00 · Neck 1:00 · Chest
+1:00 · 3:00 in total`, on the phone and on the television, on the selection
+screen as well as during it.
 
 ---
 

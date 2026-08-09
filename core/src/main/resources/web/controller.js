@@ -469,16 +469,22 @@
     (t.amendments || []).forEach(function (a) { card.appendChild(el("div", "notice", "Amendment: " + a)); });
 
     if (t.timers && t.timers.length) {
-      var tl = el("p", "meta", "Timed: " + t.timers.map(function (x) {
-        return x.label + " " + fmtClock(x.totalSeconds * 1000);
-      }).join(" · "));
-      card.appendChild(tl);
+      card.appendChild(el("p", "meta", timingLine(t.timers)));
     }
 
     if (t.benefitExplanation) {
       card.appendChild(el("p", "meta", t.benefitExplanation));
     }
     return card;
+  }
+
+  /** "Timed: Left ear 0:45 · Right ear 0:45 · 1:30 in total" */
+  function timingLine(timers) {
+    var parts = timers.map(function (t) { return t.label + " " + fmtClock(t.totalSeconds * 1000); });
+    var total = timers.reduce(function (a, t) { return a + t.totalSeconds; }, 0);
+    var line = "Timed: " + parts.join(" · ");
+    if (timers.length > 1) line += " · " + fmtClock(total * 1000) + " in total";
+    return line;
   }
 
   function renderConsideration(c, selectable) {
@@ -490,6 +496,12 @@
       var eq = el("div");
       c.equipment.forEach(function (e) { eq.appendChild(el("span", "tag", e)); });
       card.appendChild(eq);
+    }
+    // How long it runs, on the selection screen as well as during it: choosing between
+    // consideration actions without knowing whether one is forty-five seconds or four minutes
+    // is choosing blind.
+    if (c.timers && c.timers.length) {
+      card.appendChild(el("p", "meta", timingLine(c.timers)));
     }
     var who = c.mutual
       ? "Both of you perform this and both of you confirm."

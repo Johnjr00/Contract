@@ -44,6 +44,38 @@ class RenderSweepTest {
         RegexOption.IGNORE_CASE
     )
 
+    /**
+     * An instruction may only end on something both men can point at: the timer, a count, an
+     * orgasm, or the other one saying so. "until the muscle stops fighting him", "until he goes
+     * loose", "until he swears at him for it" are all judgement calls dressed up as instructions,
+     * and every one of them was written before anybody noticed the pattern.
+     */
+    private val OBJECTIVE_UNTIL = Regex(
+        // Orgasm in all four registers, a spoken cue, a timer, a count, or a plain physical
+        // fact somebody can see. Anything else is one man guessing how the other one feels.
+        "timer|finish|\\bcomes\\b|unloads|empties|is done|\\bdoes\\b|" +
+            "tells him|is told|\\bsays\\b|is spoken to|permission|" +
+            "\\bmoved\\b|all the way in|count of|\\bhurts\\b|\\bhard\\b|slick from",
+        RegexOption.IGNORE_CASE
+    )
+
+    /**
+     * A reciprocal instruction takes a plural verb. The lexicon only knows the third person
+     * singular, so "{G} and {R} [v_rim] each other" came out as "Marcus and Dan eats each other".
+     */
+    private val COMPOUND_SINGULAR = Regex("\\b(?:Marcus|Dan) and (?:Marcus|Dan)\\b[^.]*?\\b\\w+s each other\\b")
+
+    /** "Dan's the collar", from a possessive token in front of an equipment name. */
+    private val DOUBLE_DETERMINER = Regex("\\b\\w+'s the \\b")
+
+    /** "has him swallows him": the verb after "has him" has to be bare. */
+    private val HAS_HIM_CONJUGATED = Regex("\\bhas him \\w+s\\b")
+
+    private fun vagueUntil(text: String): String? =
+        Regex("until ([^.,;]{3,70})").findAll(text)
+            .map { it.groupValues[1].trim() }
+            .firstOrNull { !OBJECTIVE_UNTIL.containsMatchIn(it) }
+
     private fun ctx(explicitness: Explicitness) = GameContext(
         SharedSetup(
             player1 = PlayerSetup("Marcus", Role.DOMINANT),
@@ -79,6 +111,10 @@ class RenderSweepTest {
                     if (!text.trimEnd().endsWith(".")) add("no full stop")
                     if (PLURAL_MISMATCH.containsMatchIn(text)) add("singular noun after one of/both of")
                     if (CONJUGATED_AFTER_TO.containsMatchIn(text)) add("conjugated verb after \"to\"")
+                    vagueUntil(text)?.let { add("ends on a judgement call: \"until $it\"") }
+                    if (COMPOUND_SINGULAR.containsMatchIn(text)) add("singular verb, two subjects")
+                    if (DOUBLE_DETERMINER.containsMatchIn(text)) add("possessive followed by \"the\"")
+                    if (HAS_HIM_CONJUGATED.containsMatchIn(text)) add("conjugated verb after \"has him\"")
                 }
                 if (problems.isNotEmpty()) {
                     flagged++
@@ -94,6 +130,10 @@ class RenderSweepTest {
                     if (!text.trimEnd().endsWith(".")) add("no full stop")
                     if (PLURAL_MISMATCH.containsMatchIn(text)) add("singular noun after one of/both of")
                     if (CONJUGATED_AFTER_TO.containsMatchIn(text)) add("conjugated verb after \"to\"")
+                    vagueUntil(text)?.let { add("ends on a judgement call: \"until $it\"") }
+                    if (COMPOUND_SINGULAR.containsMatchIn(text)) add("singular verb, two subjects")
+                    if (DOUBLE_DETERMINER.containsMatchIn(text)) add("possessive followed by \"the\"")
+                    if (HAS_HIM_CONJUGATED.containsMatchIn(text)) add("conjugated verb after \"has him\"")
                 }
                 if (problems.isNotEmpty()) {
                     flagged++

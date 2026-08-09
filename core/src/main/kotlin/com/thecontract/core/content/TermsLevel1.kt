@@ -27,7 +27,7 @@ internal object TermsLevel1 {
             id = "l1_massage_neck_shoulders", level = 1, cats = setOf(MASSAGE),
             title = "Neck and shoulders",
             base = "{R} lies face down. {G} [v_massage] {R+} neck and shoulders [adv_pressure_firm], thumbs either side of the spine, moving from the base of the skull out to the point of each shoulder.",
-            explicit = "{R} goes face down and stays there. {G} straddles his hips and [v_knead] his neck and shoulders [adv_pressure_firm], thumbs either side of the spine, from the base of the skull out to each shoulder, until the muscle stops fighting him.",
+            explicit = "{R} goes face down and stays there. {G} straddles his hips and [v_knead] his neck and shoulders [adv_pressure_firm], thumbs either side of the spine, from the base of the skull out to each shoulder, for the full timer.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_neck_shoulders"),
             timers = listOf(tm("Neck", 60), tm("Left shoulder", 45), tm("Right shoulder", 45))
@@ -45,7 +45,7 @@ internal object TermsLevel1 {
             id = "l1_massage_lower_back", level = 1, cats = setOf(MASSAGE),
             title = "Lower back",
             base = "{G} [v_massage] {R+} lower back [adv_pressure_firm] with the heels of both hands, moving from the waist down to the top of the buttocks.",
-            explicit = "{G} plants the heels of both hands on {R+} lower back and [v_knead] it [adv_pressure_deep], waist down to the top of his ass, until he is loose enough to make noise about it.",
+            explicit = "{G} plants the heels of both hands on {R+} lower back and [v_knead] it [adv_pressure_deep], waist down to the top of his ass, for the full timer.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_lower_back"),
             timers = listOf(tm("Left side of the lower back", 60), tm("Right side of the lower back", 60))
@@ -72,7 +72,7 @@ internal object TermsLevel1 {
             id = "l1_massage_arms_hands", level = 1, cats = setOf(MASSAGE),
             title = "Arms and hands",
             base = "{G} [v_massage] each of {R+} arms from shoulder to wrist, then kneads the palm and every finger of each hand.",
-            explicit = "{G} takes each of {R+} arms in turn, kneads it from shoulder to wrist [adv_pressure_firm], then opens the palm and pulls on every finger until the joints give.",
+            explicit = "{G} takes each of {R+} arms in turn, kneads it from shoulder to wrist [adv_pressure_firm], then opens the palm and pulls on every finger in turn.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_arms_hands"),
             timers = listOf(tm("Left arm", 45), tm("Left hand", 30), tm("Right arm", 45), tm("Right hand", 30))
@@ -81,7 +81,7 @@ internal object TermsLevel1 {
             id = "l1_massage_calves_feet", level = 1, cats = setOf(MASSAGE),
             title = "Calves and feet",
             base = "{G} [v_massage] each of {R+} calves [adv_pressure_firm], then presses the arch and heel of each foot with both thumbs.",
-            explicit = "{G} kneads each of {R+} calves [adv_pressure_deep], then digs both thumbs into the arch and heel of each foot until he swears at him for it.",
+            explicit = "{G} kneads each of {R+} calves [adv_pressure_deep], then digs both thumbs into the arch and heel of each foot for the rest of the timer.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_calves_feet"),
             blocks = setOf(Boundary.NO_FOOT_PLAY),
@@ -100,7 +100,7 @@ internal object TermsLevel1 {
             id = "l1_massage_inner_thighs", level = 1, cats = setOf(MASSAGE),
             title = "Inner thighs",
             base = "{R} lies on his back with his legs apart. {G} [v_massage] each inner thigh from the knee up, stopping short of the groin each time.",
-            explicit = "{R} lies on his back with his legs open. {G} kneads each inner thigh from the knee up [adv_pressure_firm], stopping just short of his groin every single time, until he is pushing his hips up for more.",
+            explicit = "{R} lies on his back with his legs open. {G} kneads each inner thigh from the knee up [adv_pressure_firm], stopping just short of his groin every single time, for the full timer.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_inner_thighs"),
             timers = listOf(tm("Left inner thigh", 60), tm("Right inner thigh", 60))
@@ -138,7 +138,7 @@ internal object TermsLevel1 {
             id = "l1_massage_wand_back", level = 1, cats = setOf(MASSAGE),
             title = "Wand on the back",
             base = "{G} runs #massage_wand# over {R+} shoulders, spine and lower back [adv_toy_pace], holding it in place on each knot for a slow count of ten.",
-            explicit = "{G} runs #massage_wand# over {R+} shoulders, down his spine and into his lower back [adv_toy_pace], and holds it hard against every spot that makes him swear.",
+            explicit = "{G} runs #massage_wand# over {R+} shoulders, down his spine and into his lower back [adv_toy_pace], and holds it hard for a slow count of ten on each spot he reacts hardest to.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_wand", "massage_general"),
             equip = setOf(Equipment.MASSAGE_WAND),
@@ -148,7 +148,7 @@ internal object TermsLevel1 {
             id = "l1_massage_light_full", level = 1, cats = setOf(MASSAGE, SENSORY),
             title = "Light-pressure full body",
             base = "{G} kneads {R+} whole body [adv_pressure_light] with his fingertips only, from shoulders to feet, never pressing hard.",
-            explicit = "{G} covers {R+} whole body with fingertips only [adv_pressure_light], shoulders down to his feet, deliberately too light, until he is asking for more pressure.",
+            explicit = "{G} covers {R+} whole body with fingertips only [adv_pressure_light], shoulders down to his feet, deliberately too light, for the full timer.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_light", "massage_general"),
             timers = listOf(tm("Back and shoulders", 60), tm("Arms", 45), tm("Legs", 60))
@@ -156,8 +156,8 @@ internal object TermsLevel1 {
         t(
             id = "l1_massage_deep_back", level = 1, cats = setOf(MASSAGE),
             title = "Deep-pressure back",
-            base = "{G} uses forearms and elbows to knead {R+} back [adv_pressure_deep], holding on each tight spot until it releases.",
-            explicit = "{G} puts his forearms and elbows into {R+} back [adv_pressure_deep] and leans on every knot until it lets go, whatever noise he makes about it.",
+            base = "{G} uses forearms and elbows to knead {R+} back [adv_pressure_deep], holding on each tight spot for a slow count of ten.",
+            explicit = "{G} puts his forearms and elbows into {R+} back [adv_pressure_deep] and leans on every knot for a slow count of ten, whatever noise he makes about it.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_deep", "massage_upper_back"),
             timers = listOf(tm("Left side of the back", 75), tm("Right side of the back", 75))
@@ -186,7 +186,7 @@ internal object TermsLevel1 {
             id = "l1_kiss_hard", level = 1, cats = setOf(KISSING),
             title = "Hard kissing",
             base = "{G} takes {R+} face in both hands and kisses him [adv_kiss], not letting him pull back.",
-            explicit = "{G} takes {R+} face in both hands, kisses him [adv_kiss] and does not let him pull back until he is done with him.",
+            explicit = "{G} takes {R+} face in both hands, kisses him [adv_kiss] and does not let him pull back until the timer ends.",
             benefit = RECEIVER, type = BenefitType.KISS_RECIPIENT,
             acts = setOf("hard_kissing"),
             timers = listOf(tm("Kissing", 90))
@@ -297,7 +297,7 @@ internal object TermsLevel1 {
             id = "l1_ear_moaning", level = 1, cats = setOf(EAR_PLAY, LANGUAGE),
             title = "Moaning into his ear",
             base = "{G} presses his mouth to {R+} ear and [tone_moan] into it while his hands stay on {R+} chest.",
-            explicit = "{G} puts his mouth against {R+} ear and [tone_moan] straight into it, hands flat on his chest, and keeps going until {R} is squirming under him.",
+            explicit = "{G} puts his mouth against {R+} ear and [tone_moan] straight into it, hands flat on his chest, and keeps going for the full timer.",
             benefit = RECEIVER, type = BenefitType.EAR_PLAY_RECIPIENT,
             acts = setOf("ear_play"),
             timers = listOf(tm("Moaning into the ear", 60))
@@ -344,7 +344,7 @@ internal object TermsLevel1 {
             id = "l1_worship_nipples", level = 1, cats = setOf(BODY_WORSHIP),
             title = "Nipples, sucked and pinched",
             base = "{G} sucks and pinches {R+} nipples [adv_pace], one at a time and then both.",
-            explicit = "{G} sucks and pinches {R+} nipples [adv_pace] with fingers and mouth, one at a time and then both together, and keeps going past the point where he starts pushing his chest up.",
+            explicit = "{G} sucks and pinches {R+} nipples [adv_pace] with fingers and mouth, one at a time and then both together, and keeps going for the full timer.",
             benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
             acts = setOf("nipple_stimulation"),
             timers = listOf(tm("Left nipple", 45), tm("Right nipple", 45), tm("Both together", 45))
@@ -382,7 +382,7 @@ internal object TermsLevel1 {
             id = "l1_sensory_feather", level = 1, cats = setOf(SENSORY),
             title = "Feather over the body",
             base = "{R} lies still with his eyes closed. {G} runs #feather# over his chest, stomach and inner thighs [adv_slow].",
-            explicit = "{R} lies still with his eyes shut and does not move. {G} runs #feather# over his chest, stomach and inner thighs [adv_slow] until holding still is genuinely hard.",
+            explicit = "{R} lies still with his eyes shut and does not move. {G} runs #feather# over his chest, stomach and inner thighs [adv_slow] for the full timer.",
             benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
             acts = setOf("body_worship"),
             equip = setOf(Equipment.FEATHER),

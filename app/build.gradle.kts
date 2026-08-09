@@ -19,6 +19,20 @@ val keystoreProperties = Properties().apply {
 }
 val hasReleaseSigning = keystoreProperties.getProperty("storeFile") != null
 
+/**
+ * Commits on the current branch. Falls back to 1 when git is unavailable — a source archive
+ * still builds, it simply cannot tell one build from another.
+ */
+val buildNumber: Int = runCatching {
+    val p = ProcessBuilder("git", "rev-list", "--count", "HEAD")
+        .directory(rootProject.projectDir)
+        .redirectErrorStream(true)
+        .start()
+    val out = p.inputStream.bufferedReader().readText().trim()
+    p.waitFor()
+    out.toInt()
+}.getOrDefault(1)
+
 android {
     namespace = "com.thecontract.tv"
     compileSdk = 35
@@ -29,8 +43,13 @@ android {
         // and is the level at which notification channels and foreground services exist.
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        // Every build must carry a higher versionCode than the one before it. A launcher caches
+        // an app's banner, icon and label keyed by package and only re-reads them when the
+        // version changes, so shipping several different builds all as versionCode 1 leaves a
+        // television showing the artwork from whichever one it happened to see first. Commit
+        // count rises monotonically and is reproducible from the source tree.
+        versionCode = buildNumber
+        versionName = "1.0.$buildNumber"
         resourceConfigurations += listOf("en")
     }
 
