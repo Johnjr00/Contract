@@ -12,15 +12,15 @@ Both APKs were built and verified.
 | --- | --- |
 | Debug APK | `app/build/outputs/apk/debug/app-debug.apk` |
 | | application id `com.thecontract.tv.debug` |
-| | SHA-256 `864b7f345eb9f177f90db0069d0ea45171efea027dcb89b368874d51d664aea8` |
+| | SHA-256 `35457f8b36da83bc599bcd5fbec3f0623a07646202a75421de3d6a5fac7e2b8c` |
 | Release APK | `app/build/outputs/apk/release/app-release.apk` |
 | | application id `com.thecontract.tv`, minified and resource-shrunk by R8 |
-| | SHA-256 `068cc6eecc95bbd02593e95478842f23d33d97e315b8f0cee7a2e3e1759ade10` |
+| | SHA-256 `61ca8c1341542a71d8e3e579be51d7701ad49cb32199e21383120f814167b69d` |
 | Release signature | APK Signature Scheme v2, verified with `apksigner verify` |
 | | signer `CN=The Contract, OU=TheContract, O=TheContract, L=Unknown, ST=Unknown, C=US` |
 | | certificate SHA-256 `d460e29876eda8d73e6b1af100f78942b26ac8ab28d33aaa7f42ca605bef25e0` |
 
-These are the hashes as of the density-independent layout in section 4g below. The signing cert is unchanged from the previous fix (same keystore).
+These are the hashes as of the launcher artwork in section 4h below. The signing cert is unchanged from the previous fix (same keystore).
 
 Toolchain actually used: AGP 8.7.3, Kotlin 2.2.21, KSP 2.2.21-2.0.4, Compose BOM 2024.10.01,
 Room 2.6.1, Android SDK Platform 35, Build-Tools 35.0.0, Gradle 8.14.3, JDK 21 emitting Java 17
@@ -731,6 +731,45 @@ television devices also do, rendering the UI at 1080p and upscaling in
 hardware — and a wiped 4K emulator was too slow to drive in this CPU-only
 sandbox. The scale is derived from the framebuffer, so 2160p is the same
 arithmetic with a factor of four, but it has not been rendered on one.
+
+---
+
+### 4h. The launcher icon and television banner
+
+The app shipped with placeholder artwork: four thin bars on a near-black
+field, no name. Android TV shows a leanback app's **banner**, not its icon, so
+that is what sat in the launcher's Apps row — and beside Play, Settings and
+YouTube it read as an empty tile.
+
+Both assets were redrawn around one mark: a sheet of printed terms with a
+copper signature across it, which is the game in a picture and is discreet
+enough for a television anyone can walk past.
+
+* **Banner** (`drawable/tv_banner.xml`, 320 x 180): the mark on the left, and
+  the wordmark — "THE" tracked out in copper above "CONTRACT" in the page
+  colour, over a copper rule — on the right, on a warm dark gradient a shade
+  above the launcher's own background so the tile has an edge.
+* **Launcher icon** (`drawable/ic_launcher_foreground.xml` over a new
+  `ic_launcher_background.xml` gradient): the mark alone. Adaptive icons only
+  guarantee the central 72dp of their 108dp square and a circular mask
+  inscribes that, so the mark is scaled to put its far corners at 35.2 of the
+  36 units available. It was rendered at 192, 96, 64 and 48 px under both the
+  rounded-square and circular masks and stays legible and uncropped at all of
+  them.
+
+Both are **vector** drawables, for the same reason section 4g gives: one asset
+that is crisp on a 1080p set and a 2160p one, with no density buckets to get
+wrong. The wordmark is real type — glyph outlines lifted from DejaVu Serif
+Bold with fontTools and written into the path data, so nothing depends on a
+font being present on the device. DejaVu's licence (Bitstream Vera derived)
+permits this. `tools/make_icons.py` regenerates all three assets.
+
+Verified in the actual Android TV launcher: `aapt2 dump badging` reports the
+banner on both the application and the leanback activity, and after clearing
+the launcher's cached artwork the Apps row draws the new tile correctly
+between Settings and YouTube. The icon was verified by rendering the shipped
+vector rather than on-device, since the launcher never shows it for a leanback
+app.
 
 ---
 
