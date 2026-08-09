@@ -102,7 +102,7 @@ class PlaythroughsTest {
                 explicitness = Explicitness.EROTIC,
                 finaleFormat = FinaleFormat.UNINTERRUPTED,
                 stopWord = "stop",
-                defaultMaybeCondition = MaybeCondition.PAUSE_MIDWAY,
+                defaultMaybeCondition = MaybeCondition.UNDER_TWO_MINUTES,
                 boundaries = setOf(Boundary.NO_MARKS),
                 equipment = setOf(Equipment.MASSAGE_OIL, Equipment.LUBRICANT, Equipment.TOWELS, Equipment.MUSIC)
             ),
@@ -316,7 +316,7 @@ class PlaythroughsTest {
                 explicitness = Explicitness.EROTIC,
                 finaleFormat = FinaleFormat.THREE_ORDERS,
                 stopWord = "stop",
-                defaultMaybeCondition = MaybeCondition.ASK_AGAIN,
+                defaultMaybeCondition = MaybeCondition.GENTLER,
                 boundaries = setOf(
                     Boundary.NO_ANAL_ACTIVITY, Boundary.NO_ANAL_PENETRATION, Boundary.NO_TOYS,
                     Boundary.NO_PAIN, Boundary.NO_ROUGH_SEX, Boundary.NO_DEGRADATION,

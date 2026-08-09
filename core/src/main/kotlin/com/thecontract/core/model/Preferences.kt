@@ -196,7 +196,6 @@ object PreferenceLibrary {
  */
 @Serializable
 enum class MaybeCondition(val id: String, val label: String) {
-    ASK_AGAIN("ask_again", "Ask again immediately before starting"),
     GENTLER("gentler", "Gentler version"),
     UNDER_TWO_MINUTES("under_two_minutes", "Keep it under two minutes"),
     ROLES_REVERSED("roles_reversed", "Roles reversed"),
@@ -204,12 +203,11 @@ enum class MaybeCondition(val id: String, val label: String) {
     WITHOUT_TOY("without_toy", "Without a toy"),
     WITHOUT_RESTRAINT("without_restraint", "Without restraint"),
     SAVE_FOR_FINALE("save_for_finale", "Save it for the finale"),
-    PAUSE_MIDWAY("pause_midway", "Pause midway for a direct check-in"),
     STOP_BEFORE_ORGASM("stop_before_orgasm", "Stop before orgasm"),
     MASSAGE_FIRST("massage_first", "Begin with at least five minutes of massage");
 
     companion object {
-        /** Accepts either the wire id ("ask_again") or the enum name ("ASK_AGAIN"). */
+        /** Accepts either the wire id ("gentler") or the enum name ("GENTLER"). */
         fun byId(id: String): MaybeCondition? =
             entries.firstOrNull { it.id == id || it.name == id }
     }
@@ -225,8 +223,6 @@ enum class Amendment(val id: String, val label: String) {
     NO_TOYS("no_toys", "No toys"),
     NO_RESTRAINT("no_restraint", "No restraint"),
     STOP_BEFORE_ORGASM("stop_before_orgasm", "Stop before orgasm"),
-    MIDPOINT_CHECK("midpoint_check", "Midpoint check"),
-    ASK_AGAIN("ask_again", "Ask again immediately before execution"),
     SAVE_FOR_FINALE("save_for_finale", "Save for finale"),
     TRADE_ONLY("trade_only", "Trade only");
 

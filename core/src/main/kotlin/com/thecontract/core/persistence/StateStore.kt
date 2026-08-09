@@ -39,6 +39,11 @@ internal val StoreJson: Json = Json {
     encodeDefaults = true
     ignoreUnknownKeys = true
     explicitNulls = false
+    // A contract saved by an older build can name a setting this build no longer has — the
+    // ask-again and midway check-in conditions, for instance. Without this the whole record
+    // fails to decode and the contract silently vanishes from the saved list; with it, the
+    // property falls back to its default and the rest of the contract survives.
+    coerceInputValues = true
 }
 
 /** Non-durable store used by tests that do not exercise restart behaviour. */

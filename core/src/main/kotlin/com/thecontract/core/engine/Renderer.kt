@@ -22,7 +22,6 @@ import com.thecontract.core.style.StyleEngine
  */
 object Renderer {
 
-    private const val CHECK_IN_SECONDS = 20
     private const val MASSAGE_FIRST_SECONDS = 300
 
     fun context(ctx: GameContext, binding: PartyBinding): RenderContext = RenderContext(
@@ -118,13 +117,6 @@ object Renderer {
         return scaleTimers(timers, capSeconds.toDouble() / total, 10)
     }
 
-    private fun insertCheckIn(timers: List<RenderedTimer>, ownerId: String): List<RenderedTimer> {
-        if (timers.isEmpty()) return timers
-        val mid = timers.size / 2
-        val checkIn = RenderedTimer("$ownerId#check", "Check-in", CHECK_IN_SECONDS)
-        return timers.take(mid) + checkIn + timers.drop(mid)
-    }
-
     private fun dropEquipment(
         rendered: RenderedTerm,
         predicate: (Equipment) -> Boolean
@@ -138,13 +130,6 @@ object Renderer {
         val g = rc.giverName
         val recv = rc.receiverName
         return when (condition) {
-            MaybeCondition.ASK_AGAIN -> r.copy(
-                instruction = StyleEngine.tidy(
-                    "Before this begins, $g asks $recv one more time and waits for a clear yes. " + r.instruction
-                ),
-                conditions = r.conditions + label
-            )
-
             // Written as an override, because it lands on instructions that have already named a
             // pressure: "with hard pressure … lighter pressure" reads as a contradiction unless
             // the second sentence says plainly that it replaces the first.
@@ -186,8 +171,7 @@ object Renderer {
 
             MaybeCondition.WITHOUT_RESTRAINT -> r.copy(
                 instruction = StyleEngine.tidy(
-                    r.instruction + " Nothing is used to hold $recv down — he holds the position himself instead, " +
-                        "and $g checks he still is."
+                    r.instruction + " Nothing is used to hold $recv down — he holds the position himself instead."
                 ),
                 equipmentUsed = dropEquipment(r) {
                     it in setOf(Equipment.CUFFS, Equipment.ROPE, Equipment.SPREADER_BAR, Equipment.LEASH)
@@ -197,15 +181,6 @@ object Renderer {
 
             MaybeCondition.SAVE_FOR_FINALE -> r.copy(
                 deferToEnd = true,
-                conditions = r.conditions + label
-            )
-
-            MaybeCondition.PAUSE_MIDWAY -> r.copy(
-                instruction = StyleEngine.tidy(
-                    r.instruction + " Halfway through, $g stops and asks $recv directly whether to carry on, " +
-                        "and waits for the answer before he does."
-                ),
-                timers = insertCheckIn(r.timers, r.termId),
                 conditions = r.conditions + label
             )
 
@@ -281,22 +256,6 @@ object Renderer {
                 amendments = r.amendments + label
             )
 
-            Amendment.MIDPOINT_CHECK -> r.copy(
-                instruction = StyleEngine.tidy(
-                    r.instruction + " Amended: halfway through, $g stops and checks with $recv before carrying on."
-                ),
-                timers = insertCheckIn(r.timers, r.termId),
-                amendments = r.amendments + label
-            )
-
-            Amendment.ASK_AGAIN -> r.copy(
-                instruction = StyleEngine.tidy(
-                    "Immediately before this term is carried out, $g asks $recv again and waits for a clear yes. " +
-                        r.instruction
-                ),
-                amendments = r.amendments + label
-            )
-
             Amendment.SAVE_FOR_FINALE -> r.copy(
                 instruction = StyleEngine.tidy(
                     r.instruction + " Amended: this term is held back to the end of the scene."
@@ -335,8 +294,6 @@ object Renderer {
             add(Amendment.NO_RESTRAINT)
         }
         if (!term.climax) add(Amendment.STOP_BEFORE_ORGASM)
-        if (rendered.timers.size > 1) add(Amendment.MIDPOINT_CHECK)
-        add(Amendment.ASK_AGAIN)
         if (!term.climax) {
             add(Amendment.SAVE_FOR_FINALE)
             add(Amendment.TRADE_ONLY)

@@ -20,7 +20,7 @@ data class SharedSetup(
     val explicitness: Explicitness = Explicitness.DIRECT,
     val finaleFormat: FinaleFormat = FinaleFormat.THREE_ORDERS,
     val stopWord: String = "red",
-    val defaultMaybeCondition: MaybeCondition = MaybeCondition.ASK_AGAIN,
+    val defaultMaybeCondition: MaybeCondition = MaybeCondition.GENTLER,
     val boundaries: Set<Boundary> = emptySet(),
     val equipment: Set<Equipment> = emptySet()
 ) {

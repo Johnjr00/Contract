@@ -28,7 +28,7 @@ object Setups {
             explicitness = Explicitness.EXTREME,
             finaleFormat = finale,
             stopWord = "red",
-            defaultMaybeCondition = MaybeCondition.ASK_AGAIN,
+            defaultMaybeCondition = MaybeCondition.GENTLER,
             boundaries = emptySet(),
             equipment = Equipment.entries.toSet()
         )
@@ -83,7 +83,7 @@ object Setups {
         explicitness = Explicitness.EROTIC,
         finaleFormat = FinaleFormat.UNINTERRUPTED,
         stopWord = "stop",
-        defaultMaybeCondition = MaybeCondition.PAUSE_MIDWAY,
+        defaultMaybeCondition = MaybeCondition.UNDER_TWO_MINUTES,
         boundaries = setOf(
             Boundary.NO_ANAL_ACTIVITY,
             Boundary.NO_ANAL_PENETRATION,
