@@ -286,7 +286,7 @@ internal object TermsLevel1 {
         ),
         t(
             id = "l1_ear_whispered_praise", level = 1, cats = setOf(EAR_PLAY, LANGUAGE),
-            title = "Whispered praise in his ear",
+            title = "Praise in his ear",
             base = "{G} sucks {R+} ear and, between passes, [tone_whisper] into it and [v_praise].",
             explicit = "{G} sucks {R+} ear and, in the gaps, [tone_whisper] straight into it and [v_praise], with his lips touching the ear as he says it.",
             benefit = RECEIVER, type = BenefitType.EAR_PLAY_RECIPIENT,
@@ -297,7 +297,7 @@ internal object TermsLevel1 {
             id = "l1_ear_moaning", level = 1, cats = setOf(EAR_PLAY, LANGUAGE),
             title = "Moaning into his ear",
             base = "{G} presses his mouth to {R+} ear and [tone_moan] into it while his hands stay on {R+} chest.",
-            explicit = "{G} puts his mouth against {R+} ear and [tone_moan] straight into it, hands flat on his chest, and keeps going for the full timer.",
+            explicit = "{G} puts his mouth against {R+} ear and [tone_moan] straight into it, hands flat on {R+} chest, and keeps going for the full timer.",
             benefit = RECEIVER, type = BenefitType.EAR_PLAY_RECIPIENT,
             acts = setOf("ear_play"),
             timers = listOf(tm("Moaning into the ear", 60))

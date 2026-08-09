@@ -55,7 +55,8 @@ object Lexicon {
         k("n_mouth_use", "attention", "sucking", "mouth", "throat")
 
         // --- Rimming ----------------------------------------------------------------------
-        k("v_rim", "licks slowly at", "rims", "tongues", "eats")
+        // "licks slowly at him" never said where, which made the softest register the vaguest.
+        k("v_rim", "rims", "rims", "tongues", "eats")
         k("v_rim_hard", "presses his tongue deep into", "rims hard into", "tongue-fucks", "tongue-fucks")
         k("n_rim", "licking", "rimming", "rimming", "rimming")
 
@@ -66,7 +67,7 @@ object Lexicon {
         k("n_kiss_trail", "a trail of kisses", "a trail of kisses", "a wet trail", "a wet, open-mouthed trail")
 
         // --- Hands and stroking -----------------------------------------------------------
-        k("v_stroke", "strokes", "strokes", "jerks", "pumps")
+        k("v_stroke", "strokes", "strokes", "jerks", "jerks")
         k("v_grip", "holds", "grips", "grips", "clamps down on")
         k("v_squeeze", "presses", "squeezes", "squeezes", "crushes")
         k("adv_grip", "with a light hold", "with a firm hold", "with a tight grip", "with a punishing grip")
@@ -104,7 +105,9 @@ object Lexicon {
         // adverb or a particle: "handles roughly" produced "handles roughly Tom into three
         // positions", and "clamps" produced "clamps Dan down".
         k("v_pin", "holds", "pins", "pins", "pins")
-        k("v_handle", "moves", "handles", "manhandles", "manhandles")
+        // "handles Beau into three positions" is not English; every variant has to survive both
+        // "[v_handle] {R} into three positions" and a bare "[v_handle] him".
+        k("v_handle", "moves", "moves", "manhandles", "manhandles")
         k("v_shove", "guides", "pushes", "shoves", "shoves")
         k("v_spank", "swats", "spanks", "spanks", "spanks")
         // "fists" is not something a hand does to hair. Every variant here has to survive being
@@ -130,7 +133,7 @@ object Lexicon {
         k("v_praise", "tells him how good he is", "tells him how good he is", "tells him what a good boy he is", "tells him what a good boy he is for taking it")
         // No recipient of its own: every template that uses this already names the ear it goes
         // into, and "murmurs to him at Ben's ear" named the man twice.
-        k("v_talk_dirty", "murmurs", "talks", "talks dirty", "talks filth")
+        k("v_talk_dirty", "murmurs", "talks dirty", "talks dirty", "talks filth")
         k("tone_whisper", "murmurs", "whispers", "whispers", "growls")
         k("tone_moan", "breathes", "breathes hard", "moans", "moans and growls")
         k("n_dirty_talk", "quiet, explicit words", "explicit words", "crude, explicit talk", "the crudest words he knows")
@@ -149,7 +152,8 @@ object Lexicon {
         k("adv_hard", "firmly", "hard", "hard", "at full force")
         k("adj_wet", "slick", "wet", "wet", "sloppy")
         k("adj_intense", "intense", "intense", "rough", "brutal")
-        k("v_tease", "teases", "teases", "teases", "torments")
+        // "torments him with a slick thumb" names an effect on the other man, not an action.
+        k("v_tease", "teases", "teases", "teases", "keeps teasing")
         k("v_worship", "takes his time over", "worships", "worships", "worships every inch of")
         k("v_hold_pos", "stays where he is", "holds the position", "holds the position", "holds the position and does not move")
         k("n_endpoint", "until the timer ends", "until the timer ends", "until the timer ends", "until the timer ends")

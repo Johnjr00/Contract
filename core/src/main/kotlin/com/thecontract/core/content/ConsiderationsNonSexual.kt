@@ -256,7 +256,7 @@ internal object ConsiderationsNonSexual {
         ),
         c(
             id = "cn_ear_praise", intensity = 1, family = F_EAR, cats = setOf(EAR_PLAY, LANGUAGE),
-            title = "Whispered praise",
+            title = "Praise in his ear",
             base = "{G} sucks {R+} ear and, between passes, [tone_whisper] into it and [v_praise].",
             explicit = "{G} sucks {R+} ear and, in the gaps, [tone_whisper] into it and [v_praise], with his lips touching the ear as he says it.",
             acts = setOf("ear_play", "explicit_praise"),
@@ -274,13 +274,13 @@ internal object ConsiderationsNonSexual {
             id = "cn_ear_moaning", intensity = 2, family = F_EAR, cats = setOf(EAR_PLAY),
             title = "Moaning into his ear",
             base = "{G} presses his mouth to {R+} ear and [tone_moan] into it, hands flat on {R+} chest.",
-            explicit = "{G} puts his mouth on {R+} ear and [tone_moan] straight into it with both hands flat on his chest.",
+            explicit = "{G} puts his mouth on {R+} ear and [tone_moan] straight into it with both hands flat on {R+} chest.",
             acts = setOf("ear_play"),
             timers = listOf(tm("Moaning", 60))
         ),
         c(
             id = "cn_ear_growling", intensity = 3, family = F_EAR, cats = setOf(EAR_PLAY, LANGUAGE),
-            title = "Growling into his ear",
+            title = "Low in his ear",
             base = "{G} sucks {R+} ear and [tone_whisper] into it, low enough that {R} feels it against his ear.",
             explicit = "{G} sucks {R+} ear and [tone_whisper] into it, low enough that he feels it against his ear.",
             acts = setOf("ear_play", "dirty_talk"),
@@ -348,8 +348,8 @@ internal object ConsiderationsNonSexual {
         c(
             id = "cn_ear_rough", intensity = 5, family = F_EAR, cats = setOf(EAR_PLAY),
             title = "Ear play while he is held down",
-            base = "{G} [v_pin] {R}, sucks his ear while he stays pinned, and [tone_whisper] into it throughout.",
-            explicit = "{G} [v_pin] {R} down, sucks his ear while he stays pinned, and [tone_whisper] into it the whole time.",
+            base = "{G} [v_pin] {R} down, sucks his ear for the full timer and [tone_whisper] into it throughout.",
+            explicit = "{G} [v_pin] {R} down, sucks his ear for the full timer and [tone_whisper] into it the whole time.",
             acts = setOf("ear_play", "pinning"),
             blocks = setOf(Boundary.NO_ROUGH_SEX),
             timers = listOf(tm("Pinned, ear sucked", 120))

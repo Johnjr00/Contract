@@ -68,8 +68,8 @@ internal object TermsLevel4 {
         t(
             id = "l4_bond_rope_wrists", level = 4, cats = setOf(BONDAGE),
             title = "Rope on his wrists",
-            base = "{DOM} binds {SUB+} wrists with #rope# and checks he can get two fingers under it before he starts on him.",
-            explicit = "{DOM} binds {SUB+} wrists with #rope#, checks he can get two fingers under it, and then uses his hands on him while he can do nothing but take it.",
+            base = "{DOM} binds {SUB+} wrists with #rope#, tight enough that he cannot pull them free, before he starts on him.",
+            explicit = "{DOM} binds {SUB+} wrists with #rope# tight enough that he cannot pull them free, then uses his hands on him while he can do nothing but take it.",
             benefit = GIVER, type = BenefitType.RESTRAINT_CONTROL,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("restraint"),
@@ -234,7 +234,7 @@ internal object TermsLevel4 {
         t(
             id = "l4_impact_during_oral", level = 4, cats = setOf(IMPACT, ORAL),
             title = "Spanked while he sucks",
-            base = "{SUB} [v_suck] {DOM} on his knees and {DOM} [v_spank] him once every thirty seconds throughout.",
+            base = "{SUB} kneels and [v_suck] {DOM}, and {DOM} [v_spank] him once every thirty seconds throughout.",
             explicit = "{SUB} stays on his knees and [v_suck] {DOM}, and {DOM} [v_spank] him once every thirty seconds without breaking his rhythm.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             gCon = PartyConstraint.SUBMISSIVE, rCon = PartyConstraint.DOMINANT,
@@ -375,8 +375,8 @@ internal object TermsLevel4 {
         t(
             id = "l4_own_degradation", level = 4, cats = setOf(LANGUAGE, POWER),
             title = "Talked down to",
-            base = "{DOM} talks {SUB} down the whole time he strokes him with his hand, and does not go quiet once.",
-            explicit = "{DOM} talks {SUB} down the entire time he strokes him with his hand, and never once softens it.",
+            base = "{DOM} talks {SUB} down the whole time he strokes his cock with his hand, and does not go quiet once.",
+            explicit = "{DOM} talks {SUB} down the entire time he strokes his cock with his hand, and never once softens it.",
             benefit = GIVER, type = BenefitType.OWNERSHIP,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("degradation", "dirty_talk"),

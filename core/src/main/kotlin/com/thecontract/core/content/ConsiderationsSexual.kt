@@ -175,7 +175,7 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_hand_oiled", intensity = 2, family = F_SEX, cats = setOf(HANDS),
             title = "Oiled hand",
-            base = "{G} [v_stroke] {R} [adv_grip], using plenty of #lubricant#, thirty seconds slow then thirty seconds fast, on repeat.",
+            base = "{G} [v_stroke] {R+} cock [adv_grip], using plenty of #lubricant#, thirty seconds slow then thirty seconds fast, on repeat.",
             explicit = "{G} strokes {R+} cock [adv_grip], using plenty of #lubricant#, thirty seconds slow then thirty seconds fast, on repeat, without a break.",
             acts = setOf("massage_groin"), equip = setOf(Equipment.LUBRICANT),
             blocks = setOf(Boundary.MASSAGE_NONSEXUAL),
@@ -459,7 +459,7 @@ internal object ConsiderationsSexual {
             id = "cs_toy_prostate", intensity = 4, family = F_SEX, cats = setOf(TOYS, ANAL),
             title = "Prostate toy",
             base = "{G} [v_insert] #prostate_toy# with #lubricant# and leaves it running while he kisses {R}.",
-            explicit = "{G} [v_insert] #prostate_toy# with #lubricant#, leaves it running inside him and kisses him through it.",
+            explicit = "{G} [v_insert] #prostate_toy# with #lubricant#, leaves it running inside {R} and kisses him through it.",
             acts = setOf("anal_toys", "tongue_kissing"), anal = true,
             equip = setOf(Equipment.PROSTATE_TOY, Equipment.LUBRICANT),
             timers = listOf(tm("Pushing it in", 45), tm("Left in", 150))
@@ -585,7 +585,7 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_rest_held_wrists", intensity = 3, family = F_SEX, cats = setOf(BONDAGE, ROUGH),
             title = "Wrists held",
-            base = "{G} holds {R+} wrists above his head with one hand and strokes him with the other.",
+            base = "{G} holds {R+} wrists above his head with one hand and strokes his cock with the other.",
             explicit = "{G} pins {R+} wrists above his head with one hand and uses his hands on him with the other.",
             acts = setOf("pinning"), blocks = setOf(Boundary.NO_ROUGH_SEX),
             timers = listOf(tm("Held", 120))
@@ -665,7 +665,7 @@ internal object ConsiderationsSexual {
             id = "cs_rough_pin_kiss", intensity = 4, family = F_SEX, cats = setOf(ROUGH, KISSING),
             title = "Pinned and kissed",
             base = "{G} [v_pin] {R} by the wrists and kisses him [adv_kiss] while he stays pinned.",
-            explicit = "{G} [v_pin] {R} by the wrists, puts his weight on him and kisses him [adv_kiss] while he tries to get loose.",
+            explicit = "{G} [v_pin] {R} by the wrists, puts his weight on him and kisses him [adv_kiss] while {R} pushes back against the hold and does not get free.",
             acts = setOf("pinning", "hard_kissing"), blocks = setOf(Boundary.NO_ROUGH_SEX),
             timers = listOf(tm("Pinned", 120))
         ),
@@ -722,8 +722,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_rough_held_worked", intensity = 4, family = F_SEX, cats = setOf(ROUGH),
             title = "Held down and stroked",
-            base = "{G} holds {R} face down with one hand between his shoulders and strokes him with the other.",
-            explicit = "{G} holds {R} face down with a hand between his shoulder blades and strokes him with the other until the timer ends.",
+            base = "{G} holds {R} face down with one hand between his shoulders and strokes his cock with the other.",
+            explicit = "{G} holds {R} face down with a hand between his shoulder blades and strokes his cock with the other until the timer ends.",
             acts = setOf("pinning", "rough_handling"), blocks = setOf(Boundary.NO_ROUGH_SEX),
             timers = listOf(tm("Held down", 150))
         ),
@@ -824,7 +824,7 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_other_dirty_talk", intensity = 3, family = F_SEX, cats = setOf(LANGUAGE),
             title = "Talked through it",
-            base = "{G} [v_talk_dirty] at {R+} ear, describing what he intends to do later, hands still.",
+            base = "{G} [v_talk_dirty] into {R+} ear, describing what he intends to do later, hands still.",
             explicit = "{G} [v_talk_dirty] straight into {R+} ear, spelling out what he is going to do later, and keeps his hands completely still.",
             acts = setOf("dirty_talk", "ear_play"),
             timers = listOf(tm("Talking", 120))

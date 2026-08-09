@@ -73,7 +73,7 @@ object ContentRules {
 
     /** Manner clauses that describe an intended effect rather than an action. */
     val EFFECT_NOT_ACTION: List<Rule> = listOf(
-        Rule(ci("never settle|can never settle|cannot settle"), "an effect, not an action"),
+        Rule(ci("never (?:gets? to )?settle|cannot settle"), "an effect, not an action"),
         Rule(ci("get(?:s)? used to it|cannot get used to"), "an effect, not an action"),
         Rule(ci("brace for it|be braced for|braced for it"), "an effect, not an action"),
         Rule(ci("on purpose|deliberate(?:ly)?"), "an effect, not an action"),
@@ -184,11 +184,27 @@ object ContentRules {
     }
 
     /**
+     * "him" with nobody for it to be.
+     *
+     * `{G} [v_edge] three times with his hand` rendered "Jem edges him three times with his hand":
+     * grammatical, and the only man named is the one doing it, so the man it is being done to is
+     * never identified. It slips past [danglingPronoun] because the name does come first. An
+     * instruction that acts on "him" has to name both men.
+     */
+    fun objectWithNoOwner(text: String, names: List<String>): Boolean {
+        if (!Regex("\\bhim\\b|\\bhimself\\b", RegexOption.IGNORE_CASE).containsMatchIn(text)) return false
+        if (Regex("\\bhimself\\b", RegexOption.IGNORE_CASE).containsMatchIn(text)) return false
+        val named = names.count { Regex("\\b$it\\b").containsMatchIn(text) }
+        return named < 2
+    }
+
+    /**
      * Everything wrong with one rendered instruction. Empty means the line is fit to put in front
      * of two people who have to act on it without asking each other what it meant.
      */
     fun problems(text: String, names: List<String>): List<String> = buildList {
         if (danglingPronoun(text, names)) add("pronoun before any name")
+        if (objectWithNoOwner(text, names)) add("\"him\" with only one man named")
         if (Regex("\\b(\\w+) \\1\\b", RegexOption.IGNORE_CASE).containsMatchIn(text)) add("doubled word")
         if (text.contains("  ")) add("double space")
         if (!text.trimEnd().endsWith(".")) add("no full stop")

@@ -73,11 +73,26 @@ object ProposalSelector {
      * favouring two, and so on. Allowing the level above, as this once did, let the opening
      * proposal of a game be something two people had not worked up to yet.
      */
-    private fun levelWeight(termLevel: Int, actLevel: Int): Double = when (termLevel) {
-        actLevel -> 4.0
-        actLevel - 1 -> 1.0
+    private fun levelWeight(termLevel: Int, actLevel: Int, floor: Int = 1): Double = when {
+        termLevel < floor -> 0.0
+        termLevel == actLevel -> 4.0
+        termLevel == actLevel - 1 -> 1.0
         else -> 0.0
     }
+
+    /**
+     * The contract may not walk back down.
+     *
+     * The act sets the ceiling, but the level below it stays in the pool so that an act has more
+     * than one band to draw on. Without a floor as well, that produced signed contracts running
+     * 1, 1, 2, 1, 3, 2, 4, 4, 5, 4 — an overall climb with visible steps backwards inside it,
+     * where a term softer than one already signed turns up later in the night. The floor is the
+     * highest level signed so far, and it is dropped only if nothing at or above it is eligible,
+     * so a heavily bounded profile still gets a game rather than a stall.
+     */
+    private fun signedFloor(state: GameState): Int =
+        state.negotiation.signed.filterNot { it.term.climax }
+            .flatMap { it.allTerms }.maxOfOrNull { it.level } ?: 1
 
     fun nextProposal(state: GameState, ctx: GameContext): Selection? {
         val act = currentAct(state)
@@ -85,28 +100,33 @@ object ProposalSelector {
             state.negotiation.signed.flatMap { s -> s.allTerms.map { it.termId } }
 
         var blockedNotice: Boundary? = null
-        val weighted = mutableListOf<Pair<Selection, Double>>()
+        var weighted = mutableListOf<Pair<Selection, Double>>()
 
-        for (term in ContentLibrary.regularTerms) {
-            if (term.id in excluded) continue
-            val lw = levelWeight(term.level, act.level)
-            if (lw == 0.0) continue
-            when (val e = EligibilityEngine.evaluate(term, ctx)) {
-                is Eligibility.BlockedByBoundary -> {
-                    if (blockedNotice == null && term.level == act.level) blockedNotice = e.boundary
-                }
-                Eligibility.Unavailable -> Unit
-                is Eligibility.Ok -> {
-                    val weight = lw * analWeight(term, e.binding, ctx) * enthusiasmWeight(term, e.binding, ctx)
-                    if (weight > 0.0) {
-                        weighted += Selection(
-                            term = term,
-                            binding = e.binding,
-                            conditions = EligibilityEngine.maybeConditions(term, e.binding, ctx)
-                        ) to weight
+        // Hold the floor if anything at or above it is eligible; drop it rather than stall.
+        for (floor in listOf(signedFloor(state), 1).distinct()) {
+            weighted = mutableListOf()
+            for (term in ContentLibrary.regularTerms) {
+                if (term.id in excluded) continue
+                val lw = levelWeight(term.level, act.level, floor)
+                if (lw == 0.0) continue
+                when (val e = EligibilityEngine.evaluate(term, ctx)) {
+                    is Eligibility.BlockedByBoundary -> {
+                        if (blockedNotice == null && term.level == act.level) blockedNotice = e.boundary
+                    }
+                    Eligibility.Unavailable -> Unit
+                    is Eligibility.Ok -> {
+                        val weight = lw * analWeight(term, e.binding, ctx) * enthusiasmWeight(term, e.binding, ctx)
+                        if (weight > 0.0) {
+                            weighted += Selection(
+                                term = term,
+                                binding = e.binding,
+                                conditions = EligibilityEngine.maybeConditions(term, e.binding, ctx)
+                            ) to weight
+                        }
                     }
                 }
             }
+            if (weighted.isNotEmpty()) break
         }
         if (weighted.isEmpty()) {
             // Fall back to any eligible unseen term at any level rather than stalling.
@@ -142,9 +162,11 @@ object ProposalSelector {
         val excluded = state.negotiation.seenTermIds + state.negotiation.declinedTermIds +
             state.negotiation.signed.flatMap { s -> s.allTerms.map { it.termId } } + primaryTermId
         val rng = Random(state.sessionId.hashCode().toLong() * 7_919L + state.negotiation.proposalCounter)
+        // A bundled second term is signed alongside the first, so it obeys the same floor.
+        val floor = signedFloor(state)
         return ContentLibrary.regularTerms
             .asSequence()
-            .filter { it.id !in excluded && levelWeight(it.level, act.level) > 0.0 }
+            .filter { it.id !in excluded && levelWeight(it.level, act.level, floor) > 0.0 }
             .mapNotNull { term ->
                 val e = EligibilityEngine.evaluate(term, ctx)
                 if (e is Eligibility.Ok) {

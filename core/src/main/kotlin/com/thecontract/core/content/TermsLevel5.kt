@@ -76,8 +76,8 @@ internal object TermsLevel5 {
         t(
             id = "l5_rough_held_down_worked", level = 5, cats = setOf(ROUGH),
             title = "Held down and stroked",
-            base = "{G} holds {R} face down by the back of the shoulders and strokes him with his free hand for the full time.",
-            explicit = "{G} holds {R} face down with a hand between his shoulder blades and strokes him with the other hand until the timer ends.",
+            base = "{G} holds {R} face down by the back of the shoulders and strokes his cock with his free hand for the full time.",
+            explicit = "{G} holds {R} face down with a hand between his shoulder blades and strokes his cock with the other hand until the timer ends.",
             benefit = GIVER, type = BenefitType.COMMAND_AUTHORITY,
             acts = setOf("pinning", "rough_handling"),
             blocks = setOf(Boundary.NO_ROUGH_SEX),

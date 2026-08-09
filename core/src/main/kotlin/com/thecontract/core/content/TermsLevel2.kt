@@ -233,8 +233,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_hand_mutual", level = 2, cats = setOf(HANDS),
             title = "Both hands",
-            base = "{G} and {R} lie face to face and work each other with a slick fist and #lubricant#, matching each other's pace.",
-            explicit = "{G} and {R} lie face to face and work each other with a slick fist, each of them matching the pace the other sets, for the full timer.",
+            base = "{G} and {R} lie face to face and stroke each other's cocks with a slick fist and plenty of #lubricant#, each of them matching the pace the other sets.",
+            explicit = "{G} and {R} lie face to face and stroke each other's cocks with a slick fist and plenty of #lubricant#, each of them matching the pace the other sets, for the full timer.",
             benefit = MUTUAL, type = BenefitType.MUTUAL, mutual = true,
             acts = setOf("massage_groin"),
             equip = setOf(Equipment.LUBRICANT),
@@ -266,7 +266,7 @@ internal object TermsLevel2 {
             id = "l2_hand_sleeve", level = 2, cats = setOf(HANDS, TOYS),
             title = "The sleeve",
             base = "{G} uses #sleeve# on {R+} cock, changing speed every thirty seconds between slow and fast.",
-            explicit = "{G} slides #sleeve# down {R+} cock and swaps between slow and fast every thirty seconds, so he never gets to settle into either.",
+            explicit = "{G} slides #sleeve# down {R+} cock and swaps between slow and fast every thirty seconds for the full timer.",
             benefit = RECEIVER, type = BenefitType.TOY_RECIPIENT,
             acts = setOf("massage_groin"),
             equip = setOf(Equipment.SLEEVE, Equipment.LUBRICANT),
@@ -362,8 +362,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_power_praise", level = 2, cats = setOf(POWER, LANGUAGE),
             title = "Told exactly how good he is",
-            base = "{G} strokes {R} with his hands and [v_praise] out loud, and does not stop talking.",
-            explicit = "{G} strokes {R} with his hands and [v_praise] out loud the whole time, and does not go quiet once.",
+            base = "{G} strokes {R} with his hands and [v_praise], again every thirty seconds, and does not go quiet in between.",
+            explicit = "{G} strokes {R} with his hands and [v_praise], again every twenty seconds, and does not go quiet once.",
             benefit = RECEIVER, type = BenefitType.SERVICE_RECIPIENT,
             acts = setOf("explicit_praise"),
             timers = listOf(tm("Talking and touching", 120))
@@ -390,8 +390,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_anal_massage_hole", level = 2, cats = setOf(ANAL, MASSAGE),
             title = "Opening him up from the outside",
-            base = "{G} uses #lubricant# and [v_massage] the ring of muscle itself [adv_pressure_light] for the full timer and does not go in.",
-            explicit = "{G} slicks him with #lubricant# and rubs the ring of muscle itself [adv_pressure_light] for the full timer and does not go in at any point.",
+            base = "{G} uses #lubricant# and [v_massage] the ring of muscle around {R+} hole [adv_pressure_light] for the full timer, and does not go in.",
+            explicit = "{G} slicks {R} with #lubricant# and rubs the ring of muscle around his hole [adv_pressure_light] for the full timer, and does not go in at any point.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_anus", "anal_external"),
             equip = setOf(Equipment.LUBRICANT),
