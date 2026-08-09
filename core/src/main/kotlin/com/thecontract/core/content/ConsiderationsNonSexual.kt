@@ -86,8 +86,8 @@ internal object ConsiderationsNonSexual {
         c(
             id = "cn_mass_anus", intensity = 3, family = F_MASSAGE, cats = setOf(MASSAGE),
             title = "Opening him up from the outside",
-            base = "{G} uses #lubricant# and rubs the ring of muscle itself [adv_pressure_light], without going in.",
-            explicit = "{G} slicks him with #lubricant# and rubs the muscle itself [adv_pressure_light] until it starts to give, and still does not go in.",
+            base = "{G} uses #lubricant# and rubs the ring of muscle around {R+} hole [adv_pressure_light], without going in.",
+            explicit = "{G} slicks {R} with #lubricant# and rubs the muscle around his hole [adv_pressure_light] until it starts to give, and still does not go in.",
             acts = setOf("massage_anus", "anal_external"),
             equip = setOf(Equipment.LUBRICANT),
             blocks = setOf(Boundary.MASSAGE_NONSEXUAL),
@@ -338,8 +338,8 @@ internal object ConsiderationsNonSexual {
         c(
             id = "cn_ear_with_restraint", intensity = 4, family = F_EAR, cats = setOf(EAR_PLAY),
             title = "Ear play while he is held",
-            base = "{R} is restrained with #cuffs# and {G} sucks both his ear for the full time.",
-            explicit = "{R} is locked in #cuffs# and {G} sucks both his ear for the whole time, and he cannot do a thing about it.",
+            base = "{R} is restrained with #cuffs# and {G} sucks both of {R+} ears for the full time.",
+            explicit = "{R} is locked in #cuffs# and {G} sucks both of {R+} ears for the whole time, and he cannot do a thing about it.",
             acts = setOf("ear_play", "restraint"),
             equip = setOf(Equipment.CUFFS),
             blocks = setOf(Boundary.NO_RESTRAINTS),

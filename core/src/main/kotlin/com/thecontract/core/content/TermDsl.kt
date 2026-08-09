@@ -85,6 +85,7 @@ internal fun c(
     pCon: PartyConstraint = PartyConstraint.ANY,
     timers: List<TimerSpec> = emptyList(),
     mutual: Boolean = false,
+    pCock: Boolean = false,
     tail: String? = null
 ): ConsiderationAction = ConsiderationAction(
     id = id,
@@ -105,5 +106,6 @@ internal fun c(
     performerConstraint = pCon,
     timers = timers,
     mutual = mutual,
+    usesPerformersCock = pCock,
     extremeTail = tail
 )

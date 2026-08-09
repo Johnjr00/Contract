@@ -361,7 +361,7 @@
     var card = el("section", "card");
     card.appendChild(el("h3", null, label + " · " + t.actTitle + (t.climax ? " · closing term" : "")));
     card.appendChild(el("h2", null, t.title));
-    card.appendChild(el("p", "instruction", t.instruction));
+    if (t.instruction) card.appendChild(el("p", "instruction", t.instruction));
 
     if (t.equipment && t.equipment.length) {
       var eq = el("div");
@@ -378,9 +378,9 @@
       card.appendChild(tl);
     }
 
-    var m = el("p", "meta");
-    m.appendChild(document.createTextNode(t.benefitExplanation || ""));
-    card.appendChild(m);
+    if (t.benefitExplanation) {
+      card.appendChild(el("p", "meta", t.benefitExplanation));
+    }
     return card;
   }
 

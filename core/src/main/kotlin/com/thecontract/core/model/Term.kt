@@ -88,6 +88,15 @@ data class ConsiderationAction(
     val timers: List<TimerSpec> = emptyList(),
     /** Reciprocal action: both players control timers and both confirm completion. */
     val mutual: Boolean = false,
+    /**
+     * The performer's own cock is what the act is done with.
+     *
+     * Two things follow. He has to be able to top, which a toy or a hand would not require of
+     * him. And he is being stimulated himself, so the act is not pure service — consideration is
+     * owed by the player who gained more from the term, and an option that gets him off as well
+     * is not a payment. The selector leaves these out of what it offers.
+     */
+    val usesPerformersCock: Boolean = false,
     val extremeTail: String? = null
 )
 

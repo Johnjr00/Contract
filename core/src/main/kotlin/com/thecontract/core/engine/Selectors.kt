@@ -65,9 +65,17 @@ object ProposalSelector {
         return 1.0 + (yes.toDouble() / total)
     }
 
-    private fun levelWeight(termLevel: Int, actLevel: Int): Double = when (abs(termLevel - actLevel)) {
-        0 -> 4.0
-        1 -> 1.0
+    /**
+     * A term never runs ahead of the act it is in.
+     *
+     * The game is meant to climb from the first term to the last, so the act sets a ceiling and
+     * not merely a centre: act one draws on level one only, act two on levels one and two while
+     * favouring two, and so on. Allowing the level above, as this once did, let the opening
+     * proposal of a game be something two people had not worked up to yet.
+     */
+    private fun levelWeight(termLevel: Int, actLevel: Int): Double = when (termLevel) {
+        actLevel -> 4.0
+        actLevel - 1 -> 1.0
         else -> 0.0
     }
 
@@ -212,8 +220,9 @@ object ProposalSelector {
 /**
  * Chooses consideration actions (sections 28, 29).
  *
- * Only the beneficiary's phone ever sees this list. Intensity tracks negotiation progress, and
- * recently used actions are pushed down so consideration stays varied across a whole game.
+ * Only one phone ever sees this list: the player who gained less from the term, since he is the
+ * one being paid and so the one who says what the payment is. Intensity tracks negotiation
+ * progress, and recently used actions are pushed down so consideration stays varied.
  */
 object ConsiderationSelector {
 
@@ -229,36 +238,61 @@ object ConsiderationSelector {
         stronger: Boolean = false,
         limit: Int = 6
     ): List<ConsiderationAction> {
-        val target = (band(state) + if (stronger) 1 else 0).coerceIn(1, 5)
+        // The act is a ceiling, not a centre. Consideration climbs with the game, so the opening
+        // of a session offers hands, mouths and ears and nothing below the waist, and the last
+        // act is the only place the hardest actions can appear at all.
+        val ceiling = band(state)
+        // A moving window rather than everything up to the ceiling: by the last act, offering a
+        // jaw massage next to a fist reads as a step backwards, and the game is supposed to be
+        // climbing. A bundle of two terms is paid for from the top of the window only.
+        val floor = if (stronger) ceiling else (ceiling - 1).coerceAtLeast(1)
         val recent = state.negotiation.recentConsiderationIds.takeLast(8).toSet()
 
-        val eligible = ContentLibrary.considerations.filter { action ->
-            if (mutualRequired && !action.mutual) return@filter false
-            if (!mutualRequired && action.mutual) return@filter false
-            EligibilityEngine.evaluateConsideration(action, performer, recipient, ctx) is Eligibility.Ok
+        fun offerable(action: ConsiderationAction): Boolean {
+            // Consideration is owed by whoever gained more from the term. An act that gets the
+            // performer off is not a payment, so it is never on the list.
+            if (action.usesPerformersCock) return false
+            if (mutualRequired && !action.mutual) return false
+            if (!mutualRequired && action.mutual) return false
+            return EligibilityEngine.evaluateConsideration(action, performer, recipient, ctx) is Eligibility.Ok
         }
+
+        val eligible = ContentLibrary.considerations
+            .filter { it.intensity in floor..ceiling && offerable(it) }
+            .ifEmpty { ContentLibrary.considerations.filter { it.intensity <= ceiling && offerable(it) } }
         if (eligible.isEmpty()) {
-            // Never leave the beneficiary with nothing: relax the reciprocity requirement.
+            // Never leave him with nothing: relax reciprocity, but never the ceiling, and never
+            // offer the performer something he gets off on.
             return ContentLibrary.considerations
-                .filter { EligibilityEngine.evaluateConsideration(it, performer, recipient, ctx) is Eligibility.Ok }
-                .sortedBy { abs(it.intensity - target) }
+                .filter {
+                    !it.usesPerformersCock && it.intensity <= ceiling &&
+                        EligibilityEngine.evaluateConsideration(it, performer, recipient, ctx) is Eligibility.Ok
+                }
+                .sortedByDescending { it.intensity }
                 .take(limit)
         }
+        val target = ceiling
 
         val rng = Random(state.sessionId.hashCode().toLong() * 15_485_863L + state.negotiation.proposalCounter)
         val scored = eligible.map { action ->
             var score = 10.0 - abs(action.intensity - target) * 3.0
             if (action.id in recent) score -= 20.0
-            score += rng.nextDouble() * 2.0
+            // Enough jitter that the lower half of the window can outrank the top of it. With
+            // less, the same two or three actions headed the list for several terms running and
+            // the offer stopped feeling like a choice.
+            score += rng.nextDouble() * 4.0
             action to score
         }.sortedByDescending { it.second }
 
-        // Spread the offer across families so the beneficiary always has a real choice.
+        // Spread the offer across families so he always has a real choice. Two from any one
+        // family, not three: the ear-play list has four late-game variants of itself, and three
+        // of them side by side made every late offer read as the same thing worded differently.
+        val maxPerFamily = (limit / 3).coerceAtLeast(2)
         val chosen = LinkedHashMap<String, ConsiderationAction>()
         val familiesSeen = mutableMapOf<ConsiderationFamily, Int>()
         for ((action, _) in scored) {
             val seen = familiesSeen.getOrDefault(action.family, 0)
-            if (seen >= 3) continue
+            if (seen >= maxPerFamily) continue
             chosen[action.id] = action
             familiesSeen[action.family] = seen + 1
             if (chosen.size >= limit) break

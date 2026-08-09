@@ -215,7 +215,8 @@ class ProtocolTest {
         }
         val current = h.state().negotiation.current!!
         val beneficiary = assertNotNull(current.beneficiary, "no unbalanced proposal appeared")
-        val chooser = if (beneficiary == Slot.PLAYER_1) driver.p1 else driver.p2
+        // The player who gained less names the payment; the beneficiary performs it.
+        val chooser = if (beneficiary == Slot.PLAYER_1) driver.p2 else driver.p1
         val actionId = chooser.choiceIdsStartingWith("pick_consideration:").first()
             .removePrefix("pick_consideration:")
         chooser.act(com.thecontract.core.protocol.PickConsideration(actionId))

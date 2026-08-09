@@ -79,7 +79,7 @@ class PersistenceTest {
                     }
 
                 GamePhase.CONSIDERATION_PRIVATE_SELECTION -> {
-                    val chooser = s.negotiation.current!!.beneficiary ?: Slot.PLAYER_1
+                    val chooser = s.negotiation.current!!.beneficiary?.other ?: Slot.PLAYER_1
                     val phone = if (chooser == Slot.PLAYER_1) driver.p1 else driver.p2
                     val id = phone.choiceIdsStartingWith("pick_consideration:").first()
                         .removePrefix("pick_consideration:")

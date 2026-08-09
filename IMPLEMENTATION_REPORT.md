@@ -12,15 +12,15 @@ Both APKs were built and verified.
 | --- | --- |
 | Debug APK | `app/build/outputs/apk/debug/app-debug.apk` |
 | | application id `com.thecontract.tv.debug` |
-| | SHA-256 `35457f8b36da83bc599bcd5fbec3f0623a07646202a75421de3d6a5fac7e2b8c` |
+| | SHA-256 `ac0baddd0d9d19a9bd253542c74e698b2a0c0b987f86ac3e6b192270e96d68b9` |
 | Release APK | `app/build/outputs/apk/release/app-release.apk` |
 | | application id `com.thecontract.tv`, minified and resource-shrunk by R8 |
-| | SHA-256 `61ca8c1341542a71d8e3e579be51d7701ad49cb32199e21383120f814167b69d` |
+| | SHA-256 `48275c621f3d627a5dbaa5414bb520c37a743869023c22235b16326df26a7172` |
 | Release signature | APK Signature Scheme v2, verified with `apksigner verify` |
 | | signer `CN=The Contract, OU=TheContract, O=TheContract, L=Unknown, ST=Unknown, C=US` |
 | | certificate SHA-256 `d460e29876eda8d73e6b1af100f78942b26ac8ab28d33aaa7f42ca605bef25e0` |
 
-These are the hashes as of the launcher artwork in section 4h below. The signing cert is unchanged from the previous fix (same keystore).
+These are the hashes as of the consideration and escalation rework in section 4i below. The signing cert is unchanged from the previous fix (same keystore).
 
 Toolchain actually used: AGP 8.7.3, Kotlin 2.2.21, KSP 2.2.21-2.0.4, Compose BOM 2024.10.01,
 Room 2.6.1, Android SDK Platform 35, Build-Tools 35.0.0, Gradle 8.14.3, JDK 21 emitting Java 17
@@ -770,6 +770,73 @@ the launcher's cached artwork the Apps row draws the new tile correctly
 between Settings and YouTube. The icon was verified by rendering the shipped
 vector rather than on-device, since the launcher never shows it for a leanback
 app.
+
+---
+
+### 4i. Who picks the consideration, and how the game climbs
+
+Three rules about consideration were wrong, and they were wrong together.
+
+**The wrong player was choosing.** Consideration is a payment: the player who
+gained more from the term owes it. He also got to pick what it was, which let
+him pay himself in whatever he happened to fancy. The list now opens on the
+other phone — the player who gained less is the one being paid, so he is the
+one who names the payment. The beneficiary still performs it. `GameEngine`
+rejects a pick from the wrong phone, and the two screens now say plainly which
+side of the deal each player is on.
+
+**Some options paid the wrong player.** Every consideration is written
+performer-to-recipient, so nearly all of them were already service. The
+exception was the eight where the performer's own cock does the work — he is
+being stimulated himself, which is not a payment. `ConsiderationAction` now
+carries `usesPerformersCock`, and the selector never offers those. Penetration
+is still available as consideration through fingers, a dildo, a plug and
+fisting, so a bottom who is owed is not short-changed.
+
+That flag fixed a second, older defect on the way: eligibility checked that
+the *recipient* could bottom but never that the performer could top, so a
+strict bottom could be handed an option that required him to fuck someone.
+
+*A judgement call worth knowing about:* the game's own benefit model treats
+being penetrated as the benefit and the top as the one doing the work, so
+"he fucks him" could be read either way. It is excluded here on the ground
+that consideration should be one-sided service. It is one flag per action to
+put back.
+
+**Neither terms nor consideration climbed reliably.** A term was weighted
+towards its act but the level above was still reachable, so a first proposal
+could be something two people had not worked up to. The act is now a ceiling:
+act one draws on level one only, act two on levels one and two, and so on.
+Consideration got a moving window — the current band and the one below it —
+so the opening offers hands, mouths and ears with nothing below the waist,
+and the hardest actions exist only in the last act. Two further fixes came out
+of reading the offers: no more than two actions from one family (three ear-play
+variants side by side made every late offer read as the same thing reworded),
+and wider scoring jitter, because the same two options had been heading the
+list for several terms running.
+
+Measured over a full quick game, in order: ears, back and stomach; external
+anal and slow oral; the wand; permission and the crop; clamped and fucked;
+then the two closing terms. Consideration alongside it: praise, scalp and
+kissing; nipples and body trail; oral and thighs; groin and external anal;
+fingers and toys; dildo, crop and fisting.
+
+**Read end to end.** A harness printed every screen both phones and the
+television show, for a game that also rejects, counteroffers, trades a bundle,
+backs out and repeats a consideration. Reading it turned up nine more defects,
+all fixed: "sucks both his ear"; "{G} slicks him" in an instruction that never
+named him; "lets neither drop"; "until his legs are unreliable" and "until he
+actually says the word" on terms that already carry timers; a sentence opening
+"While he strokes him with his hands" before either man is named; and, in the
+final scene, the term card repeating the instruction that was already on the
+screen above it and still showing the negotiating note about who earns whose
+signature, after the contract was signed.
+
+Three of those are a class rather than one-offs, so `RenderSweepTest` now
+renders every term, closing term and consideration in all four registers and
+fails on a pronoun that arrives before any name, a doubled word, a double
+space or a missing full stop. It flags zero. `ConsiderationFairnessTest`
+holds the three rules above over a whole game. 57 tests pass.
 
 ---
 

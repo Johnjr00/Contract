@@ -202,7 +202,7 @@ internal object TermsLevel2 {
             id = "l2_rim_chair", level = 2, cats = setOf(RIMMING, ANAL),
             title = "Over the edge",
             base = "{R} bends over #sturdy_chair#. {G} kneels behind him and [v_rim] him from there.",
-            explicit = "{R} bends over #sturdy_chair# and holds on. {G} kneels behind him, spreads him and [v_rim] him from there until his legs are unreliable.",
+            explicit = "{R} bends over #sturdy_chair# and holds on. {G} kneels behind him, spreads him with both hands and [v_rim] him from there for the full timer.",
             benefit = RECEIVER, type = BenefitType.RIMMING_RECIPIENT,
             acts = setOf("rimming"),
             equip = setOf(Equipment.STURDY_CHAIR),
@@ -362,8 +362,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_power_praise", level = 2, cats = setOf(POWER, LANGUAGE),
             title = "Told exactly how good he is",
-            base = "While he strokes him with his hands, {G} [v_praise] out loud and does not stop talking.",
-            explicit = "{G} strokes him with his hands and [v_praise] out loud the whole time, and does not go quiet once.",
+            base = "{G} strokes {R} with his hands and [v_praise] out loud, and does not stop talking.",
+            explicit = "{G} strokes {R} with his hands and [v_praise] out loud the whole time, and does not go quiet once.",
             benefit = RECEIVER, type = BenefitType.SERVICE_RECIPIENT,
             acts = setOf("explicit_praise"),
             timers = listOf(tm("Talking and touching", 120))

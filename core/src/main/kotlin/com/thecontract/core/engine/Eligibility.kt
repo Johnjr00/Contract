@@ -265,6 +265,11 @@ object EligibilityEngine {
             if (action.analPenetration && !ctx.setup.player(recipient).analRole.canBottom) {
                 return Eligibility.Unavailable
             }
+            // Doing it with his own cock is the one case that asks the performer to top; a hand,
+            // a finger or a toy asks nothing of his role.
+            if (action.usesPerformersCock && !ctx.setup.player(performer).analRole.canTop) {
+                return Eligibility.Unavailable
+            }
         }
 
         val erectionParties = when (action.erectionRequired) {

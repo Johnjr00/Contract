@@ -187,7 +187,8 @@ class GameDriver(
 
             GamePhase.CONSIDERATION_PRIVATE_SELECTION, GamePhase.CLOSING_TERM_CONSIDERATION -> {
                 if (current == null) return
-                val chooser = current.beneficiary ?: Slot.PLAYER_1
+                // The player who gained less from the term is the one who names the payment.
+                val chooser = current.beneficiary?.other ?: Slot.PLAYER_1
                 if (counter in plan.backAtConsideration && counter !in backsFromConsideration) {
                     backsFromConsideration += counter
                     check(phone(chooser).act(Back)) { "Back was refused during consideration choice" }

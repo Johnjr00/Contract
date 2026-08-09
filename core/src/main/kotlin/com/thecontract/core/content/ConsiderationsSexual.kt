@@ -258,7 +258,8 @@ internal object ConsiderationsSexual {
             explicit = "{G} slicks up and grinds himself against {R+} [n_hole] without once pushing in, until {R} is begging.",
             acts = setOf("anal_external"), equip = setOf(Equipment.LUBRICANT),
             erection = PartyRef.GIVER, pCon = PartyConstraint.TOP,
-            timers = listOf(tm("Against him", 150))
+            timers = listOf(tm("Against him", 150)),
+            pCock = true
         ),
         c(
             id = "cs_ext_tongue_outside", intensity = 3, family = F_SEX, cats = setOf(ANAL, RIMMING),
@@ -311,7 +312,8 @@ internal object ConsiderationsSexual {
             explicit = "{G} takes {R} from behind with #lubricant# [adv_thrust_hard] for the whole timer and does not ease off once.",
             acts = setOf("topping", "rough_anal"), anal = true, erection = PartyRef.GIVER,
             pCon = PartyConstraint.TOP, equip = setOf(Equipment.LUBRICANT),
-            timers = listOf(tm("Pushing in", 45), tm("Hard", 150))
+            timers = listOf(tm("Pushing in", 45), tm("Hard", 150)),
+            pCock = true
         ),
         c(
             id = "cs_ranal_pinned_hard", intensity = 5, family = F_SEX, cats = setOf(ANAL, ROUGH),
@@ -320,7 +322,8 @@ internal object ConsiderationsSexual {
             explicit = "{G} pins {R+} shoulders down with #lubricant# and fucks him [adv_thrust_hard], keeping him flat and taking it the whole time.",
             acts = setOf("topping", "rough_anal", "pinning"), anal = true, erection = PartyRef.GIVER,
             pCon = PartyConstraint.TOP, equip = setOf(Equipment.LUBRICANT),
-            timers = listOf(tm("Pushing in", 45), tm("Pinned and fucked", 150))
+            timers = listOf(tm("Pushing in", 45), tm("Pinned and fucked", 150)),
+            pCock = true
         ),
         c(
             id = "cs_ranal_hair_hard", intensity = 5, family = F_SEX, cats = setOf(ANAL, ROUGH),
@@ -329,7 +332,8 @@ internal object ConsiderationsSexual {
             explicit = "{G} takes {R} from behind with #lubricant#, fists his hair to hold his head up and fucks him [adv_thrust_hard] the whole way through.",
             acts = setOf("topping", "rough_anal", "rough_hair_pulling"), anal = true, erection = PartyRef.GIVER,
             pCon = PartyConstraint.TOP, equip = setOf(Equipment.LUBRICANT),
-            timers = listOf(tm("Pushing in", 45), tm("Hard", 150))
+            timers = listOf(tm("Pushing in", 45), tm("Hard", 150)),
+            pCock = true
         ),
         c(
             id = "cs_ranal_dildo_hard", intensity = 5, family = F_SEX, cats = setOf(ANAL, ROUGH, TOYS),
@@ -386,7 +390,7 @@ internal object ConsiderationsSexual {
             id = "cs_fing_and_oral", intensity = 4, family = F_SEX, cats = setOf(ANAL, ORAL),
             title = "Fingers and mouth",
             base = "{G} [v_suck] {R} and [v_finger] him at the same time, both at the same rhythm.",
-            explicit = "{G} [v_suck] {R} and [v_finger] him at once, both in the same rhythm, and lets neither drop.",
+            explicit = "{G} [v_suck] {R} and [v_finger] him at once, both in the same rhythm, and does not stop either one early.",
             acts = setOf("oral", "fingering"), anal = true, equip = setOf(Equipment.LUBRICANT),
             timers = listOf(tm("Mouth only", 45), tm("Mouth and fingers", 150))
         ),
@@ -733,7 +737,8 @@ internal object ConsiderationsSexual {
             acts = setOf("topping", "hard_sex"), anal = true, erection = PartyRef.GIVER,
             pCon = PartyConstraint.TOP, equip = setOf(Equipment.LUBRICANT),
             blocks = setOf(Boundary.NO_ROUGH_SEX),
-            timers = listOf(tm("Pushing in", 45), tm("Hard", 120))
+            timers = listOf(tm("Pushing in", 45), tm("Hard", 120)),
+            pCock = true
         ),
         c(
             id = "cs_sex_short_back", intensity = 5, family = F_SEX, cats = setOf(ANAL),
@@ -742,7 +747,8 @@ internal object ConsiderationsSexual {
             explicit = "{G} [v_enter] {R} with #lubricant# and [v_fuck] him [adv_thrust_slow] without looking away once.",
             acts = setOf("topping"), anal = true, erection = PartyRef.GIVER,
             pCon = PartyConstraint.TOP, equip = setOf(Equipment.LUBRICANT),
-            timers = listOf(tm("Pushing in", 45), tm("Slow", 120))
+            timers = listOf(tm("Pushing in", 45), tm("Slow", 120)),
+            pCock = true
         ),
         c(
             id = "cs_sex_short_bent", intensity = 5, family = F_SEX, cats = setOf(ANAL, ROUGH),
@@ -752,7 +758,8 @@ internal object ConsiderationsSexual {
             acts = setOf("topping", "hard_sex"), anal = true, erection = PartyRef.GIVER,
             pCon = PartyConstraint.TOP, equip = setOf(Equipment.LUBRICANT, Equipment.STURDY_CHAIR),
             blocks = setOf(Boundary.NO_ROUGH_SEX),
-            timers = listOf(tm("Pushing in", 45), tm("Hard", 120))
+            timers = listOf(tm("Pushing in", 45), tm("Hard", 120)),
+            pCock = true
         ),
         c(
             id = "cs_sex_short_ride", intensity = 5, family = F_SEX, cats = setOf(ANAL),
@@ -761,7 +768,8 @@ internal object ConsiderationsSexual {
             explicit = "{G} lies flat and {R} sinks onto him with #lubricant#, all the way down inside the first minute, then rides him hard for the rest.",
             acts = setOf("topping"), anal = true, erection = PartyRef.GIVER,
             pCon = PartyConstraint.TOP, equip = setOf(Equipment.LUBRICANT),
-            timers = listOf(tm("Taking him in", 60), tm("Riding him hard", 120))
+            timers = listOf(tm("Taking him in", 60), tm("Riding him hard", 120)),
+            pCock = true
         ),
 
         // ------------------------------------------------------------- other (8)

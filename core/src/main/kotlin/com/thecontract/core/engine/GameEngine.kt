@@ -617,8 +617,10 @@ class GameEngine {
         }
         val current = s.negotiation.current ?: return reject(es, CODE_PHASE, "No proposal is open.")
         val mutual = current.beneficiary == null
-        if (!mutual && slot != null && slot != current.beneficiary) {
-            return reject(es, CODE_NOT_ALLOWED, "Only the player who owes consideration chooses it.")
+        // The one who is owed says what he is owed. The beneficiary performs it, but choosing it
+        // as well would let him pay himself.
+        if (!mutual && slot != null && slot != current.beneficiary?.other) {
+            return reject(es, CODE_NOT_ALLOWED, "Only the player who is owed consideration chooses it.")
         }
         val chosen = current.considerationOptions.firstOrNull { it.actionId == actionId }
             ?: return reject(es, CODE_INVALID, "That consideration is not on offer.")

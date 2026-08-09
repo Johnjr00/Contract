@@ -316,8 +316,11 @@ private fun TermPanel(term: TermCard, label: String) {
         )
         Spacer(Modifier.height(8.dp))
         BasicText(term.title, style = TvType.title)
-        Spacer(Modifier.height(12.dp))
-        BasicText(term.instruction, style = TvType.body)
+        // The final scene sends these empty, because the screen above already says them.
+        if (term.instruction.isNotBlank()) {
+            Spacer(Modifier.height(12.dp))
+            BasicText(term.instruction, style = TvType.body)
+        }
         if (term.equipment.isNotEmpty()) {
             Spacer(Modifier.height(12.dp))
             BasicText("Uses: ${term.equipment.joinToString(", ")}", style = TvType.muted)
@@ -337,8 +340,10 @@ private fun TermPanel(term: TermCard, label: String) {
                 style = TvType.muted
             )
         }
-        Spacer(Modifier.height(14.dp))
-        BasicText(term.benefitExplanation, style = TvType.body.copy(color = TvColors.accent))
+        if (term.benefitExplanation.isNotBlank()) {
+            Spacer(Modifier.height(14.dp))
+            BasicText(term.benefitExplanation, style = TvType.body.copy(color = TvColors.accent))
+        }
     }
 }
 

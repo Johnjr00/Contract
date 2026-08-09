@@ -392,7 +392,7 @@ internal object TermsLevel3 {
             id = "l3_orgasm_on_command", level = 3, cats = setOf(ORGASM_CONTROL, POWER),
             title = "On his word",
             base = "{DOM} strokes {SUB} with his hand and {SUB} holds on until {DOM} tells him he may finish.",
-            explicit = "{DOM} strokes {SUB} with his hand and {SUB} [v_hold_back] until {DOM} actually says the word.",
+            explicit = "{DOM} strokes {SUB} with his hand and {SUB} [v_hold_back] until {DOM} tells him out loud that he can.",
             benefit = GIVER, type = BenefitType.ORGASM_CONTROL,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("climax_permission", "commands"),

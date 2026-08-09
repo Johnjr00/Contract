@@ -421,12 +421,21 @@ object ViewBuilder {
             GamePhase.CONSIDERATION_PRIVATE_SELECTION, GamePhase.CLOSING_TERM_CONSIDERATION -> {
                 if (current == null) return base.copy(heading = "Preparing", waiting = true)
                 val mutual = current.beneficiary == null
-                val mine = mutual || current.beneficiary == slot
+                // The player who gained less from the term is the one being paid, so he is the
+                // one who names the payment.
+                val mine = mutual || current.beneficiary?.other == slot
                 if (mine) {
+                    val payer = current.beneficiary?.let { s.setup.name(it) }
                     base.copy(
                         heading = "Choose your consideration",
-                        body = "You benefit more from this term, so you earn the signature. " +
-                            "This list is private — the TV shows nothing while you choose.",
+                        body = if (payer == null) {
+                            "Neither of you gains more from this term, so you both do this one. " +
+                                "This list is private — the TV shows nothing while you choose."
+                        } else {
+                            "$payer gains more from this term, so he owes you for it. Pick what he " +
+                                "does to earn your signature. This list is private — the TV shows " +
+                                "nothing while you choose."
+                        },
                         term = termCard(s, current.term),
                         bundledTerm = current.bundledTerm?.let { termCard(s, it) },
                         considerationOptions = current.considerationOptions.map { considerationCard(s, it) },
@@ -435,7 +444,8 @@ object ViewBuilder {
                 } else {
                     base.copy(
                         heading = "Waiting",
-                        body = "The other player is choosing what he will do to earn your signature.",
+                        body = "You gain more from this term, so you owe him for it. He is choosing " +
+                            "what you will do to earn his signature.",
                         waiting = true,
                         term = termCard(s, current.term)
                     )
@@ -639,7 +649,12 @@ object ViewBuilder {
     private fun executionView(s: GameState, slot: Slot?, base: ClientView, nowMs: Long): ClientView {
         val idx = s.finale.executionOrder.getOrNull(s.finale.stepIndex)
         val signed = idx?.let { s.negotiation.signed.getOrNull(it) }
-        val card = signed?.let { termCard(s, it.term) }
+        // The heading and body already carry the title and the instruction, so the card beneath
+        // them is here for the equipment, conditions, amendments and timers. Repeating the
+        // instruction printed the same paragraph twice on the same screen, and the benefit
+        // explanation is a negotiating aid — by now the term is signed and being performed, so
+        // "he therefore earns his signature" is describing something that already happened.
+        val card = signed?.let { termCard(s, it.term).copy(instruction = "", benefitExplanation = "") }
         val started = s.finale.stepStarted
         val mayControl = TimerEngine.mayControl(s.timers, slot)
         val mayComplete = TimerEngine.mayComplete(s.timers, slot)
