@@ -30,7 +30,7 @@ internal object ConsiderationsNonSexual {
         c(
             id = "cn_mass_scalp", intensity = 1, family = F_MASSAGE, cats = setOf(MASSAGE),
             title = "Scalp massage",
-            base = "{G} rubs {R+} scalp with his fingertips [adv_pressure_light], covering the whole head.",
+            base = "{G} rubs {R+} scalp [adv_pressure_light], using his fingertips only, and covers the whole head.",
             explicit = "{G} takes {R+} head in both hands and rubs his scalp [adv_pressure_light] for the full timer.",
             acts = setOf("massage_scalp"),
             timers = listOf(tm("Scalp", 90))
@@ -38,8 +38,8 @@ internal object ConsiderationsNonSexual {
         c(
             id = "cn_mass_jaw", intensity = 1, family = F_MASSAGE, cats = setOf(MASSAGE),
             title = "Jaw and face",
-            base = "{G} kneads {R+} jaw, temples and cheekbones [adv_pressure_light] with his thumbs.",
-            explicit = "{G} holds {R+} face and kneads his jaw, temples and cheekbones [adv_pressure_light] with both thumbs.",
+            base = "{G} rubs {R+} jaw, temples and cheekbones [adv_pressure_light] with his thumbs.",
+            explicit = "{G} holds {R+} face and rubs his jaw, temples and cheekbones [adv_pressure_light] with both thumbs.",
             acts = setOf("massage_jaw_face"),
             timers = listOf(tm("Jaw", 45), tm("Temples", 45))
         ),
@@ -55,14 +55,14 @@ internal object ConsiderationsNonSexual {
             id = "cn_mass_upper_back", intensity = 1, family = F_MASSAGE, cats = setOf(MASSAGE),
             title = "Upper back",
             base = "{G} kneads {R+} upper back [adv_pressure_deep], following the inside edge of each shoulder blade.",
-            explicit = "{G} [v_knead] {R+} upper back [adv_pressure_deep], digging along the inside edge of each shoulder blade.",
+            explicit = "{G} [v_knead] {R+} upper back [adv_pressure_deep], following the inside edge of each shoulder blade.",
             acts = setOf("massage_upper_back"),
             timers = listOf(tm("Left shoulder blade", 60), tm("Right shoulder blade", 60))
         ),
         c(
             id = "cn_mass_lower_back", intensity = 1, family = F_MASSAGE, cats = setOf(MASSAGE),
             title = "Lower back",
-            base = "{G} kneads {R+} lower back [adv_pressure_firm] with the heels of both hands.",
+            base = "{G} kneads {R+} lower back [adv_pressure_firm], using the heels of both hands.",
             explicit = "{G} puts the heels of both hands into {R+} lower back and presses it [adv_pressure_deep].",
             acts = setOf("massage_lower_back"),
             timers = listOf(tm("Left side", 60), tm("Right side", 60))
@@ -114,7 +114,7 @@ internal object ConsiderationsNonSexual {
             id = "cn_mass_groin", intensity = 3, family = F_MASSAGE, cats = setOf(MASSAGE),
             title = "Groin",
             base = "{G} kneads the hip creases and the area around {R+} cock without touching the shaft.",
-            explicit = "{G} rubs {R+} hip creases and everything around his cock and deliberately never touches the shaft.",
+            explicit = "{G} rubs {R+} hip creases and everything around his cock and does not touch the shaft once.",
             acts = setOf("massage_groin"),
             blocks = setOf(Boundary.MASSAGE_NONSEXUAL),
             timers = listOf(tm("Left hip crease", 45), tm("Right hip crease", 45), tm("Around the base", 60))
@@ -123,7 +123,7 @@ internal object ConsiderationsNonSexual {
             id = "cn_mass_oil", intensity = 2, family = F_MASSAGE, cats = setOf(MASSAGE),
             title = "Oiled back",
             base = "{G} warms #massage_oil# and kneads {R+} whole back in long strokes, shoulders to waist.",
-            explicit = "{G} warms #massage_oil#, pours it down {R+} spine and kneads his whole back in long, greedy strokes.",
+            explicit = "{G} warms #massage_oil#, pours it down {R+} spine and kneads his whole back in strokes that run its full length.",
             acts = setOf("massage_oil", "massage_general"),
             equip = setOf(Equipment.MASSAGE_OIL),
             timers = listOf(tm("Shoulders", 60), tm("Mid back", 60), tm("Lower back", 60))
@@ -132,7 +132,7 @@ internal object ConsiderationsNonSexual {
             id = "cn_mass_candle", intensity = 2, family = F_MASSAGE, cats = setOf(MASSAGE, SENSORY),
             title = "Massage candle",
             base = "{G} drips warm wax from #massage_candle# along {R+} back, then presses it in [adv_pressure_firm].",
-            explicit = "{G} tips #massage_candle# down {R+} spine, listens to him react, then presses the wax in [adv_pressure_firm].",
+            explicit = "{G} tips #massage_candle# down {R+} spine, waits a slow count of five, then presses the wax in [adv_pressure_firm].",
             acts = setOf("massage_candle", "warm_wax"),
             equip = setOf(Equipment.MASSAGE_CANDLE),
             timers = listOf(tm("Wax", 30), tm("Pushing it in", 90))
@@ -141,7 +141,7 @@ internal object ConsiderationsNonSexual {
             id = "cn_mass_wand", intensity = 2, family = F_MASSAGE, cats = setOf(MASSAGE),
             title = "Massage wand",
             base = "{G} runs #massage_wand# over {R+} shoulders, spine and lower back [adv_toy_pace].",
-            explicit = "{G} runs #massage_wand# over {R+} shoulders, spine and lower back [adv_toy_pace] and holds it for a slow count of ten on each spot he reacts hardest to.",
+            explicit = "{G} runs #massage_wand# over {R+} shoulders, spine and lower back [adv_toy_pace] and holds it for a slow count of ten on the top of each shoulder, on the middle of the spine and on each side of the lower back.",
             acts = setOf("massage_wand"),
             equip = setOf(Equipment.MASSAGE_WAND),
             timers = listOf(tm("Shoulders", 60), tm("Spine", 45), tm("Lower back", 60))
@@ -150,7 +150,7 @@ internal object ConsiderationsNonSexual {
             id = "cn_mass_reciprocal", intensity = 1, family = F_MASSAGE, cats = setOf(MASSAGE),
             title = "Massage each other",
             base = "{G} and {R} knead each other's necks and shoulders at the same time, sitting face to face.",
-            explicit = "{G} and {R} sit face to face and knead each other's necks and shoulders at once, and neither stops first.",
+            explicit = "{G} and {R} sit face to face and knead each other's necks and shoulders at once, and neither stops before the timer ends.",
             acts = setOf("massage_neck_shoulders"), mutual = true,
             timers = listOf(tm("Both at once", 120))
         ),
@@ -158,7 +158,7 @@ internal object ConsiderationsNonSexual {
             id = "cn_mass_four_areas", intensity = 2, family = F_MASSAGE, cats = setOf(MASSAGE),
             title = "Four areas, timed",
             base = "{G} kneads four areas of {R+} body in turn: shoulders, lower back, buttocks and each thigh.",
-            explicit = "{G} handles {R} in four timed passes — shoulders, lower back, ass, then each thigh — and does not cut any of them short.",
+            explicit = "{G} kneads {R} in four timed passes — shoulders, lower back, ass, then each thigh — and gives every one of them its full time.",
             acts = setOf("massage_general", "massage_neck_shoulders", "massage_lower_back"),
             timers = listOf(tm("Shoulders", 60), tm("Lower back", 45), tm("Left thigh", 30), tm("Right thigh", 30))
         ),
@@ -191,8 +191,8 @@ internal object ConsiderationsNonSexual {
         c(
             id = "cn_kiss_mouth_neck_chest", intensity = 1, family = F_KISS, cats = setOf(KISSING),
             title = "Mouth, neck, chest",
-            base = "{G} uses {R+} mouth, then his neck, then his chest with his mouth, one minute each.",
-            explicit = "{G} uses {R+} mouth, neck and chest in turn [adv_kiss], a minute each, and does not rush any of them.",
+            base = "{G} puts his mouth on {R+} mouth, then his neck, then his chest, one minute each.",
+            explicit = "{G} puts his mouth on {R+} mouth, then his neck, then his chest [adv_kiss], and gives each one the full minute.",
             acts = setOf("tongue_kissing", "neck_kissing", "chest_nipple_kissing"),
             timers = listOf(tm("Mouth", 60), tm("Neck", 60), tm("Chest", 60))
         ),
@@ -234,7 +234,7 @@ internal object ConsiderationsNonSexual {
             id = "cn_ear_one", intensity = 1, family = F_EAR, cats = setOf(EAR_PLAY),
             title = "One ear",
             base = "{G} sucks one of {R+} ears — outer edge first, then the lobe.",
-            explicit = "{G} takes one of {R+} ears in his mouth, rubs the outer edge, then sucks the lobe and holds it.",
+            explicit = "{G} takes one of {R+} ears in his mouth, rubs the outer edge, then sucks the lobe and keeps it in his mouth until the timer ends.",
             acts = setOf("ear_play"),
             timers = listOf(tm("Outer edge", 45), tm("Lobe", 45))
         ),
@@ -258,7 +258,7 @@ internal object ConsiderationsNonSexual {
             id = "cn_ear_praise", intensity = 1, family = F_EAR, cats = setOf(EAR_PLAY, LANGUAGE),
             title = "Whispered praise",
             base = "{G} sucks {R+} ear and, between passes, [tone_whisper] into it and [v_praise].",
-            explicit = "{G} sucks {R+} ear and, in the gaps, [tone_whisper] into it and [v_praise] close enough for him to feel every word.",
+            explicit = "{G} sucks {R+} ear and, in the gaps, [tone_whisper] into it and [v_praise], with his lips touching the ear as he says it.",
             acts = setOf("ear_play", "explicit_praise"),
             timers = listOf(tm("Ear and whispering", 90))
         ),
@@ -281,16 +281,16 @@ internal object ConsiderationsNonSexual {
         c(
             id = "cn_ear_growling", intensity = 3, family = F_EAR, cats = setOf(EAR_PLAY, LANGUAGE),
             title = "Growling into his ear",
-            base = "{G} sucks {R+} ear and [tone_whisper] into it low enough that {R} feels it more than hears it.",
-            explicit = "{G} sucks {R+} ear and [tone_whisper] into it so low that he feels it more than he hears it.",
+            base = "{G} sucks {R+} ear and [tone_whisper] into it, low enough that {R} feels it against his ear.",
+            explicit = "{G} sucks {R+} ear and [tone_whisper] into it, low enough that he feels it against his ear.",
             acts = setOf("ear_play", "dirty_talk"),
             timers = listOf(tm("Growling", 60))
         ),
         c(
             id = "cn_ear_neck", intensity = 1, family = F_EAR, cats = setOf(EAR_PLAY, KISSING),
             title = "Ear and neck",
-            base = "{G} alternates between {R+} ear and the side of his neck, never staying long in one place.",
-            explicit = "{G} swaps between {R+} ear and the side of his neck constantly so he can never settle into either.",
+            base = "{G} alternates between {R+} ear and the side of his neck, changing every fifteen seconds.",
+            explicit = "{G} swaps between {R+} ear and the side of his neck every fifteen seconds for the whole timer.",
             acts = setOf("ear_play", "neck_kissing"),
             timers = listOf(tm("Left ear and neck", 60), tm("Right ear and neck", 60))
         ),
@@ -298,14 +298,14 @@ internal object ConsiderationsNonSexual {
             id = "cn_ear_reciprocal", intensity = 1, family = F_EAR, cats = setOf(EAR_PLAY),
             title = "Ear play on each other",
             base = "{G} and {R} lie face to face on their sides and suck each other's ears at the same time.",
-            explicit = "{G} and {R} lie face to face and suck each other's ears at once, and neither one stops first.",
+            explicit = "{G} and {R} lie face to face and suck each other's ears at once, and neither one stops before the timer ends.",
             acts = setOf("ear_play"), mutual = true,
             timers = listOf(tm("Both at once", 90))
         ),
         c(
             id = "cn_ear_with_massage", intensity = 2, family = F_EAR, cats = setOf(EAR_PLAY, MASSAGE),
             title = "Ear play during a massage",
-            base = "{G} sucks {R+} shoulders and leans down to suck his ear without stopping his hands.",
+            base = "{G} kneads {R+} shoulders with both hands and leans down to suck his ear without stopping his hands.",
             explicit = "{G} keeps kneading {R+} shoulders [adv_pressure_firm] and sucks his ear at the same time. His hands do not stop.",
             acts = setOf("ear_play", "massage_neck_shoulders"),
             timers = listOf(tm("Shoulders only", 45), tm("Shoulders and ear", 90))
@@ -331,7 +331,7 @@ internal object ConsiderationsNonSexual {
             id = "cn_ear_with_toy", intensity = 4, family = F_EAR, cats = setOf(EAR_PLAY),
             title = "Ear play with a toy on him",
             base = "{G} sucks {R+} ear while using #TOY# on him.",
-            explicit = "{G} sucks {R+} ear and runs #TOY# on him at the same time, and neither stops.",
+            explicit = "{G} sucks {R+} ear and runs #TOY# on him at the same time, and neither his mouth nor the toy stops before the timer ends.",
             acts = setOf("ear_play"), toy = true,
             timers = listOf(tm("Ear and toy", 120))
         ),
@@ -348,11 +348,11 @@ internal object ConsiderationsNonSexual {
         c(
             id = "cn_ear_rough", intensity = 5, family = F_EAR, cats = setOf(EAR_PLAY),
             title = "Ear play while he is held down",
-            base = "{G} [v_pin] {R} and sucks his ear while he stays pinned, [tone_whisper] into it throughout.",
-            explicit = "{G} [v_pin] {R} down and sucks his ear while he stays pinned, [tone_whisper] into it the whole time.",
+            base = "{G} [v_pin] {R}, sucks his ear while he stays pinned, and [tone_whisper] into it throughout.",
+            explicit = "{G} [v_pin] {R} down, sucks his ear while he stays pinned, and [tone_whisper] into it the whole time.",
             acts = setOf("ear_play", "pinning"),
             blocks = setOf(Boundary.NO_ROUGH_SEX),
-            timers = listOf(tm("Pinned and stroked", 120))
+            timers = listOf(tm("Pinned, ear sucked", 120))
         )
     )
 }

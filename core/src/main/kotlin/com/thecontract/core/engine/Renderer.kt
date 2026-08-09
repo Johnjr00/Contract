@@ -145,10 +145,13 @@ object Renderer {
                 conditions = r.conditions + label
             )
 
+            // Written as an override, because it lands on instructions that have already named a
+            // pressure: "with hard pressure … lighter pressure" reads as a contradiction unless
+            // the second sentence says plainly that it replaces the first.
             MaybeCondition.GENTLER -> r.copy(
                 instruction = StyleEngine.tidy(
-                    r.instruction + " All of it is taken at the gentler end: lighter pressure, a slower pace, " +
-                        "and nothing pushed further than it needs to go."
+                    r.instruction + " Everything above is done at the gentler end instead: lighter pressure " +
+                        "than written, a slower pace, and nothing taken as far as the term says."
                 ),
                 conditions = r.conditions + label
             )
@@ -230,8 +233,8 @@ object Renderer {
         return when (amendment) {
             Amendment.GENTLER -> r.copy(
                 instruction = StyleEngine.tidy(
-                    r.instruction + " Amended to the gentler version: lighter pressure, a slower pace, " +
-                        "and nothing taken as far as it could be."
+                    r.instruction + " Amended: everything above is done at lighter pressure and a slower " +
+                        "pace than written."
                 ),
                 amendments = r.amendments + label
             )

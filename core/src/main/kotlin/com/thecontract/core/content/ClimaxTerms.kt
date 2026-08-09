@@ -50,8 +50,8 @@ internal object ClimaxTerms {
         t(
             id = "cx_top_inside_from_behind", level = 5, cats = setOf(CLIMAX, ANAL), climax = true,
             title = "He finishes inside him from behind",
-            base = "{G} gets on his hands and knees. {R} [v_enter] him with #lubricant# and starts [adv_thrust_slow] and builds to [adv_thrust_hard] until he [v_come_in] him, then stays inside for a slow count of twenty before withdrawing. If the timer ends first, he holds the hard rhythm until he finishes.",
-            explicit = "{G} gets on his hands and knees and stays there. {R} [v_enter] him with #lubricant#, starts [adv_thrust_slow], builds to [adv_thrust_hard] and [v_come_in] him, then stays buried for a slow count of twenty before he pulls out. If the timer ends first he keeps going at that pace until he is done.",
+            base = "{G} gets on his hands and knees. {R} [v_enter] him with #lubricant#, moves [adv_thrust_slow] for the first two minutes, then [adv_thrust_hard] until he [v_come_in] him, then stays inside for a slow count of twenty before withdrawing. If the timer ends first, he holds the hard rhythm until he finishes.",
+            explicit = "{G} gets on his hands and knees and stays there. {R} [v_enter] him with #lubricant#, moves [adv_thrust_slow] for the first two minutes, then [adv_thrust_hard], and [v_come_in] him, then stays buried for a slow count of twenty before he pulls out. If the timer ends first he keeps going at that pace until he is done.",
             benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
             acts = setOf("bottoming"), anal = true,
             rCon = PartyConstraint.TOP, gCon = PartyConstraint.BOTTOM,
@@ -151,7 +151,7 @@ internal object ClimaxTerms {
             id = "cx_bottom_self_while_rimmed", level = 5, cats = setOf(CLIMAX, RIMMING, ANAL), climax = true,
             title = "His own hand while he is eaten out",
             base = "{R} strokes himself with his own hand while {G} [v_rim] him without stopping until he finishes. If the timer ends first, {G} does not come up until he does.",
-            explicit = "{R} strokes his own cock while {G} [v_rim] him and does not stop for anything until he [v_come]. If the timer ends first, {G} still does not come up until he is done.",
+            explicit = "{R} strokes his own cock while {G} [v_rim] him and does not stop at any point until he [v_come]. If the timer ends first, {G} still does not come up until he is done.",
             benefit = RECEIVER, type = BenefitType.RIMMING_RECIPIENT,
             acts = setOf("rimming"),
             timers = listOf(tm("Until he finishes", 240))
@@ -221,8 +221,8 @@ internal object ClimaxTerms {
         t(
             id = "cx_np_oral", level = 5, cats = setOf(CLIMAX, ORAL), climax = true,
             title = "Sucked until he finishes",
-            base = "{G} [v_suck] {R} until he finishes and does not come off for anything. If the timer ends first, he keeps the same rhythm until he does.",
-            explicit = "{G} [v_suck] {R} until he [v_come] and does not come off for any reason. If the timer ends first, the rhythm does not change until he is done.",
+            base = "{G} [v_suck] {R} until he finishes and does not come off at any point. If the timer ends first, he keeps the same rhythm until he does.",
+            explicit = "{G} [v_suck] {R} until he [v_come] and does not come off at any point. If the timer ends first, the rhythm does not change until he is done.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral"),
             timers = listOf(tm("Until he finishes", 240))
@@ -230,8 +230,8 @@ internal object ClimaxTerms {
         t(
             id = "cx_np_hand", level = 5, cats = setOf(CLIMAX, HANDS), climax = true,
             title = "Stroked by hand until he finishes",
-            base = "{G} [v_stroke] {R} with #lubricant# [adv_grip], thirty seconds slow then thirty seconds fast, repeating that cycle without a break until he finishes. If the timer ends first, he keeps the same cycle going until he does.",
-            explicit = "{G} strokes {R+} cock with #lubricant# [adv_grip], thirty seconds slow then thirty seconds fast, repeating that cycle without a break until he [v_come]. If the timer ends first he keeps the same cycle going until he is done.",
+            base = "{G} [v_stroke] {R} [adv_grip], using plenty of #lubricant#, thirty seconds slow then thirty seconds fast, repeating that cycle without a break until he finishes. If the timer ends first, he keeps the same cycle going until he does.",
+            explicit = "{G} strokes {R+} cock [adv_grip], using plenty of #lubricant#, thirty seconds slow then thirty seconds fast, repeating that cycle without a break until he [v_come]. If the timer ends first he keeps the same cycle going until he is done.",
             benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
             equip = setOf(Equipment.LUBRICANT),
             timers = listOf(tm("Until he finishes", 240))
@@ -249,7 +249,7 @@ internal object ClimaxTerms {
         t(
             id = "cx_np_vibration", level = 5, cats = setOf(CLIMAX, TOYS), climax = true,
             title = "Vibration until he finishes",
-            base = "{G} holds #vibrator# on {R} where he asks for it, at the setting he asks for, until he finishes. If the timer ends first, it stays exactly there until he does.",
+            base = "{G} holds #vibrator# against the underside of {R+} cock on a high setting until he finishes. If the timer ends first, it stays exactly there until he does.",
             explicit = "{G} pins #vibrator# against {R+} perineum on the highest setting until he [v_come]. If the timer ends first it does not move until he is done.",
             benefit = RECEIVER, type = BenefitType.TOY_RECIPIENT,
             acts = setOf("vibration"),
