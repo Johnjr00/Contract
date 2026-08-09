@@ -96,7 +96,7 @@ internal object TermsLevel5 {
         t(
             id = "l5_rough_grip_and_kiss", level = 5, cats = setOf(ROUGH, KISSING),
             title = "Held by the jaw",
-            base = "{G} [v_grip] {R+} jaw, holds his face still and kisses him [adv_kiss] until he is done.",
+            base = "{G} [v_grip] {R+} jaw, holds his face still and kisses him [adv_kiss] until the timer ends.",
             explicit = "{G} [v_grip] {R+} jaw, holds his face still and kisses him [adv_kiss] until the timer ends.",
             benefit = GIVER, type = BenefitType.COMMAND_AUTHORITY,
             acts = setOf("rough_handling", "hard_kissing"),
@@ -520,8 +520,8 @@ internal object TermsLevel5 {
         t(
             id = "l5_bdsm_degradation_scene", level = 5, cats = setOf(LANGUAGE, POWER, ROUGH),
             title = "Talked down and taken",
-            base = "{DOM} talks {SUB} down in the agreed terms while he [v_handle] him, from start to finish.",
-            explicit = "{DOM} talks {SUB} down in the agreed terms the entire time he [v_handle] him, and does not soften it once.",
+            base = "{DOM} talks {SUB} down while he [v_handle] him, from the first second of the timer to the last.",
+            explicit = "{DOM} talks {SUB} down the entire time he [v_handle] him, and does not soften it once.",
             benefit = GIVER, type = BenefitType.OWNERSHIP,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("degradation", "rough_handling", "dirty_talk"),

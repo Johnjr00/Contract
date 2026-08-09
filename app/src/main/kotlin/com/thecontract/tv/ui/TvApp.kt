@@ -107,7 +107,7 @@ fun TvApp(
                     }
                 }
 
-                view.term?.let { TermPanel(it, "Proposed term") }
+                view.term?.let { TermPanel(it, termLabel(view)) }
                 view.bundledTerm?.let { TermPanel(it, "Second term in the trade") }
                 view.consideration?.let { ConsiderationPanel(it) }
 
@@ -472,6 +472,26 @@ private fun formatClock(remainingMs: Long): String {
     val seconds = total % 60
     return "$minutes:${seconds.toString().padStart(2, '0')}"
 }
+
+/**
+ * What the term card is called depends on where the game is. It read "Proposed term" on every
+ * screen that carried one, including the screen that had just announced it signed and every
+ * screen of the final scene, where nothing is being proposed to anybody.
+ */
+private fun termLabel(view: ClientView): String = when {
+    view.execution != null -> "Term in the scene"
+    view.phase == GamePhase.TERM_SIGNED -> "Signed term"
+    view.phase in EARNING_PHASES -> "The term being earned"
+    else -> "Proposed term"
+}
+
+/** The steps where a consideration is being chosen, performed or judged. */
+private val EARNING_PHASES = setOf(
+    GamePhase.CONSIDERATION_PRIVATE_SELECTION,
+    GamePhase.CLOSING_TERM_CONSIDERATION,
+    GamePhase.CONSIDERATION_PUBLIC_EXECUTION,
+    GamePhase.WAITING_FOR_SIGNATURE_CONFIRMATION
+)
 
 /** The screens whose whole purpose is getting a phone connected. */
 private val PAIRING_PHASES = setOf(

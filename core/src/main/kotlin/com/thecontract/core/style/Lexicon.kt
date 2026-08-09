@@ -35,7 +35,7 @@ object Lexicon {
         // --- Oral -------------------------------------------------------------------------
         k("v_suck", "worships", "sucks", "sucks", "swallows")
         k("v_suck_slow", "takes his time over", "sucks slowly on", "sucks hard and slow on", "sucks deep and slow on")
-        k("v_deep", "sinks slowly onto", "takes deeper onto", "pushes his throat down onto", "forces himself down onto")
+        k("v_deep", "sinks slowly onto", "works his way down onto", "pushes his throat down onto", "forces himself down onto")
         k("v_lick", "traces his tongue over", "licks", "licks", "laps at")
         k("v_mouth", "attends to", "licks and sucks", "sucks and bites at", "sucks hard on")
         k("v_tongue", "circles his tongue around", "runs his tongue over", "drags his tongue over", "drags his tongue over")

@@ -12,15 +12,15 @@ Both APKs were built and verified.
 | --- | --- |
 | Debug APK | `app/build/outputs/apk/debug/app-debug.apk` |
 | | application id `com.thecontract.tv.debug` |
-| | SHA-256 `c44c62d3aa54dd3e5730b5b3e583ddab63e5df9c8c8387511ba1a32623c89927` |
+| | SHA-256 `0597e6ca19a10067a512fa243d7f4c0fbc19df5a9dd187de65e7268d041edb15` |
 | Release APK | `app/build/outputs/apk/release/app-release.apk` |
 | | application id `com.thecontract.tv`, minified and resource-shrunk by R8 |
-| | SHA-256 `5f1c86b4fa676564e69432aedaf8c906b04e8da3b370512d74813b6b9fcadfab` |
+| | SHA-256 `02f6a941e6f00f074216ba8f34275b157b700de299c2028d34e05bee1f88a055` |
 | Release signature | APK Signature Scheme v2, verified with `apksigner verify` |
 | | signer `CN=The Contract, OU=TheContract, O=TheContract, L=Unknown, ST=Unknown, C=US` |
 | | certificate SHA-256 `d460e29876eda8d73e6b1af100f78942b26ac8ab28d33aaa7f42ca605bef25e0` |
 
-These are the hashes as of the on-phone help bubbles in section 4j below. The signing cert is unchanged from the previous fix (same keystore).
+These are the hashes as of the on-device playthrough in section 4k below. The signing cert is unchanged from the previous fix (same keystore).
 
 Toolchain actually used: AGP 8.7.3, Kotlin 2.2.21, KSP 2.2.21-2.0.4, Compose BOM 2024.10.01,
 Room 2.6.1, Android SDK Platform 35, Build-Tools 35.0.0, Gradle 8.14.3, JDK 21 emitting Java 17
@@ -878,6 +878,62 @@ rather than clicking: both bubbles open with the right text, a tap away
 closes, a second tap on the same **?** closes, a tap inside the bubble does
 not, and the button underneath still does its job — tapping Counteroffer
 through the open bubble sent the answer.
+
+---
+
+### 4k. A whole game played on the device, read screen by screen
+
+The delivered APK was installed on a wiped emulator — every earlier build
+uninstalled first — and a complete quick game was played through two
+phone-sized browser tabs driving the real controller against the real server
+in the app. Ten regular terms, two closing terms, twelve consideration
+rounds and a twelve-step final scene. Every screen either phone showed was
+captured as text and as a screenshot and read: 205 screens.
+
+Eight defects came out of it.
+
+**Two vague terms.** "Playing it straight" said only that the two of them
+"run the term as an authority scene, staying in character" — circular, and it
+tells a player nothing to actually do. It now has him giving an order roughly
+every thirty seconds and the other carrying each one out without speaking.
+"Held by the jaw" ended "until he is done" on a term that carries its own
+timer; it ends at the timer now.
+
+**Four deferrals to an agreement the game never makes.** Two degradation
+terms told the players to use "the terms they have already agreed on". No
+such agreement exists anywhere in the game. Both now stand on their own.
+
+**Three grammar faults that only exist after substitution.** "one of Dan's
+ear"; "reaches round to strokes his cock", where the lexicon hands back a
+third-person verb that cannot follow "to"; and "takes deeper onto Dan's
+cock", a `v_deep` variant that does not parse in the one register that used
+it. All three are now caught by `RenderSweepTest`, which grew two rules: a
+singular body part after "one of"/"both of", and a conjugated verb after
+"to".
+
+**The term card was labelled "Proposed term" on every screen that carried
+one** — 167 of the 212 screens in the first full run, including the screen
+that had just announced the term *signed*, every consideration screen, and
+every screen of the final scene, where nothing is being proposed to anybody.
+It now reads "Signed term", "The term being earned" or "Term in the scene"
+as appropriate, on the phone and on the television.
+
+**"Mark it complete" gave no sign it had worked.** Pressing it left the same
+button sitting there unchanged; the only feedback was the clock stopping. It
+is replaced by the fact of it — a "Marked complete" tag — and moving on
+becomes the obvious next press.
+
+**The last term of the scene offered "Next term".** There is no next term at
+step 12 of 12; that button ends the session. It now says "Finish the
+contract".
+
+Two things found and deliberately not treated as product defects. A cold
+first launch after a fresh install still trips the `startForeground` window
+on this unaccelerated emulator, as already recorded in section 1; the second
+launch is fine. And the driver's own clicks were being lost until it stopped
+re-clicking timer controls and started pressing buttons inside a single page
+evaluation — the phone rebuilds its DOM on a state change, which is correct
+behaviour and not something a human thumb races.
 
 ---
 

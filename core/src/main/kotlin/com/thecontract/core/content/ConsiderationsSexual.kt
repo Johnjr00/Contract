@@ -135,7 +135,7 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_rim_and_stroke", intensity = 4, family = F_SEX, cats = setOf(RIMMING, HANDS, ANAL),
             title = "Rimming and stroking",
-            base = "{G} [v_rim] {R} and reaches round to [v_stroke] his cock at the same rhythm.",
+            base = "{G} [v_rim] {R} and, reaching round, [v_stroke] his cock at the same rhythm.",
             explicit = "{G} [v_rim] {R} and reaches round to stroke his cock in the same rhythm so he gets both at once.",
             acts = setOf("rimming"), timers = listOf(tm("Rimming", 60), tm("Both", 120))
         ),

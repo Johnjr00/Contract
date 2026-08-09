@@ -347,7 +347,7 @@
 
     if (v.setup) main.appendChild(renderSetup(v.setup));
     if (v.profile) main.appendChild(renderProfile(v.profile));
-    if (v.term) main.appendChild(renderTerm(v.term, "Proposed term"));
+    if (v.term) main.appendChild(renderTerm(v.term, termLabel(v)));
     if (v.bundledTerm) main.appendChild(renderTerm(v.bundledTerm, "Second term in the trade"));
     if (v.termOptions && v.termOptions.length) {
       v.termOptions.forEach(function (t) { main.appendChild(renderTerm(t, "Option")); });
@@ -432,6 +432,26 @@
     }
 
     paintTimers();
+  }
+
+  /*
+   * What the term card is called depends on where the game is. It said "Proposed term" on every
+   * screen that carried one, including the screen that had just announced it signed and every
+   * screen of the final scene, where nothing is being proposed to anybody.
+   */
+  function termLabel(v) {
+    if (v.execution) return "Term in the scene";
+    switch (v.phase) {
+      case "TERM_SIGNED":
+        return "Signed term";
+      case "CONSIDERATION_PRIVATE_SELECTION":
+      case "CLOSING_TERM_CONSIDERATION":
+      case "CONSIDERATION_PUBLIC_EXECUTION":
+      case "WAITING_FOR_SIGNATURE_CONFIRMATION":
+        return "The term being earned";
+      default:
+        return "Proposed term";
+    }
   }
 
   function renderTerm(t, label) {

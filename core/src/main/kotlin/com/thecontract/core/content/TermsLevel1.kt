@@ -260,7 +260,7 @@ internal object TermsLevel1 {
         t(
             id = "l1_ear_one", level = 1, cats = setOf(EAR_PLAY),
             title = "One ear",
-            base = "{G} sucks one of {R+} ear [adv_kiss] — lips along the outer edge, then the lobe.",
+            base = "{G} sucks one of {R+} ears [adv_kiss] — lips along the outer edge, then the lobe.",
             explicit = "{G} takes one of {R+} ears in his mouth [adv_kiss], rubs the outer edge with his lips, then sucks the lobe and does not let go early.",
             benefit = RECEIVER, type = BenefitType.EAR_PLAY_RECIPIENT,
             acts = setOf("ear_play"),

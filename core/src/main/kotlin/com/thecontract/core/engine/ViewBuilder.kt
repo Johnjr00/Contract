@@ -656,6 +656,8 @@ object ViewBuilder {
         // "he therefore earns his signature" is describing something that already happened.
         val card = signed?.let { termCard(s, it.term).copy(instruction = "", benefitExplanation = "") }
         val started = s.finale.stepStarted
+        val marked = s.finale.stepIndex in s.finale.stepsCompleted
+        val lastStep = s.finale.stepIndex >= s.finale.executionOrder.lastIndex
         val mayControl = TimerEngine.mayControl(s.timers, slot)
         val mayComplete = TimerEngine.mayComplete(s.timers, slot)
         return base.copy(
@@ -674,8 +676,18 @@ object ViewBuilder {
             ),
             choices = buildList {
                 if (!started) add(Choice("exec:begin", "Begin this term"))
-                if (started && mayComplete) add(Choice("exec:complete", "Mark it complete"))
-                if (started) add(Choice("exec:next", "Next term", kind = "nav"))
+                // Marking a term complete used to leave its own button sitting there unchanged,
+                // so the only sign it had worked was the clock stopping. It is replaced by the
+                // fact of it, and moving on becomes the obvious next press.
+                if (started && marked) add(Choice("exec:done", "Marked complete", kind = "status"))
+                if (started && mayComplete && !marked) add(Choice("exec:complete", "Mark it complete"))
+                if (started) {
+                    if (lastStep) {
+                        add(Choice("exec:next", "Finish the contract"))
+                    } else {
+                        add(Choice("exec:next", "Next term", kind = if (marked) "action" else "nav"))
+                    }
+                }
                 if (s.finale.stepIndex > 0) add(Choice("exec:prev", "Previous term", kind = "nav"))
                 add(Choice("global_pause", "Pause everything", danger = true))
             },

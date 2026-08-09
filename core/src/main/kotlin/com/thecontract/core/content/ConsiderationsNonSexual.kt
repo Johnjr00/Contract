@@ -233,7 +233,7 @@ internal object ConsiderationsNonSexual {
         c(
             id = "cn_ear_one", intensity = 1, family = F_EAR, cats = setOf(EAR_PLAY),
             title = "One ear",
-            base = "{G} sucks one of {R+} ear — outer edge first, then the lobe.",
+            base = "{G} sucks one of {R+} ears — outer edge first, then the lobe.",
             explicit = "{G} takes one of {R+} ears in his mouth, rubs the outer edge, then sucks the lobe and holds it.",
             acts = setOf("ear_play"),
             timers = listOf(tm("Outer edge", 45), tm("Lobe", 45))

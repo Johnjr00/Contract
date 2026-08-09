@@ -24,6 +24,26 @@ import kotlin.test.assertEquals
  */
 class RenderSweepTest {
 
+    /**
+     * "one of Dan's ear". Two of these survived every earlier pass because they only read wrong
+     * once the possessive is substituted in, and both were caught by eye rather than by a check.
+     */
+    private val PLURAL_MISMATCH = Regex(
+        "\\b(?:one|both|each) of \\w+(?:'s)? " +
+            "(?:ear|hand|arm|leg|thigh|cheek|nipple|foot|calf|wrist|shoulder|knee)\\b",
+        RegexOption.IGNORE_CASE
+    )
+
+    /**
+     * "reaches round to strokes his cock". The lexicon hands back a third-person verb, which is
+     * right everywhere except immediately after "to".
+     */
+    private val CONJUGATED_AFTER_TO = Regex(
+        "\\bto (?:strokes|sucks|kisses|licks|rims|grips|pulls|pushes|takes|holds|works|" +
+            "spanks|edges|teases|fucks|kneads|massages|rubs)\\b",
+        RegexOption.IGNORE_CASE
+    )
+
     private fun ctx(explicitness: Explicitness) = GameContext(
         SharedSetup(
             player1 = PlayerSetup("Marcus", Role.DOMINANT),
@@ -57,6 +77,8 @@ class RenderSweepTest {
                     if (Regex("\\b(\\w+) \\1\\b").containsMatchIn(text)) add("doubled word")
                     if (text.contains("  ")) add("double space")
                     if (!text.trimEnd().endsWith(".")) add("no full stop")
+                    if (PLURAL_MISMATCH.containsMatchIn(text)) add("singular noun after one of/both of")
+                    if (CONJUGATED_AFTER_TO.containsMatchIn(text)) add("conjugated verb after \"to\"")
                 }
                 if (problems.isNotEmpty()) {
                     flagged++
@@ -70,6 +92,8 @@ class RenderSweepTest {
                     if (Regex("\\b(\\w+) \\1\\b").containsMatchIn(text)) add("doubled word")
                     if (text.contains("  ")) add("double space")
                     if (!text.trimEnd().endsWith(".")) add("no full stop")
+                    if (PLURAL_MISMATCH.containsMatchIn(text)) add("singular noun after one of/both of")
+                    if (CONJUGATED_AFTER_TO.containsMatchIn(text)) add("conjugated verb after \"to\"")
                 }
                 if (problems.isNotEmpty()) {
                     flagged++

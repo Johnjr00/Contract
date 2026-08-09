@@ -341,8 +341,8 @@ internal object TermsLevel4 {
         t(
             id = "l4_service_roleplay_authority", level = 4, cats = setOf(POWER, ROLEPLAY),
             title = "Playing it straight",
-            base = "{DOM} and {SUB} run the term as an authority scene, staying in character from start to finish.",
-            explicit = "{DOM} and {SUB} run the whole term as an authority scene and neither one drops character for a second.",
+            base = "{DOM} gives {SUB} an order roughly every thirty seconds and {SUB} carries each one out without speaking, except to answer him. Neither of them breaks character until the timer ends.",
+            explicit = "{DOM} gives {SUB} an order roughly every thirty seconds and {SUB} does each one without a word, except to answer him. Neither of them drops character for a second until the timer ends.",
             benefit = GIVER, type = BenefitType.COMMAND_AUTHORITY,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("roleplay_lead", "commands"),
@@ -375,8 +375,8 @@ internal object TermsLevel4 {
         t(
             id = "l4_own_degradation", level = 4, cats = setOf(LANGUAGE, POWER),
             title = "Talked down to",
-            base = "{DOM} talks {SUB} down while stroking him with his hand, in the terms they have already agreed on.",
-            explicit = "{DOM} talks {SUB} down the whole time he strokes him with his hand, in exactly the terms they have already agreed on.",
+            base = "{DOM} talks {SUB} down the whole time he strokes him with his hand, and does not go quiet once.",
+            explicit = "{DOM} talks {SUB} down the entire time he strokes him with his hand, and never once softens it.",
             benefit = GIVER, type = BenefitType.OWNERSHIP,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("degradation", "dirty_talk"),

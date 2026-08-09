@@ -193,7 +193,7 @@ internal object TermsLevel2 {
             id = "l2_rim_plus_stroke", level = 2, cats = setOf(RIMMING, HANDS, ANAL),
             title = "Rimming and stroking",
             base = "{G} [v_rim] {R} while one hand reaches round and [v_stroke] his cock at the same rhythm.",
-            explicit = "{G} [v_rim] {R} and reaches round to [v_stroke] his cock in the same rhythm, so he gets both at once and cannot separate them.",
+            explicit = "{G} [v_rim] {R} and, reaching round, [v_stroke] his cock in the same rhythm, so he gets both at once and cannot separate them.",
             benefit = RECEIVER, type = BenefitType.RIMMING_RECIPIENT,
             acts = setOf("rimming"),
             timers = listOf(tm("Rimming only", 60), tm("Rimming and stroking", 120))
