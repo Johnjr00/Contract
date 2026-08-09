@@ -618,7 +618,7 @@ object ViewBuilder {
 
     private fun relevantAmendmentChoices(s: GameState, r: RenderedTerm): List<Choice> {
         val term = ContentLibrary.termsById[r.termId] ?: return emptyList()
-        val ctx = GameContext(s.setup, s.profiles)
+        val ctx = GameContext.of(s)
         return Renderer.relevantAmendments(term, r)
             .filter { amendment ->
                 if (amendment != Amendment.ROLES_REVERSED) return@filter true
@@ -631,7 +631,7 @@ object ViewBuilder {
 
     private fun bundleOptionCard(s: GameState, termId: String): TermCard? {
         val term = ContentLibrary.termsById[termId] ?: return null
-        val ctx = GameContext(s.setup, s.profiles)
+        val ctx = GameContext.of(s)
         val e = EligibilityEngine.evaluate(term, ctx)
         if (e !is Eligibility.Ok) return null
         return termCard(s, Renderer.renderTerm(term, e.binding, ctx, EligibilityEngine.maybeConditions(term, e.binding, ctx)))
@@ -639,7 +639,7 @@ object ViewBuilder {
 
     private fun closingOptionCard(s: GameState, termId: String, finisher: Slot): TermCard? {
         val term = ContentLibrary.termsById[termId] ?: return null
-        val ctx = GameContext(s.setup, s.profiles)
+        val ctx = GameContext.of(s)
         val binding = PartyBinding(finisher.other, finisher)
         val e = EligibilityEngine.evaluate(term, ctx, preferredBinding = binding)
         if (e !is Eligibility.Ok || e.binding != binding) return null

@@ -312,16 +312,33 @@ object ConsiderationSelector {
         val maxPerFamily = (limit / 3).coerceAtLeast(2)
         val chosen = LinkedHashMap<String, ConsiderationAction>()
         val familiesSeen = mutableMapOf<ConsiderationFamily, Int>()
+
+        // Eligibility already stops a man being offered anything on his hole once his allowance
+        // is gone, but a vers top with his one still unspent could otherwise see four of them
+        // side by side in the same list. He is allowed one all night, so he is shown one.
+        val receptiveHeadroom = ctx.setup.player(recipient).analRole.receptiveAnalLimit -
+            (ctx.analReceptionUsed[recipient] ?: 0)
+        var receptiveOffered = 0
+        fun mayOffer(action: ConsiderationAction): Boolean {
+            if (recipient !in EligibilityEngine.receptiveParties(action, performer, recipient)) return true
+            if (receptiveHeadroom > 1) return true
+            return receptiveOffered == 0
+        }
+
         for ((action, _) in scored) {
             val seen = familiesSeen.getOrDefault(action.family, 0)
             if (seen >= maxPerFamily) continue
+            if (!mayOffer(action)) continue
             chosen[action.id] = action
+            if (recipient in EligibilityEngine.receptiveParties(action, performer, recipient)) receptiveOffered++
             familiesSeen[action.family] = seen + 1
             if (chosen.size >= limit) break
         }
         for ((action, _) in scored) {
             if (chosen.size >= limit) break
+            if (action.id in chosen || !mayOffer(action)) continue
             chosen[action.id] = action
+            if (recipient in EligibilityEngine.receptiveParties(action, performer, recipient)) receptiveOffered++
         }
         return chosen.values.toList()
     }

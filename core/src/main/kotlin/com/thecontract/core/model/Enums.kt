@@ -20,13 +20,29 @@ enum class Role { DOMINANT, SUBMISSIVE }
  * consideration actions, bundles, closing terms and final instructions.
  */
 @Serializable
-enum class AnalRole(val canTop: Boolean, val canBottom: Boolean, val topWeight: Double, val bottomWeight: Double) {
-    TOP(true, false, 1.0, 0.0),
-    VERS_TOP(true, true, 1.6, 0.6),
-    VERS(true, true, 1.0, 1.0),
-    VERS_BOTTOM(true, true, 0.6, 1.6),
-    BOTTOM(false, true, 0.0, 1.0),
-    NO_ANAL(false, false, 0.0, 0.0);
+enum class AnalRole(
+    val canTop: Boolean,
+    val canBottom: Boolean,
+    val topWeight: Double,
+    val bottomWeight: Double,
+    /**
+     * How many times across a whole game this player may be the receptive party in anal content
+     * — penetrated, rimmed, fingered, plugged, or worked on the hole in any other way.
+     *
+     * A top is not a man who merely prefers not to bottom: he never bottoms, and nothing goes
+     * near his hole all night, so his allowance is zero. A vers top will do it, but rarely, so
+     * his allowance is exactly one for the entire game. `canBottom` on its own was never enough
+     * to express either, because it only ever gated penetration and let rimming, fingering and
+     * fisting through.
+     */
+    val receptiveAnalLimit: Int
+) {
+    TOP(true, false, 1.0, 0.0, receptiveAnalLimit = 0),
+    VERS_TOP(true, true, 1.6, 0.6, receptiveAnalLimit = 1),
+    VERS(true, true, 1.0, 1.0, receptiveAnalLimit = Int.MAX_VALUE),
+    VERS_BOTTOM(true, true, 0.6, 1.6, receptiveAnalLimit = Int.MAX_VALUE),
+    BOTTOM(false, true, 0.0, 1.0, receptiveAnalLimit = Int.MAX_VALUE),
+    NO_ANAL(false, false, 0.0, 0.0, receptiveAnalLimit = 0);
 
     val allowsAnyAnal: Boolean get() = this != NO_ANAL
 }

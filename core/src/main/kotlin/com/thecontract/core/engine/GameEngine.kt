@@ -99,7 +99,7 @@ class GameEngine {
         )
     )
 
-    fun context(state: GameState): GameContext = GameContext(state.setup, state.profiles)
+    fun context(state: GameState): GameContext = GameContext.of(state)
 
     /**
      * Called by the session manager when a phone claims or reclaims a slot. Keeps pairing
@@ -287,7 +287,7 @@ class GameEngine {
     /** Builds the next proposal, or moves to closing terms if the pool is exhausted. */
     private fun startProposal(s: GameState, now: Long): GameState {
         if (s.allRegularTermsSigned) return startClosing(s, now)
-        val ctx = GameContext(s.setup, s.profiles)
+        val ctx = GameContext.of(s)
         var selection = ProposalSelector.nextProposal(s, ctx)
         var working = s
         if (selection == null) {
@@ -438,7 +438,7 @@ class GameEngine {
     /** Re-renders the term with the amendment applied. Returns null if it cannot be applied. */
     private fun applyChosenAmendment(s: GameState, amendment: Amendment, now: Long): GameState? {
         val current = s.negotiation.current ?: return null
-        val ctx = GameContext(s.setup, s.profiles)
+        val ctx = GameContext.of(s)
         val term = ContentLibrary.termsById[current.term.termId] ?: return null
         val amendments = current.appliedAmendments + amendment
         val reversed = Amendment.ROLES_REVERSED in amendments
@@ -494,7 +494,7 @@ class GameEngine {
         val current = s.negotiation.current ?: return s
         val initiator = current.responses.entries.firstOrNull { it.value == ProposalResponse.BUNDLE }?.key
             ?: return s
-        val ctx = GameContext(s.setup, s.profiles)
+        val ctx = GameContext.of(s)
         val candidates = ProposalSelector.bundleCandidates(s, ctx, current.term.termId)
         if (candidates.isEmpty()) {
             // Nothing compatible to trade with: fall back to signing the single term.
@@ -521,7 +521,7 @@ class GameEngine {
         if (termId !in current.bundleCandidateIds) return reject(es, CODE_INVALID, "That term is not on offer.")
         if (s.regularTermsRemaining < 2) return reject(es, CODE_INVALID, "There is not enough room left for a trade.")
 
-        val ctx = GameContext(s.setup, s.profiles)
+        val ctx = GameContext.of(s)
         val term = ContentLibrary.termsById[termId] ?: return reject(es, CODE_INVALID, "Unknown term.")
         val e = EligibilityEngine.evaluate(term, ctx)
         if (e !is Eligibility.Ok) return reject(es, CODE_INVALID, "That term is no longer compatible.")
@@ -564,7 +564,7 @@ class GameEngine {
 
     private fun beginConsideration(s: GameState, stronger: Boolean, now: Long): GameState {
         val current = s.negotiation.current ?: return s
-        val ctx = GameContext(s.setup, s.profiles)
+        val ctx = GameContext.of(s)
         val parts = buildList {
             ContentLibrary.termsById[current.term.termId]?.let {
                 add(it to PartyBinding(current.term.giver, current.term.receiver))
@@ -784,7 +784,7 @@ class GameEngine {
         val done = s.negotiation.signedClosing.mapNotNull { it.closingFor }.toSet()
         val next = Slot.entries.firstOrNull { it !in done }
             ?: return s.copy(phase = GamePhase.FINAL_CONTRACT_REVIEW, negotiation = s.negotiation.copy(closingTurn = null))
-        val ctx = GameContext(s.setup, s.profiles)
+        val ctx = GameContext.of(s)
         val candidates = ProposalSelector.closingCandidates(s, ctx, next)
         return s.copy(
             phase = GamePhase.CLOSING_TERM_SELECTION,
@@ -807,7 +807,7 @@ class GameEngine {
         if (s.negotiation.current != null) return reject(es, CODE_PHASE, "The closing term is already chosen.")
         if (termId !in s.negotiation.closingOptionIds) return reject(es, CODE_INVALID, "That term is not on offer.")
 
-        val ctx = GameContext(s.setup, s.profiles)
+        val ctx = GameContext.of(s)
         val term = ContentLibrary.termsById[termId] ?: return reject(es, CODE_INVALID, "Unknown term.")
         val binding = PartyBinding(turn.other, turn)
         val e = EligibilityEngine.evaluate(term, ctx, preferredBinding = binding)
