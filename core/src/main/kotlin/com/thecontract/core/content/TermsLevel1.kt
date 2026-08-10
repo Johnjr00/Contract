@@ -177,7 +177,7 @@ internal object TermsLevel1 {
             id = "l1_kiss_tongue", level = 1, cats = setOf(KISSING),
             title = "Tongue-heavy kissing",
             base = "{G} kisses {R} [adv_kiss_deep], leading with his tongue the whole time while {R} follows.",
-            explicit = "{G} kisses {R} [adv_kiss_deep], all tongue, and leads throughout. {R} takes it and does not try to take over.",
+            explicit = "{G} kisses {R} [adv_kiss_deep], all tongue, and leads throughout. {R} follows and does not take over the kiss at any point.",
             benefit = RECEIVER, type = BenefitType.KISS_RECIPIENT,
             acts = setOf("tongue_kissing"),
             timers = listOf(tm("Kissing", 120))
@@ -240,7 +240,7 @@ internal object TermsLevel1 {
             id = "l1_kiss_reciprocal", level = 1, cats = setOf(KISSING),
             title = "Reciprocal make-out",
             base = "{G} and {R} take turns leading: two minutes each, and the one following keeps his hands still.",
-            explicit = "{G} and {R} take turns running the kiss. Two minutes each. Whoever is following keeps his hands flat on the bed and takes it.",
+            explicit = "{G} and {R} take turns running the kiss. Two minutes each. Whoever is following keeps his hands flat on the bed and does not lead.",
             benefit = MUTUAL, type = BenefitType.MUTUAL, mutual = true,
             acts = setOf("long_making_out", "tongue_kissing"),
             timers = listOf(tm("{G} leads", 120), tm("{R} leads", 120))
@@ -335,7 +335,7 @@ internal object TermsLevel1 {
             id = "l1_worship_head_to_toe", level = 1, cats = setOf(BODY_WORSHIP),
             title = "Body worship",
             base = "{G} moves his way down {R+} body with hands and mouth and names one thing he likes about each part he reaches.",
-            explicit = "{G} moves down {R+} body with hands and mouth and says out loud, part by part, exactly what he likes about it. He does not skip anything.",
+            explicit = "{G} moves down {R+} body with hands and mouth and says out loud, part by part, exactly what he likes about it. He does not skip a single part.",
             benefit = RECEIVER, type = BenefitType.SERVICE_RECIPIENT,
             acts = setOf("body_worship", "explicit_praise"),
             timers = listOf(tm("Chest and arms", 60), tm("Stomach", 45), tm("Thighs", 60))

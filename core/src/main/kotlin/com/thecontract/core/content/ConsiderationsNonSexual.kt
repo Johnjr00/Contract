@@ -339,7 +339,7 @@ internal object ConsiderationsNonSexual {
             id = "cn_ear_with_restraint", intensity = 4, family = F_EAR, cats = setOf(EAR_PLAY),
             title = "Ear play while he is held",
             base = "{R} is restrained with #cuffs# and {G} sucks both of {R+} ears for the full time.",
-            explicit = "{R} is locked in #cuffs# and {G} sucks both of {R+} ears for the whole time, and he cannot do a thing about it.",
+            explicit = "{R} is locked in #cuffs# and {G} sucks both of {R+} ears for the whole time, and he does not turn his head away from either one.",
             acts = setOf("ear_play", "restraint"),
             equip = setOf(Equipment.CUFFS),
             blocks = setOf(Boundary.NO_RESTRAINTS),

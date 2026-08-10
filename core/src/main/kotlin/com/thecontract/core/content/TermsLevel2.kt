@@ -124,7 +124,7 @@ internal object TermsLevel2 {
             id = "l2_oral_head_held", level = 2, cats = setOf(ORAL, POWER),
             title = "Hands on his head",
             base = "{G} [v_suck] {R+} cock while {R} rests both hands on {G+} head and pulls him all the way down every fifth stroke.",
-            explicit = "{G} [v_suck] {R+} cock and {R} keeps both hands on {G+} head, pulling him all the way down every fifth stroke. {G} takes what he is given.",
+            explicit = "{G} [v_suck] {R+} cock and {R} keeps both hands on {G+} head, pulling him all the way down every fifth stroke. {G} keeps his hands behind his own back throughout.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "deep_oral"), rPrefs = setOf("commands_give"),
             timers = listOf(tm("Hands on his head", 120))
@@ -193,7 +193,7 @@ internal object TermsLevel2 {
             id = "l2_rim_plus_stroke", level = 2, cats = setOf(RIMMING, HANDS, ANAL),
             title = "Rimming and stroking",
             base = "{G} [v_rim] {R} while one hand reaches round and [v_stroke] his cock at the same rhythm.",
-            explicit = "{G} [v_rim] {R} and, reaching round, [v_stroke] his cock in the same rhythm, so he gets both at once and cannot separate them.",
+            explicit = "{G} [v_rim] {R} and, reaching round, [v_stroke] his cock in the same rhythm, so he gets both at once.",
             benefit = RECEIVER, type = BenefitType.RIMMING_RECIPIENT,
             acts = setOf("rimming"),
             timers = listOf(tm("Rimming only", 60), tm("Rimming and stroking", 120))
@@ -324,7 +324,7 @@ internal object TermsLevel2 {
             title = "Asking first",
             base = "For the length of this term, {SUB} asks out loud before he touches {DOM} anywhere, and waits for an answer each time.",
             explicit = "For the whole of this term {SUB} asks out loud before he puts a hand anywhere on {DOM}, and waits for an actual answer every single time.",
-            benefit = RECEIVER, type = BenefitType.PERMISSION_CONTROL,
+            benefit = MUTUAL, type = BenefitType.MUTUAL,
             gCon = PartyConstraint.SUBMISSIVE, rCon = PartyConstraint.DOMINANT,
             acts = setOf("permission_control", "commands"),
             timers = listOf(tm("Asking first", 180))
@@ -334,7 +334,7 @@ internal object TermsLevel2 {
             title = "Holding position",
             base = "{DOM} puts {SUB} face down with his knees apart and his arms stretched above his head. {SUB} [v_hold_pos] while {DOM} runs both hands over his back, his ass and the backs of his thighs.",
             explicit = "{DOM} puts {SUB} face down with his knees apart and his arms stretched above his head. {SUB} [v_hold_pos] while {DOM} uses his hands and mouth on his back, his ass and the inside of his thighs for the full timer.",
-            benefit = GIVER, type = BenefitType.COMMAND_AUTHORITY,
+            benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("commands"),
             timers = listOf(tm("Holding position", 120))
@@ -353,8 +353,8 @@ internal object TermsLevel2 {
             id = "l2_power_commands", level = 2, cats = setOf(POWER),
             title = "Doing as he is told",
             base = "{DOM} gives {SUB} a short instruction every thirty seconds and {SUB} carries each one out without comment.",
-            explicit = "{DOM} [v_order] {SUB} into a new position every thirty seconds, naming it out loud, and {SUB} takes it without a word back.",
-            benefit = GIVER, type = BenefitType.COMMAND_AUTHORITY,
+            explicit = "{DOM} [v_order] {SUB} into a new position every thirty seconds, naming it out loud, and {SUB} moves into it without a word back.",
+            benefit = MUTUAL, type = BenefitType.MUTUAL,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("commands"),
             timers = listOf(tm("Round 1", 30), tm("Round 2", 30), tm("Round 3", 30), tm("Round 4", 30))
@@ -403,8 +403,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_oral_harder_intro", level = 2, cats = setOf(ORAL),
             title = "A harder pace",
-            base = "{R} fucks {G+} mouth faster than usual and {G} takes it for the full time without pulling off.",
-            explicit = "{R} fucks {G+} mouth hard and {G} takes all of it for the full time, without pulling off once.",
+            base = "{R} fucks {G+} mouth faster than usual and {G} keeps his lips sealed around him for the full time without pulling off.",
+            explicit = "{R} fucks {G+} mouth hard and {G} keeps his lips sealed around him for the full time, without pulling off once.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "harder_oral"),
             blocks = setOf(Boundary.NO_ROUGH_SEX),

@@ -205,9 +205,10 @@ object ContentValidator {
             if (mutualParty != mutualType) {
                 add(Problem("term ${term.id}", "benefit party and benefit type disagree about being mutual"))
             }
-            if (mutualParty && !term.mutual) {
-                add(Problem("term ${term.id}", "mutual benefit but the term is not marked mutual"))
-            }
+            // Balanced benefit and "both men perform it" are different claims, and only one
+            // implies the other. A term where the submissive holds a position, keeps silent or
+            // obeys an order is carried out by one man and benefits neither, because being the
+            // one giving the orders is not a benefit.
             if (!mutualParty && term.mutual) {
                 add(Problem("term ${term.id}", "marked mutual but names a single beneficiary"))
             }

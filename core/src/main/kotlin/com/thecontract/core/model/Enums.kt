@@ -131,6 +131,15 @@ enum class PartyConstraint { ANY, DOMINANT, SUBMISSIVE, TOP, BOTTOM }
  * Deliberately independent of how enthusiastically anyone answered their private profile.
  */
 @Serializable
+/**
+ * What a player gets out of a term, and therefore who owes consideration for it.
+ *
+ * Every value names something done to a man's body. Being in charge is deliberately not on this
+ * list: command, ownership, restraint, permission and orgasm control used to sit here and hand
+ * the benefit to whoever held the whip, which made the man being edged, spanked or tied the one
+ * owed nothing. The benefit belongs to whoever is on the receiving end of the physical act, and
+ * a term where nobody is — a rule, a protocol, a spoken declaration — is simply balanced.
+ */
 enum class BenefitType(val label: String) {
     MASSAGE_RECIPIENT("receives the massage"),
     KISS_RECIPIENT("receives the kissing"),
@@ -141,11 +150,8 @@ enum class BenefitType(val label: String) {
     TOY_RECIPIENT("receives the toy"),
     FINGERING_RECIPIENT("receives the fingering"),
     PENETRATION_RECIPIENT("receives penetration"),
-    COMMAND_AUTHORITY("gains command authority"),
-    OWNERSHIP("gains ownership"),
-    PERMISSION_CONTROL("gains permission control"),
-    RESTRAINT_CONTROL("gains restraint control"),
-    ORGASM_CONTROL("gains orgasm control"),
+    IMPACT_RECIPIENT("receives the impact"),
+    HANDLING_RECIPIENT("is the one handled"),
     SERVICE_RECIPIENT("receives service"),
     MUTUAL("benefits both equally")
 }

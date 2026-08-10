@@ -86,14 +86,18 @@ class Game1BroadProfileTest {
         val closingFor = final.negotiation.signedClosing.mapNotNull { it.closingFor }.toSet()
         assertEquals(setOf(Slot.PLAYER_1, Slot.PLAYER_2), closingFor, "both players must climax")
 
-        // Beneficiaries are assigned, and a mutual term has none by design.
+        // A term both men perform has no beneficiary by design. A term only one man performs may
+        // still have none — an order obeyed or a rule kept is done by one of them and benefits
+        // neither, because being the one in charge of it is not a benefit.
         final.negotiation.signed.forEach { signed ->
-            if (!signed.term.mutual) {
-                assertNotNull(signed.term.beneficiary, "term ${signed.term.termId} has no beneficiary")
-            } else {
+            if (signed.term.mutual) {
                 assertNull(signed.term.beneficiary, "mutual term ${signed.term.termId} named a beneficiary")
             }
         }
+        assertTrue(
+            final.negotiation.signed.any { it.term.beneficiary != null },
+            "no signed term named a beneficiary at all"
+        )
 
         // The plan actually exercised what it claimed to.
         assertTrue(driver.backsTaken.isNotEmpty(), "Back navigation was never exercised")

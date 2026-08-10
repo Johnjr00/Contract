@@ -45,7 +45,22 @@ object ContentRules {
         Rule(ci("\\bproperly\\b|\\bthoroughly\\b"), "says nothing about what to do"),
         Rule(ci("\\bas needed\\b|when he actually has to"), "leaves the instruction to the player"),
         Rule(ci("\\bworks him over\\b"), "names no body part and no action"),
-        Rule(ci("without ceremony"), "says nothing about what to do")
+        Rule(ci("without ceremony"), "says nothing about what to do"),
+        /**
+         * "and takes it" is the whole family: enduring something is not an instruction, because
+         * it tells a man nothing to do with his hands, his mouth or his weight. Every one of
+         * these is now written as the thing he actually holds still, seals or does not move.
+         */
+        Rule(ci("\\btakes? (?:it|all of it)\\b"), "enduring is not an action — say what he does"),
+        Rule(ci("takes what he is given"), "enduring is not an action — say what he does"),
+        Rule(ci("cannot do a thing about it"), "an effect, not an action"),
+        Rule(ci("no cheating|no arguing|no exceptions"), "an assertion, not an instruction"),
+        Rule(ci("leaving him there"), "says nothing about what to do"),
+        Rule(ci("cannot separate them"), "an effect, not an action"),
+        Rule(ci("soften(?:s|ing)? it"), "vague — say what he keeps doing instead"),
+        Rule(ci("easing off"), "vague — say what changes, or that nothing does"),
+        Rule(ci("does not skip anything"), "vague — name what may not be skipped"),
+        Rule(ci("does not assume"), "vague — say what he waits for")
     )
 
     /** Endpoints that depend on reading the other man rather than on watching the clock. */

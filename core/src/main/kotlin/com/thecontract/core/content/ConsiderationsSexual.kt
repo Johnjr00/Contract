@@ -97,7 +97,7 @@ internal object ConsiderationsSexual {
             id = "cs_oral_hard_pace", intensity = 4, family = F_SEX, cats = setOf(ORAL, ROUGH),
             title = "Harder oral",
             base = "{R} fucks {G+} mouth hard and {G} keeps his lips sealed around him through all of it.",
-            explicit = "{R} fucks {G+} mouth hard and {G} takes all of it for the whole timer, without pulling off once.",
+            explicit = "{R} fucks {G+} mouth hard and {G} keeps his lips sealed around him for the whole timer, without pulling off once.",
             acts = setOf("oral", "harder_oral"), blocks = setOf(Boundary.NO_ROUGH_SEX),
             timers = listOf(tm("Hard pace", 90))
         ),
@@ -185,7 +185,7 @@ internal object ConsiderationsSexual {
             id = "cs_hand_two_handed", intensity = 3, family = F_SEX, cats = setOf(HANDS),
             title = "Both hands",
             base = "{G} uses both hands on {R} with #lubricant#, one on the shaft and one on the balls.",
-            explicit = "{G} uses both hands on {R} with #lubricant#, one stroking the shaft and one on his balls, and does not stop.",
+            explicit = "{G} uses both hands on {R} with #lubricant#, one stroking the shaft and one on his balls, and neither hand stops before the timer ends.",
             acts = setOf("massage_groin"), equip = setOf(Equipment.LUBRICANT),
             blocks = setOf(Boundary.MASSAGE_NONSEXUAL),
             timers = listOf(tm("Both hands", 150))
@@ -319,7 +319,7 @@ internal object ConsiderationsSexual {
             id = "cs_ranal_pinned_hard", intensity = 5, family = F_SEX, cats = setOf(ANAL, ROUGH),
             title = "Pinned down and taken hard",
             base = "{G} pins {R+} shoulders to the bed with #lubricant# and fucks him [adv_thrust_hard], keeping him flat the whole time.",
-            explicit = "{G} pins {R+} shoulders down with #lubricant# and fucks him [adv_thrust_hard], keeping him flat and taking it the whole time.",
+            explicit = "{G} pins {R+} shoulders down with #lubricant# and fucks him [adv_thrust_hard], keeping him flat, and {R} takes every stroke without pulling forward.",
             acts = setOf("topping", "rough_anal", "pinning"), anal = true, erection = PartyRef.GIVER,
             pCon = PartyConstraint.TOP, equip = setOf(Equipment.LUBRICANT),
             timers = listOf(tm("Pushing in", 45), tm("Pinned and fucked", 150)),
@@ -348,7 +348,7 @@ internal object ConsiderationsSexual {
             id = "cs_ranal_fingers_hard", intensity = 5, family = F_SEX, cats = setOf(ANAL, ROUGH),
             title = "Three fingers, hard",
             base = "{G} builds to three fingers in {R} with #lubricant# and finger-fucks him hard for the whole timer.",
-            explicit = "{G} builds to three fingers in {R} with #lubricant# and finger-fucks him hard for the whole timer, without easing off.",
+            explicit = "{G} builds to three fingers in {R} with #lubricant# and finger-fucks him hard for the whole timer, without slowing down.",
             acts = setOf("fingering", "rough_anal"), anal = true, equip = setOf(Equipment.LUBRICANT),
             timers = listOf(tm("Building up", 60), tm("Hard", 150))
         ),
@@ -440,7 +440,7 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_toy_plug", intensity = 4, family = F_SEX, cats = setOf(TOYS, ANAL),
             title = "Plugged",
-            base = "{G} opens {R} up with #lubricant# and [v_insert] #anal_plug#, and it stays in.",
+            base = "{G} opens {R} up with #lubricant# and [v_insert] #anal_plug#, and it stays in for the rest of the timer.",
             explicit = "{G} opens {R} up with #lubricant# and [v_insert] #anal_plug#, and it stays exactly where it is.",
             acts = setOf("plug", "anal_toys"), anal = true,
             equip = setOf(Equipment.ANAL_PLUG, Equipment.LUBRICANT),
@@ -688,8 +688,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_rough_oral", intensity = 5, family = F_SEX, cats = setOf(ROUGH, ORAL),
             title = "Rough oral",
-            base = "{R} keeps both hands in {G+} hair and pulls him all the way down in a steady rhythm, and {G} takes it.",
-            explicit = "{R} keeps both hands in {G+} hair and pulls him all the way down in a steady rhythm, and {G} takes all of it.",
+            base = "{R} keeps both hands in {G+} hair and pulls him all the way down in a steady rhythm, and {G} keeps his hands flat on the floor throughout.",
+            explicit = "{R} keeps both hands in {G+} hair and pulls him all the way down in a steady rhythm, and {G} keeps his hands flat on the floor and does not pull off.",
             acts = setOf("oral", "harder_oral", "rough_hair_pulling"), blocks = setOf(Boundary.NO_ROUGH_SEX),
             timers = listOf(tm("Steady rhythm", 120))
         ),
