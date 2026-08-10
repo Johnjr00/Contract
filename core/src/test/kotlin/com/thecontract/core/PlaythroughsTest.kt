@@ -382,11 +382,30 @@ class PlaythroughsTest {
         Regex("\\b(cock|hole|balls|anus|rims?|fucks?|swallows)\\b", RegexOption.IGNORE_CASE)
 
     /**
+     * Which man a signed slot put ahead, or null when it left them level.
+     *
+     * A bundle is signed and paid for as one thing, so who came out ahead is decided across both
+     * of its terms rather than off the first one.
+     */
+    private fun beneficiaryOf(entry: com.thecontract.core.model.SignedTerm): Slot? =
+        if (entry.bundledTerm != null) {
+            BenefitAnalysis.combinedBeneficiary(
+                entry.allTerms.mapNotNull { rendered ->
+                    ContentLibrary.termsById[rendered.termId]
+                        ?.let { it to PartyBinding(rendered.giver, rendered.receiver) }
+                }
+            )
+        } else {
+            entry.term.beneficiary
+        }
+
+    /**
      * The rules the game itself has to keep, checked against the running session rather than
      * against the library, because these are engine behaviour and not authored text:
      *
      *  - the act never runs backwards, so the contract gets more intense from first term to last;
      *  - the opening term stays away from cocks and holes;
+     *  - the benefit alternates, so neither man gets two one-sided terms running;
      *  - consideration is chosen by the man who gained *less* from the term, and every option he
      *    is shown is worked on him rather than by him.
      */
@@ -396,6 +415,16 @@ class PlaythroughsTest {
         val levels = signed.map { it.term.level }
         if (levels != levels.sorted()) {
             failures += "${game.label}: signed term levels run backwards: $levels"
+        }
+
+        // Whoever came out ahead on one term does not come out ahead on the next. Balanced terms
+        // put nobody ahead, so they drop out of the sequence rather than counting as a turn.
+        val order = signed.mapNotNull { entry -> beneficiaryOf(entry)?.let { entry to it } }
+        order.zipWithNext().forEach { (a, b) ->
+            if (a.second == b.second) {
+                failures += "${game.label}: ${a.second} benefits from both ${a.first.term.termId} " +
+                    "(#${a.first.index}) and ${b.first.term.termId} (#${b.first.index}) back to back"
+            }
         }
         signed.firstOrNull()?.let { first ->
             if (first.term.level != 1) {
@@ -408,17 +437,7 @@ class PlaythroughsTest {
         val receipts = s.negotiation.receipts.associateBy { it.id }
         signed.forEach { entry ->
             val consideration = entry.considerationReceiptId?.let { receipts[it] } ?: return@forEach
-            // A bundle is paid for as one thing, so who owes is decided across both terms.
-            val beneficiary = if (entry.bundledTerm != null) {
-                BenefitAnalysis.combinedBeneficiary(
-                    entry.allTerms.mapNotNull { rendered ->
-                        ContentLibrary.termsById[rendered.termId]
-                            ?.let { it to PartyBinding(rendered.giver, rendered.receiver) }
-                    }
-                )
-            } else {
-                entry.term.beneficiary
-            } ?: return@forEach
+            val beneficiary = beneficiaryOf(entry) ?: return@forEach
             if (consideration.mutual) return@forEach
             if (consideration.performer != beneficiary) {
                 failures += "${game.label}: ${consideration.actionId} was performed by the man who " +

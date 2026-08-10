@@ -4,6 +4,7 @@ import com.thecontract.core.content.ContentLibrary
 import com.thecontract.core.model.Act
 import com.thecontract.core.model.AnalRole
 import com.thecontract.core.model.Answer
+import com.thecontract.core.model.BenefitParty
 import com.thecontract.core.model.Boundary
 import com.thecontract.core.model.ConsiderationAction
 import com.thecontract.core.model.ConsiderationFamily
@@ -94,34 +95,86 @@ object ProposalSelector {
         state.negotiation.signed.filterNot { it.term.climax }
             .flatMap { it.allTerms }.maxOfOrNull { it.level } ?: 1
 
+    /**
+     * Which man the contract last put ahead.
+     *
+     * Read from what is *signed* rather than from what has been proposed, so declining a term
+     * never lets one man collect a run of terms in his favour. Balanced terms name nobody and
+     * are skipped rather than treated as a turn: they leave the debt exactly where it was. A
+     * bundle counts once, on its combined beneficiary, because the pair is signed and paid for
+     * as a single step.
+     */
+    private fun lastBeneficiary(state: GameState): Slot? {
+        for (signed in state.negotiation.signedRegular.asReversed()) {
+            val parts = signed.allTerms.mapNotNull { r ->
+                ContentLibrary.termsById[r.termId]?.let { it to PartyBinding(r.giver, r.receiver) }
+            }
+            val who = if (parts.isEmpty()) signed.term.beneficiary else BenefitAnalysis.combinedBeneficiary(parts)
+            if (who != null) return who
+        }
+        return null
+    }
+
+    /** Whose turn it is to come out ahead, or null before anything one-sided has been signed. */
+    private fun owedBeneficiary(state: GameState): Slot? = lastBeneficiary(state)?.other
+
+    /**
+     * The binding that puts [owed] on the winning side of this term, or null if the term has no
+     * winning side. Which slot benefits is fixed by the term's own structure, so the only lever
+     * is which man is cast as the giver and which as the receiver.
+     */
+    private fun bindingFavouring(term: Term, owed: Slot): PartyBinding? = when (term.benefitParty) {
+        BenefitParty.GIVER -> PartyBinding(owed, owed.other)
+        BenefitParty.RECEIVER -> PartyBinding(owed.other, owed)
+        BenefitParty.MUTUAL -> null
+    }
+
+    /** True when signing this selection would not hand the same man two terms in a row. */
+    private fun alternates(selection: Selection, owed: Slot?): Boolean {
+        if (owed == null) return true
+        val benefits = BenefitAnalysis.beneficiary(selection.term, selection.binding)
+        return benefits == null || benefits == owed
+    }
+
     fun nextProposal(state: GameState, ctx: GameContext): Selection? {
         val act = currentAct(state)
         val excluded = state.negotiation.seenTermIds + state.negotiation.declinedTermIds +
             state.negotiation.signed.flatMap { s -> s.allTerms.map { it.termId } }
+        val owed = owedBeneficiary(state)
 
         var blockedNotice: Boundary? = null
         var weighted = mutableListOf<Pair<Selection, Double>>()
 
-        // Hold the floor if anything at or above it is eligible; drop it rather than stall.
-        for (floor in listOf(signedFloor(state), 1).distinct()) {
+        // Two rules shape the pool, and each is dropped only when nothing survives with it in
+        // place. The floor stops the contract walking back down to something softer than it has
+        // already signed; alternation stops one man collecting four terms in his favour in a
+        // row. The floor is the outer rule because a visible step backwards in intensity reads
+        // worse than a repeated beneficiary, but in practice almost every term can be bound
+        // either way round, so the first attempt is the one that lands.
+        val attempts = listOf(signedFloor(state), 1).distinct()
+            .flatMap { floor -> listOf(floor to true, floor to false) }
+
+        for ((floor, alternate) in attempts) {
             weighted = mutableListOf()
             for (term in ContentLibrary.regularTerms) {
                 if (term.id in excluded) continue
                 val lw = levelWeight(term.level, act.level, floor)
                 if (lw == 0.0) continue
-                when (val e = EligibilityEngine.evaluate(term, ctx)) {
+                val preferred = if (alternate && owed != null) bindingFavouring(term, owed) else null
+                when (val e = EligibilityEngine.evaluate(term, ctx, preferred)) {
                     is Eligibility.BlockedByBoundary -> {
                         if (blockedNotice == null && term.level == act.level) blockedNotice = e.boundary
                     }
                     Eligibility.Unavailable -> Unit
                     is Eligibility.Ok -> {
-                        val weight = lw * analWeight(term, e.binding, ctx) * enthusiasmWeight(term, e.binding, ctx)
-                        if (weight > 0.0) {
-                            weighted += Selection(
-                                term = term,
-                                binding = e.binding,
-                                conditions = EligibilityEngine.maybeConditions(term, e.binding, ctx)
-                            ) to weight
+                        val selection = Selection(
+                            term = term,
+                            binding = e.binding,
+                            conditions = EligibilityEngine.maybeConditions(term, e.binding, ctx)
+                        )
+                        if (!alternate || alternates(selection, owed)) {
+                            val weight = lw * analWeight(term, e.binding, ctx) * enthusiasmWeight(term, e.binding, ctx)
+                            if (weight > 0.0) weighted += selection to weight
                         }
                     }
                 }
@@ -129,12 +182,19 @@ object ProposalSelector {
             if (weighted.isNotEmpty()) break
         }
         if (weighted.isEmpty()) {
-            // Fall back to any eligible unseen term at any level rather than stalling.
-            for (term in ContentLibrary.regularTerms) {
-                if (term.id in excluded) continue
-                val e = EligibilityEngine.evaluate(term, ctx)
-                if (e is Eligibility.Ok) {
-                    return Selection(term, e.binding, EligibilityEngine.maybeConditions(term, e.binding, ctx), blockedNotice)
+            // Fall back to any eligible unseen term at any level rather than stalling, still
+            // preferring one that keeps the benefit alternating.
+            for (alternate in listOf(true, false)) {
+                for (term in ContentLibrary.regularTerms) {
+                    if (term.id in excluded) continue
+                    val preferred = if (alternate && owed != null) bindingFavouring(term, owed) else null
+                    val e = EligibilityEngine.evaluate(term, ctx, preferred)
+                    if (e is Eligibility.Ok) {
+                        val selection = Selection(
+                            term, e.binding, EligibilityEngine.maybeConditions(term, e.binding, ctx), blockedNotice
+                        )
+                        if (!alternate || alternates(selection, owed)) return selection
+                    }
                 }
             }
             return null
@@ -164,11 +224,20 @@ object ProposalSelector {
         val rng = Random(state.sessionId.hashCode().toLong() * 7_919L + state.negotiation.proposalCounter)
         // A bundled second term is signed alongside the first, so it obeys the same floor.
         val floor = signedFloor(state)
-        return ContentLibrary.regularTerms
+        val owed = owedBeneficiary(state)
+        // The pair is signed and paid for as one step, so it is the *combined* benefit that has
+        // to land on the man whose turn it is. A second term in the other man's favour can
+        // cancel the first one out, and then the trade quietly skips somebody's turn.
+        val primary = state.negotiation.current?.term
+            ?.takeIf { it.termId == primaryTermId }
+            ?.let { r -> ContentLibrary.termsById[r.termId]?.let { it to PartyBinding(r.giver, r.receiver) } }
+
+        val eligible = ContentLibrary.regularTerms
             .asSequence()
             .filter { it.id !in excluded && levelWeight(it.level, act.level, floor) > 0.0 }
             .mapNotNull { term ->
-                val e = EligibilityEngine.evaluate(term, ctx)
+                val preferred = owed?.let { bindingFavouring(term, it) }
+                val e = EligibilityEngine.evaluate(term, ctx, preferred)
                 if (e is Eligibility.Ok) {
                     Selection(term, e.binding, EligibilityEngine.maybeConditions(term, e.binding, ctx))
                 } else {
@@ -176,8 +245,17 @@ object ProposalSelector {
                 }
             }
             .toList()
-            .shuffled(rng)
-            .take(limit)
+
+        val alternating = if (owed == null || primary == null) {
+            eligible
+        } else {
+            eligible.filter {
+                BenefitAnalysis.combinedBeneficiary(listOf(primary, it.term to it.binding)) != owed.other
+            }
+        }
+        // Offering nothing turns a bundle request into a plain signature, so an empty filtered
+        // list falls back to the unfiltered one rather than cancelling the trade.
+        return alternating.ifEmpty { eligible }.shuffled(rng).take(limit)
     }
 
     /** Compatible closing (climax) terms for one player, who is the one guaranteed to finish. */
