@@ -97,6 +97,39 @@ class NarrationScriptTest {
         assertTrue(seen > 0, "no private phase was reached")
     }
 
+    /**
+     * The television never starts the same passage again on its own.
+     *
+     * Several phases share one screen: answering a proposal moves the phase on while the same
+     * term is still displayed, and a finished timer does the same to a consideration. Narration
+     * is triggered by [Narration.Line.key] changing, so anything that varies with the phase
+     * rather than with the words puts the television back at the top of a passage the players
+     * are halfway through listening to — the proposal case reads over the second player while he
+     * is still deciding. Only an explicit replay, which raises the nonce, may repeat a passage.
+     */
+    @Test
+    fun `the same passage is never started again while it is still on screen`() {
+        var previous: Narration.Line? = null
+        var transitions = 0
+        play { h ->
+            val line = Narration.script(h.tvView(), enabled = true)
+            if (line == null) {
+                previous = null
+                return@play
+            }
+            val last = previous
+            if (last != null && last.key != line.key) {
+                transitions++
+                assertTrue(
+                    last.text != line.text,
+                    "the TV would read the same passage again in ${h.state().phase}:\n  ${line.text}"
+                )
+            }
+            previous = line
+        }
+        assertTrue(transitions >= 5, "too few narration changes to judge: $transitions")
+    }
+
     /** A phone view is never a narration source, whatever a caller does with it. */
     @Test
     fun `a phone view is never spoken`() {

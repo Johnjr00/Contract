@@ -26,6 +26,11 @@ import com.thecontract.core.model.GamePhase
  * amended term is re-read because its text changed, stepping back to an earlier finale step is
  * re-read because the key differs from the step just spoken, and the "Read it again" button
  * works by raising [ClientView.narrationNonce], which is part of the key.
+ *
+ * The key is deliberately built from what is being said rather than from the phase saying it.
+ * Several phases share a screen — a proposal being read and a proposal waiting for the second
+ * answer are the same term on the same television — and keying on the phase made every one of
+ * those transitions start the passage again from the top.
  */
 object Narration {
 
@@ -60,16 +65,27 @@ object Narration {
         // whatever the caller passes in.
         if (view.audience != "tv") return null
 
-        val body = when (view.phase) {
-            in TERM_PHASES -> termScript(view)
-            in CONSIDERATION_PHASES -> considerationScript(view)
-            GamePhase.FINAL_EXECUTION -> finaleScript(view)
-            else -> null
-        } ?: return null
+        // Grouped rather than keyed on the phase itself, because a phase can change while the
+        // screen does not. Answering a proposal moves PROPOSAL to WAITING_FOR_PROPOSAL_RESPONSES
+        // with the same term still on the television, and a finished timer moves
+        // CONSIDERATION_PUBLIC_EXECUTION to WAITING_FOR_SIGNATURE_CONFIRMATION with the same
+        // consideration still on it. Keyed on the phase, both of those started the passage again
+        // from the top — the first one over the second player while he was still deciding.
+        val (group, body) = when (view.phase) {
+            in TERM_PHASES -> TERM to termScript(view)
+            in CONSIDERATION_PHASES -> CONSIDERATION to considerationScript(view)
+            GamePhase.FINAL_EXECUTION -> FINALE to finaleScript(view)
+            else -> return null
+        }
+        if (body == null) return null
 
         val step = view.execution?.stepIndex ?: 0
-        return Line(key = "${view.phase}|$step|${view.narrationNonce}|${body.hashCode()}", text = body)
+        return Line(key = "$group|$step|${view.narrationNonce}|${body.hashCode()}", text = body)
     }
+
+    private const val TERM = "term"
+    private const val CONSIDERATION = "consideration"
+    private const val FINALE = "finale"
 
     private fun termScript(view: ClientView): String? {
         val parts = listOfNotNull(view.term, view.bundledTerm)
