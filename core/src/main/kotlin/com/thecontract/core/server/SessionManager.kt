@@ -63,7 +63,18 @@ class SessionManager(
         fun onTvView(view: ClientView)
     }
 
-    private data class ClientConn(val id: String, var slot: Slot? = null, var deviceId: String? = null)
+    /**
+     * [resumeToken] is remembered so a phone that says hello before there is a session can be
+     * answered properly once there is one, without it having to ask again. It cannot ask again:
+     * its socket is open and the pings keep it that way, so nothing on the phone would ever
+     * prompt a second hello.
+     */
+    private data class ClientConn(
+        val id: String,
+        var slot: Slot? = null,
+        var deviceId: String? = null,
+        var resumeToken: String? = null
+    )
 
     private val lock = ReentrantLock()
     private val secureRandom = SecureRandom()
@@ -124,6 +135,7 @@ class SessionManager(
         record = rec
         clients.values.forEach { it.slot = null }
         persistLocked()
+        greetWaitingClientsLocked()
         broadcastLocked()
         rec
     }
@@ -140,8 +152,36 @@ class SessionManager(
         )
         clients.values.forEach { it.slot = null }
         persistLocked()
+        greetWaitingClientsLocked()
         broadcastLocked()
         true
+    }
+
+    /**
+     * Hands slots back to phones that were already connected when the session appeared.
+     *
+     * A phone reconnects on its own the moment the server is listening, which on a relaunch is
+     * several seconds before anybody has picked "resume" on the television. It says hello, is
+     * told there is no session, and then has nothing left to do: its socket is open and the
+     * pings keep it open, so it will never say hello again, and the broadcast that follows the
+     * resume skips it because it has no slot. It would sit there, connected and useless, while
+     * the game ran on the television without it.
+     *
+     * So the server asks on its behalf, with what the phone already told it. Each one lands in
+     * its own slot by way of the resume token it presented, exactly as if it had reconnected a
+     * moment later.
+     */
+    private fun greetWaitingClientsLocked() {
+        val waiting = clients.values.filter { it.slot == null && it.deviceId != null }
+        if (waiting.isEmpty()) return
+        val outbound = mutableListOf<Pair<String, ServerMessage>>()
+        waiting.forEach { conn ->
+            helloLocked(conn.id, conn.deviceId!!, conn.resumeToken, outbound)
+        }
+        outbound.forEach { (id, msg) -> transport?.send(id, msg) }
+        // The same full snapshot a phone gets when it says hello itself. The lock is reentrant,
+        // so this is safe to do from inside the caller's critical section.
+        waiting.forEach { if (it.slot != null) sendSnapshot(it.id) }
     }
 
     fun abandonSession() = lock.withLock {
@@ -281,73 +321,89 @@ class SessionManager(
 
     private fun handleHello(clientId: String, deviceId: String, resumeToken: String?) {
         val outbound = mutableListOf<Pair<String, ServerMessage>>()
-        lock.withLock {
-            val rec = record ?: run {
-                outbound += clientId to ErrorMessage("NO_SESSION", "No game is running on the TV.")
-                return@withLock
-            }
-            val conn = clients.getOrPut(clientId) { ClientConn(clientId) }
-            conn.deviceId = deviceId
-
-            val liveSlots = clients.values.mapNotNull { if (it.id == clientId) null else it.slot }.toSet()
-
-            // 1. A valid resume token always returns the phone to its own slot.
-            val byToken = Slot.entries.firstOrNull { slot ->
-                val st = rec.slot(slot)
-                st.claimed && st.reconnectToken != null && resumeToken != null &&
-                    constantTimeEquals(st.reconnectToken, resumeToken)
-            }
-            // 2. Same browser returning without its token.
-            val byDevice = Slot.entries.firstOrNull { slot ->
-                val st = rec.slot(slot)
-                st.claimed && st.deviceId == deviceId && slot !in liveSlots
-            }
-            val existing = byToken ?: byDevice
-            if (existing != null && (existing !in liveSlots || byToken != null)) {
-                attachLocked(conn, existing, deviceId, rotateToken = false)
-                outbound += clientId to HelloOk(
-                    rec.sessionId, existing, record!!.slot(existing).reconnectToken!!, engineState!!.state.version
-                )
-                return@withLock
-            }
-
-            // 3. A free slot: first phone becomes Player 1, second becomes Player 2.
-            val free = Slot.entries.firstOrNull { !rec.slot(it).claimed }
-            if (free != null) {
-                attachLocked(conn, free, deviceId, rotateToken = true)
-                val claimed = Slot.entries.count { record!!.slot(it).claimed }
-                engineState = engine.onSlotClaimed(engineState!!, claimed, clock())
-                record = record!!.copy(state = engineState!!.state)
-                outbound += clientId to HelloOk(
-                    rec.sessionId, free, record!!.slot(free).reconnectToken!!, engineState!!.state.version
-                )
-                persistLocked()
-                return@withLock
-            }
-
-            // 4. Both slots are taken. An unknown browser may ask to reclaim a disconnected
-            //    slot, but only the TV remote can approve it. No PIN is involved.
-            val reclaimable = Slot.entries.firstOrNull { it !in liveSlots && rec.slot(it).claimed }
-            if (reclaimable != null) {
-                val requestId = "rc-" + secureToken().take(10)
-                record = rec.copy(
-                    pendingReclaim = PendingReclaim(requestId, reclaimable, deviceId, clock())
-                )
-                outbound += clientId to ReclaimPending(
-                    requestId, reclaimable,
-                    "This slot already belongs to another phone. Confirm the takeover with the TV remote."
-                )
-                persistLocked()
-                return@withLock
-            }
-
-            outbound += clientId to SessionFull(
-                "Session full. This game already has its two players."
-            )
-        }
+        lock.withLock { helloLocked(clientId, deviceId, resumeToken, outbound) }
         outbound.forEach { (id, msg) -> transport?.send(id, msg) }
         lock.withLock { broadcastLocked() }
         sendSnapshot(clientId)
+    }
+
+    /**
+     * Answers a hello, or replays one on the phone's behalf when a session appears later.
+     *
+     * Everything the phone told us is recorded before the session is checked, because the
+     * no-session answer is not the end of the conversation: the television is usually still on
+     * its start screen when the phones reconnect, and the phone has no way to ask a second time.
+     */
+    private fun helloLocked(
+        clientId: String,
+        deviceId: String,
+        resumeToken: String?,
+        outbound: MutableList<Pair<String, ServerMessage>>
+    ) {
+        val conn = clients.getOrPut(clientId) { ClientConn(clientId) }
+        conn.deviceId = deviceId
+        if (resumeToken != null) conn.resumeToken = resumeToken
+
+        val rec = record ?: run {
+            outbound += clientId to ErrorMessage("NO_SESSION", "No game is running on the TV.")
+            return
+        }
+
+        val liveSlots = clients.values.mapNotNull { if (it.id == clientId) null else it.slot }.toSet()
+
+        // 1. A valid resume token always returns the phone to its own slot.
+        val byToken = Slot.entries.firstOrNull { slot ->
+            val st = rec.slot(slot)
+            st.claimed && st.reconnectToken != null && resumeToken != null &&
+                constantTimeEquals(st.reconnectToken, resumeToken)
+        }
+        // 2. Same browser returning without its token.
+        val byDevice = Slot.entries.firstOrNull { slot ->
+            val st = rec.slot(slot)
+            st.claimed && st.deviceId == deviceId && slot !in liveSlots
+        }
+        val existing = byToken ?: byDevice
+        if (existing != null && (existing !in liveSlots || byToken != null)) {
+            attachLocked(conn, existing, deviceId, rotateToken = false)
+            outbound += clientId to HelloOk(
+                rec.sessionId, existing, record!!.slot(existing).reconnectToken!!, engineState!!.state.version
+            )
+            return
+        }
+
+        // 3. A free slot: first phone becomes Player 1, second becomes Player 2.
+        val free = Slot.entries.firstOrNull { !rec.slot(it).claimed }
+        if (free != null) {
+            attachLocked(conn, free, deviceId, rotateToken = true)
+            val claimed = Slot.entries.count { record!!.slot(it).claimed }
+            engineState = engine.onSlotClaimed(engineState!!, claimed, clock())
+            record = record!!.copy(state = engineState!!.state)
+            outbound += clientId to HelloOk(
+                rec.sessionId, free, record!!.slot(free).reconnectToken!!, engineState!!.state.version
+            )
+            persistLocked()
+            return
+        }
+
+        // 4. Both slots are taken. An unknown browser may ask to reclaim a disconnected
+        //    slot, but only the TV remote can approve it. No PIN is involved.
+        val reclaimable = Slot.entries.firstOrNull { it !in liveSlots && rec.slot(it).claimed }
+        if (reclaimable != null) {
+            val requestId = "rc-" + secureToken().take(10)
+            record = rec.copy(
+                pendingReclaim = PendingReclaim(requestId, reclaimable, deviceId, clock())
+            )
+            outbound += clientId to ReclaimPending(
+                requestId, reclaimable,
+                "This slot already belongs to another phone. Confirm the takeover with the TV remote."
+            )
+            persistLocked()
+            return
+        }
+
+        outbound += clientId to SessionFull(
+            "Session full. This game already has its two players."
+        )
     }
 
     private fun attachLocked(conn: ClientConn, slot: Slot, deviceId: String, rotateToken: Boolean) {

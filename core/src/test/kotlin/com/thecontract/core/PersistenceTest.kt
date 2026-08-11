@@ -129,6 +129,44 @@ class PersistenceTest {
         )
     }
 
+    /**
+     * The phones come back on their own after the television is relaunched.
+     *
+     * This is the real order of events, not a contrived one. A phone reconnects the instant the
+     * server is listening, which is several seconds before anybody has picked Resume on the
+     * television, so it says hello into a running server with no session and is told there is
+     * none. That answer used to be the end of it: the socket stays open, the pings keep it open,
+     * nothing on the phone ever prompts a second hello, and the broadcast after the resume skips
+     * it because it has no slot. Both phones sat there connected and slotless while the game ran
+     * on the television without them.
+     */
+    @Test
+    fun `phones that reconnected before the resume are given their slots back`(@TempDir dir: File) {
+        val store = JsonFileStateStore(dir)
+        val (h, _) = startedGame(store)
+        val slot1 = h.phones.values.first { it.slot == Slot.PLAYER_1 }
+        val token1 = slot1.resumeToken
+        val token2 = h.phones.values.first { it.slot == Slot.PLAYER_2 }.resumeToken
+        val sessionId = h.state().sessionId
+        h.manager.persistNow()
+        assertNotNull(token1)
+
+        // The television restarts. Its server is listening; nobody has picked Resume yet.
+        val fresh = Harness(store, TestClock())
+        val p1 = fresh.newPhone("one", resumeToken = token1).join()
+        val p2 = fresh.newPhone("two", resumeToken = token2).join()
+        assertNull(p1.slot, "there was no session yet, so no slot should have been handed out")
+        assertNull(p2.slot)
+
+        // Now somebody picks Resume on the television. The phones ask nothing further.
+        assertTrue(fresh.manager.resumeSavedSession())
+
+        assertEquals(Slot.PLAYER_1, p1.slot, "player one was left connected without a slot")
+        assertEquals(Slot.PLAYER_2, p2.slot, "player two was left connected without a slot")
+        assertEquals(sessionId, p1.view?.sessionId, "the phone did not receive the resumed game")
+        assertNotNull(p2.view, "the phone was never sent the state it reconnected for")
+    }
+
     @Test
     fun `an unfinished session is offered on launch and is never silently destroyed`(@TempDir dir: File) {
         val store = JsonFileStateStore(dir)
