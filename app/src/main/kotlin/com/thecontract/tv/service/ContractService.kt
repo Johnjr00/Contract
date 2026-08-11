@@ -132,7 +132,13 @@ class ContractService : Service() {
         narrationJob = scope.launch {
             var spokenKey: String? = null
             ServerHolder.tvView.collect { view ->
-                val enabled = manager.sessionRecord?.state?.setup?.narrationEnabled ?: true
+                val setup = manager.sessionRecord?.state?.setup
+                val enabled = setup?.narrationEnabled ?: true
+                // The voice is a one-time download. Start it the moment there is a session that
+                // wants narration — that is the pairing screen, minutes before the first term,
+                // rather than making the first term the thing that waits for it. Gated on the
+                // setting, so a table that has turned narration off never fetches 139 MB.
+                if (setup?.narrationEnabled == true) narrator?.prepare()
                 val line = Narration.script(view, enabled)
                 when {
                     line == null -> {

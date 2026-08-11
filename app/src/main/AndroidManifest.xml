@@ -3,9 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!--
-      The only network capability the app needs is the ability to open a listening socket on the
-      local network and to observe address changes. There are no outbound calls of any kind: no
-      analytics, no crash reporting, no telemetry, no remote assets.
+      Network use is a listening socket on the local network, plus address changes. There is no
+      analytics, no crash reporting and no telemetry, and nothing about a session — no term, no
+      profile, no spoken text — ever leaves the box.
+
+      There is exactly one outbound call, made once in the life of an install: fetching the voice
+      model, which is too large to ship inside the APK. It is a fixed list of files at a pinned
+      commit, verified by hash, and after it succeeds the app never reaches the network again.
+      See VoiceInstaller.
     -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />

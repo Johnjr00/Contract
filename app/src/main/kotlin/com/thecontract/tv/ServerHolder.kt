@@ -43,12 +43,24 @@ object ServerHolder {
      * box rather than estimated from somebody else's benchmark — above 1.0 means the machine
      * cannot generate speech as fast as it is spoken, which is the number that decides whether
      * a heavier voice is usable here.
+     *
+     * [download] is present only during the one-time fetch of the voice, and [failureNote] says
+     * what went wrong in a sentence a player can act on — "the television could not reach the
+     * network" is a different problem from "this device cannot run the voice", and the line on
+     * screen is the only place either of them surfaces.
      */
     data class NarrationStatus(
         val speaking: Boolean = false,
         val realTimeFactor: Double? = null,
-        val failed: Boolean = false
-    )
+        val failed: Boolean = false,
+        val failureNote: String? = null,
+        val download: Download? = null
+    ) {
+        data class Download(val bytesDone: Long, val bytesTotal: Long) {
+            val percent: Int
+                get() = if (bytesTotal <= 0) 0 else ((bytesDone * 100) / bytesTotal).toInt()
+        }
+    }
 
     private val _narration = MutableStateFlow(NarrationStatus())
     val narration: StateFlow<NarrationStatus> = _narration.asStateFlow()

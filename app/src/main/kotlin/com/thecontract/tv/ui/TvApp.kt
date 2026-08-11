@@ -336,12 +336,23 @@ private fun SuggestionLists(lists: List<com.thecontract.core.model.Suggestions>)
  * between a term appearing and the first word of it. Saying so is better than silence that
  * looks like a fault. The measured factor is shown because it is the number that decides
  * whether this box can carry a heavier voice, and it can only be measured here.
+ *
+ * The download line matters more than it looks. It is the only place the one-time fetch of the
+ * voice is visible, and it appears on the pairing screen, which is where a television that has
+ * just been set up will be sitting while it runs — a progress figure there is the difference
+ * between a wait somebody understands and a game that seems to have gone quiet for no reason.
  */
 @Composable
 private fun NarrationLine() {
     val status by ServerHolder.narration.collectAsState()
+    val download = status.download
     val text = when {
-        status.failed -> "Narration unavailable on this device."
+        download != null ->
+            "Downloading the voice · ${download.percent}% of ${download.bytesTotal / 1_000_000} MB · " +
+                "once only, then it works offline"
+        // The installer's own words when it has them: being unable to reach the network is a
+        // thing a player can fix, and "unavailable" would hide that.
+        status.failed -> status.failureNote ?: "Narration unavailable on this device."
         status.speaking -> "Reading aloud…" + rtfSuffix(status.realTimeFactor)
         status.realTimeFactor != null -> "Narration ready" + rtfSuffix(status.realTimeFactor)
         else -> return

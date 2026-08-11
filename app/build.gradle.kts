@@ -95,6 +95,12 @@ android {
     }
 
     packaging {
+        // ONNX Runtime and sherpa-onnx are 24 MB of arm64 native library uncompressed, which the
+        // modern default stores in the APK verbatim so it can be mapped straight from it. Storing
+        // them compressed instead costs a one-time extraction at install and takes the APK from
+        // 33.0 MiB to 17.7 MiB — the difference between a build that can be handed over and one
+        // that cannot, which for a sideloaded app matters more than a few milliseconds of launch.
+        jniLibs { useLegacyPackaging = true }
         resources {
             excludes += setOf(
                 "META-INF/*.kotlin_module",
@@ -108,10 +114,18 @@ android {
     }
 
     sourceSets["main"].java.srcDirs("src/main/kotlin")
+    sourceSets["test"].java.srcDirs("src/test/kotlin")
 
     lint {
         abortOnError = false
     }
+}
+
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
+    // VoiceModelManifestTest checks the checked-in model against what the app expects to
+    // download, and has to find it from wherever Gradle runs the tests.
+    systemProperty("contract.rootDir", rootDir.absolutePath)
 }
 
 kotlin {
@@ -143,4 +157,8 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+
+    testImplementation(libs.kotlin.test)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }
