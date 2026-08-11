@@ -51,10 +51,29 @@ android {
         versionCode = buildNumber
         versionName = "1.0.$buildNumber"
         resourceConfigurations += listOf("en")
-        // The Shield and every other current Android TV box are 64-bit ARM. Shipping the other
-        // three ABIs of the speech runtime would add about 90 MB to an already large artifact
-        // for hardware this app does not run on.
-        ndk { abiFilters += "arm64-v8a" }
+    }
+
+    /**
+     * One APK per architecture rather than one APK for all of them.
+     *
+     * The speech runtime is about 28 MB of native library per architecture, so a single APK
+     * carrying all three would be some 45 MiB — past the size that can be handed over, which is
+     * the constraint the whole voice design already bends around. Split, each one is under 20 MiB
+     * and a device only carries the code it can execute.
+     *
+     * Emulators are the reason more than one is built. Every Android TV box is arm64, so that
+     * alone would do for real hardware — but Android Studio's virtual devices are Intel, and an
+     * APK with no matching architecture does not install with a subtle warning, it is refused
+     * outright with INSTALL_FAILED_NO_MATCHING_ABIS. Android TV images are x86 at API 30 and
+     * x86_64 above it, so both are built. armeabi-v7a is not: no Android TV device is 32-bit ARM.
+     */
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "x86_64", "x86")
+            isUniversalApk = false
+        }
     }
 
     signingConfigs {
