@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -46,11 +48,16 @@ fun TvApp(
     onChoice: (String) -> Unit,
     onRemoteAction: (RemoteAction) -> Unit
 ) {
+    // What is on screen decides how much room the rest of it gets, so both facts are settled
+    // once, here, rather than being asked again by each panel that cares.
+    val sceneRunning = view.timers.any { it.state == "RUNNING" || it.state == "PAUSED" }
+    val hasCard = view.term != null || view.consideration != null
+
     Row(
         modifier = Modifier
             .fillMaxSize()
             .background(TvColors.background)
-            .padding(48.dp)
+            .padding(horizontal = TvLayout.safeAreaX, vertical = TvLayout.safeAreaY)
     ) {
         Column(
             modifier = Modifier
@@ -65,119 +72,111 @@ fun TvApp(
             // glance and must never be somewhere below the fold.
             ActiveTimerPanel(view.timers)
 
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
-                view.reclaimRequest?.let { request ->
-                    ReclaimPrompt(request.playerName, request.requestId, onRemoteAction)
-                }
-
-                // Ahead of the heading card, which while pairing only repeats the same words.
-                // Nothing in this column is focusable, so a remote cannot scroll it: anything
-                // below the fold here is invisible on a real television, and a join code nobody
-                // can see is the one thing that screen exists to show. Once play starts the
-                // term on offer is what has to be up here instead, so the code drops away.
-                if (view.phase in PAIRING_PHASES) {
-                    view.join?.let { join ->
-                        JoinPanel(join.url, join.qrMatrix, join.interfaceName, join.address, join.port)
+            FitToHeight(modifier = Modifier.weight(1f)) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                ) {
+                    view.reclaimRequest?.let { request ->
+                        ReclaimPrompt(request.playerName, request.requestId, onRemoteAction)
                     }
-                }
 
-                TvCard {
-                    BasicText(view.heading, style = TvType.display)
-                    if (view.body.isNotBlank()) {
-                        Spacer(Modifier.height(12.dp))
-                        BasicText(view.body, style = TvType.body)
+                    // Ahead of the heading, which while pairing only repeats the same words. A join
+                    // code nobody can see is the one thing that screen exists to show. Once play
+                    // starts the term on offer is what has to be up here instead, so the code drops
+                    // away.
+                    if (view.phase in PAIRING_PHASES) {
+                        view.join?.let { join ->
+                            JoinPanel(join.url, join.qrMatrix, join.interfaceName, join.address, join.port)
+                        }
                     }
-                    if (view.waiting) {
-                        Spacer(Modifier.height(12.dp))
-                        BasicText("Waiting…", style = TvType.muted)
+
+                    PhaseHeading(view, hasCard, sceneRunning)
+
+                    view.blockedNotice?.let { notice ->
+                        Box(
+                            Modifier
+                                .fillMaxWidth()
+                                .background(TvColors.panelRaised, RoundedCornerShape(12.dp))
+                                .border(2.dp, TvColors.warn, RoundedCornerShape(12.dp))
+                                .padding(20.dp)
+                        ) {
+                            BasicText(notice, style = TvType.body)
+                        }
                     }
-                    NarrationLine()
-                }
 
-                view.blockedNotice?.let { notice ->
-                    Box(
-                        Modifier
-                            .fillMaxWidth()
-                            .background(TvColors.panelRaised, RoundedCornerShape(12.dp))
-                            .border(2.dp, TvColors.warn, RoundedCornerShape(12.dp))
-                            .padding(20.dp)
-                    ) {
-                        BasicText(notice, style = TvType.body)
+                    view.term?.let { TermPanel(it, termLabel(view), sceneRunning) }
+                    view.bundledTerm?.let { TermPanel(it, "Second term in the trade", sceneRunning) }
+                    view.consideration?.let { ConsiderationPanel(it, sceneRunning) }
+
+                    // Only when the panel above is not already showing one. That panel draws the
+                    // timer that is actually running; this draws every timer the term carries, and
+                    // terms carry up to seven. Both at once meant the running clock appeared twice
+                    // and the second copy pushed the term itself off the screen.
+                    if (!sceneRunning && view.timers.isNotEmpty()) TimerPanel(view.timers)
+
+                    view.execution?.let { execution ->
+                        TvCard(raised = true) {
+                            BasicText("Final scene", style = TvType.label)
+                            BasicText(
+                                "Term ${execution.stepIndex} of ${execution.stepCount}" +
+                                    if (execution.started) " · running" else " · not started",
+                                style = TvType.heading
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            BasicText("Stop word: ${execution.stopWord}", style = TvType.muted)
+                        }
                     }
-                }
 
-                view.term?.let { TermPanel(it, termLabel(view)) }
-                view.bundledTerm?.let { TermPanel(it, "Second term in the trade") }
-                view.consideration?.let { ConsiderationPanel(it) }
-
-                if (view.timers.isNotEmpty()) TimerPanel(view.timers)
-
-                view.execution?.let { execution ->
-                    TvCard(raised = true) {
-                        BasicText("Final scene", style = TvType.label)
-                        BasicText(
-                            "Term ${execution.stepIndex} of ${execution.stepCount}" +
-                                if (execution.started) " · running" else " · not started",
-                            style = TvType.heading
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        BasicText("Stop word: ${execution.stopWord}", style = TvType.muted)
-                    }
-                }
-
-                view.draft?.let { draft ->
-                    TvCard {
-                        BasicText("Draft contract", style = TvType.title)
-                        Spacer(Modifier.height(8.dp))
-                        BasicText(
-                            "${draft.signedRegular} of ${draft.requiredRegular} regular terms · " +
-                                "${draft.signedClosing} of 2 closing terms · " +
-                                "${draft.receiptsCompleted} consideration receipts",
-                            style = TvType.muted
-                        )
-                        draft.byAct.forEach { (act, terms) ->
-                            Spacer(Modifier.height(20.dp))
-                            BasicText(act, style = TvType.label)
-                            terms.forEach { term ->
-                                Spacer(Modifier.height(10.dp))
-                                BasicText("${term.index}. ${term.title}", style = TvType.heading)
-                                BasicText(term.instruction, style = TvType.body)
-                                term.bundledInstruction?.let {
-                                    BasicText("Traded with: $it", style = TvType.body)
-                                }
-                                term.considerationTitle?.let {
-                                    BasicText("Consideration performed: $it", style = TvType.muted)
+                    view.draft?.let { draft ->
+                        TvCard {
+                            BasicText("Draft contract", style = TvType.title)
+                            Spacer(Modifier.height(8.dp))
+                            BasicText(
+                                "${draft.signedRegular} of ${draft.requiredRegular} regular terms · " +
+                                    "${draft.signedClosing} of 2 closing terms · " +
+                                    "${draft.receiptsCompleted} consideration receipts",
+                                style = TvType.muted
+                            )
+                            draft.byAct.forEach { (act, terms) ->
+                                Spacer(Modifier.height(20.dp))
+                                BasicText(act, style = TvType.label)
+                                terms.forEach { term ->
+                                    Spacer(Modifier.height(10.dp))
+                                    BasicText("${term.index}. ${term.title}", style = TvType.heading)
+                                    BasicText(term.instruction, style = TvType.body)
+                                    term.bundledInstruction?.let {
+                                        BasicText("Traded with: $it", style = TvType.body)
+                                    }
+                                    term.considerationTitle?.let {
+                                        BasicText("Consideration performed: $it", style = TvType.muted)
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                if (view.savedContracts.isNotEmpty() && view.phase == GamePhase.NO_SESSION) {
-                    TvCard {
-                        BasicText("Saved contracts on this TV", style = TvType.title)
-                        Spacer(Modifier.height(8.dp))
-                        view.savedContracts.forEach {
-                            BasicText("${it.title} — ${it.termCount} terms", style = TvType.muted)
+                    if (view.savedContracts.isNotEmpty() && view.phase == GamePhase.NO_SESSION) {
+                        TvCard {
+                            BasicText("Saved contracts on this TV", style = TvType.title)
+                            Spacer(Modifier.height(8.dp))
+                            view.savedContracts.forEach {
+                                BasicText("${it.title} — ${it.termCount} terms", style = TvType.muted)
+                            }
                         }
                     }
                 }
-
-                Spacer(Modifier.height(40.dp))
             }
         }
 
-        Spacer(Modifier.width(36.dp))
+        Spacer(Modifier.width(TvLayout.columnGap))
 
         // Remote-controlled column. Every backup control the specification asks for lives here.
+        // 380 dp, not the 460 dp it was: at the old canvas that left the game itself 368 dp — a
+        // backup control panel wider than the term under negotiation — and every line in the
+        // column beside it wrapped two or three times over because of it.
         Column(
             modifier = Modifier
-                .width(460.dp)
+                .width(TvLayout.remoteWidth)
                 .fillMaxHeight()
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(14.dp)
@@ -209,6 +208,56 @@ fun TvApp(
     }
 }
 
+/**
+ * What step the game is on, at whatever prominence the rest of the screen can spare.
+ *
+ * On its own — pairing, waiting, the finished contract — this is the screen, and it is drawn as a
+ * full card in the largest type there is. Beside a term card it is a caption: the term card
+ * already carries the same words in its own label ("Proposed term · Act II"), so a second copy of
+ * them at 40sp was costing 258 dp of a screen that had none to give. And once a timer is running
+ * it goes entirely: the pair are performing, not reading, and what has to be legible then is the
+ * instruction and the clock.
+ *
+ * The narration line survives all three, because it is the only place the one-time voice download
+ * is ever reported, and a television that has gone quiet mid-scene with no explanation reads as a
+ * fault.
+ */
+@Composable
+private fun PhaseHeading(view: ClientView, hasCard: Boolean, sceneRunning: Boolean) {
+    if (hasCard && sceneRunning) {
+        NarrationLine(leadingGap = false)
+        return
+    }
+    if (hasCard) {
+        Column(Modifier.fillMaxWidth()) {
+            BasicText(view.heading, style = TvType.title)
+            if (view.body.isNotBlank()) {
+                Spacer(Modifier.height(6.dp))
+                BasicText(view.body, style = TvType.muted)
+            }
+            if (view.waiting) {
+                Spacer(Modifier.height(6.dp))
+                BasicText("Waiting…", style = TvType.muted)
+            }
+            NarrationLine()
+        }
+        return
+    }
+    TvCard {
+        BasicText(view.heading, style = TvType.display)
+        if (view.body.isNotBlank()) {
+            Spacer(Modifier.height(12.dp))
+            BasicText(view.body, style = TvType.body)
+        }
+        if (view.waiting) {
+            Spacer(Modifier.height(12.dp))
+            BasicText("Waiting…", style = TvType.muted)
+        }
+        NarrationLine()
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun Header(view: ClientView, serverRunning: Boolean, joinPort: Int) {
     // One Column, not a loose run of siblings. The caller arranges its children with
@@ -227,7 +276,15 @@ private fun Header(view: ClientView, serverRunning: Boolean, joinPort: Int) {
             )
         }
         Spacer(Modifier.height(10.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        // Flowed, not a plain Row. A pill never wraps its own text, so two long names in a row
+        // simply ran past the end of the column and the second one was cut in half by the panel
+        // beside it. Given the room this wraps to a second line instead, which costs 8 dp on the
+        // rare screen that needs it and never loses a word.
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             listOf("PLAYER_1" to "Player 1", "PLAYER_2" to "Player 2").forEach { (slot, fallback) ->
                 val name = view.names[slot] ?: fallback
                 val state = view.connections[slot]
@@ -343,7 +400,7 @@ private fun SuggestionLists(lists: List<com.thecontract.core.model.Suggestions>)
  * between a wait somebody understands and a game that seems to have gone quiet for no reason.
  */
 @Composable
-private fun NarrationLine() {
+private fun NarrationLine(leadingGap: Boolean = true) {
     val status by ServerHolder.narration.collectAsState()
     val download = status.download
     val text = when {
@@ -357,15 +414,24 @@ private fun NarrationLine() {
         status.realTimeFactor != null -> "Narration ready" + rtfSuffix(status.realTimeFactor)
         else -> return
     }
-    Spacer(Modifier.height(12.dp))
+    if (leadingGap) Spacer(Modifier.height(12.dp))
     BasicText(text, style = TvType.muted)
 }
 
 private fun rtfSuffix(rtf: Double?): String =
     rtf?.let { " · ${(it * 100).toInt() / 100.0}x real time" } ?: ""
 
+/**
+ * The term itself.
+ *
+ * While a timer runs this is cut back to the label, the title and the instruction. Everything
+ * that follows — what it needs, how long it takes, whose turn it is to gain — is what the pair
+ * read while they were deciding whether to sign it. Once the clock is going that decision is
+ * behind them and the instruction is the only line still being acted on, so it is the one that
+ * has to stay at full size rather than be shrunk to fit around the rest.
+ */
 @Composable
-private fun TermPanel(term: TermCard, label: String) {
+private fun TermPanel(term: TermCard, label: String, sceneRunning: Boolean = false) {
     TvCard {
         BasicText(
             "$label · ${term.actTitle}" + if (term.climax) " · closing term" else "",
@@ -378,6 +444,7 @@ private fun TermPanel(term: TermCard, label: String) {
             Spacer(Modifier.height(12.dp))
             BasicText(term.instruction, style = TvType.body)
         }
+        if (sceneRunning) return@TvCard
         SuggestionLists(term.suggestions)
         if (term.equipment.isNotEmpty()) {
             Spacer(Modifier.height(12.dp))
@@ -403,13 +470,14 @@ private fun TermPanel(term: TermCard, label: String) {
 }
 
 @Composable
-private fun ConsiderationPanel(consideration: ConsiderationCard) {
+private fun ConsiderationPanel(consideration: ConsiderationCard, sceneRunning: Boolean = false) {
     TvCard(raised = true) {
         BasicText("Consideration", style = TvType.label)
         Spacer(Modifier.height(8.dp))
         BasicText(consideration.title, style = TvType.title)
         Spacer(Modifier.height(12.dp))
         BasicText(consideration.instruction, style = TvType.body)
+        if (sceneRunning) return@TvCard
         SuggestionLists(consideration.suggestions)
         if (consideration.timers.isNotEmpty()) {
             Spacer(Modifier.height(10.dp))
