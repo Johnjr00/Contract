@@ -342,7 +342,7 @@ internal object ConsiderationsNonSexual {
             id = "cn_ear_with_oral", intensity = 3, family = F_EAR, cats = setOf(EAR_PLAY),
             title = "Ear play, then his mouth lower down",
             base = "{G} sucks {R+} ear for a minute, then moves his way down and [v_suck] him, then comes back up to the ear.",
-            explicit = "{G} sucks {R+} ear for a minute, goes down and [v_suck] him, then comes straight back up to the ear.",
+            explicit = "{G} sucks {R+} ear for a minute, goes down and [v_suck] him, then goes straight back up to the ear.",
             acts = setOf("ear_play", "oral"),
             timers = listOf(tm("Ear", 60), tm("Mouth lower down", 90), tm("Back to the ear", 60))
         ),

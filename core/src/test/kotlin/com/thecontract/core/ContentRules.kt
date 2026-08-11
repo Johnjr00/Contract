@@ -116,6 +116,18 @@ object ContentRules {
             "conjugated verb straight after \"to\""
         ),
         Rule(ci("\\bhas him \\w+s\\b"), "the verb after \"has him\" has to be bare"),
+        /**
+         * The hand named twice in one clause. A lexicon verb may not carry an instrument any
+         * more than an object: `[v_stroke]` resolving to "runs his hand over" produced "while
+         * his hand runs his hand over the rest" and "runs his hand over the base with his hand".
+         */
+        Rule(
+            ci("\\b(?:his |one |the other )?hands?\\b[^.]{0,45}?\\bwith (?:his|the other) hand\\b"),
+            "the hand is named twice in one clause"
+        ),
+        Rule(ci("\\bhis hand\\b[^.,;]{0,40}\\bhis hand\\b"), "the hand is named twice in one clause"),
+        /** Both hands used by the hand that is not busy: "uses his hands on him with the other". */
+        Rule(ci("\\bhis hands\\b[^.]{0,40}\\bwith the other\\b"), "one hand is already busy, so it cannot be both"),
         Rule(ci("\\b\\w+'s the \\b"), "possessive followed by \"the\""),
         Rule(
             ci("(?:grinds his palms into|presses hard into|digs into|kneads) [^.]{0,90}?\\bwith light"),

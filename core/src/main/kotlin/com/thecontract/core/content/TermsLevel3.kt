@@ -410,7 +410,7 @@ internal object TermsLevel3 {
             id = "l3_orgasm_permission", level = 3, cats = setOf(ORGASM_CONTROL, POWER),
             title = "Asking to come",
             base = "{SUB} must ask out loud and be given permission before he finishes at any point tonight.",
-            explicit = "{SUB} asks out loud and waits to be told yes before he comes at any point tonight, and waits for the answer every time.",
+            explicit = "{SUB} asks out loud and waits to be told yes before he comes at any point tonight, every single time.",
             benefit = MUTUAL, type = BenefitType.MUTUAL,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("climax_permission", "permission_control"),

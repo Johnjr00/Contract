@@ -178,8 +178,8 @@ internal object ConsiderationsMutual {
         c(
             id = "cm_grip_and_hold", intensity = 2, family = F_SEX, cats = setOf(HANDS),
             title = "Held, not stroked",
-            base = "{G} and {R} lie face to face, each holding the other's cock [adv_grip] without moving his hand, and they kiss [adv_kiss] for the whole time.",
-            explicit = "{G} and {R} lie face to face, each with a hand closed round the other's cock [adv_grip] and not moving it, and they kiss [adv_kiss] for the whole time.",
+            base = "{G} and {R} lie face to face, each holds the other's cock [adv_grip] and does not move his hand, and they kiss [adv_kiss] for the whole time.",
+            explicit = "{G} and {R} lie face to face, each holds the other's cock [adv_grip] and does not move his hand once, and they kiss [adv_kiss] for the whole time.",
             acts = setOf("massage_groin", "hard_kissing"), mutual = true,
             blocks = setOf(Boundary.MASSAGE_NONSEXUAL),
             timers = listOf(tm("Held and kissing", 90))

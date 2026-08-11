@@ -58,8 +58,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_oral_deep", intensity = 3, family = F_SEX, cats = setOf(ORAL),
             title = "Deep oral",
-            base = "{G} [v_deep] {R+} cock, taking it further on each pass than the last, and comes all the way off between passes rather than during one.",
-            explicit = "{G} [v_deep] {R+} cock, further every pass, and comes all the way off between passes and not during one.",
+            base = "{G} [v_deep] {R+} cock, taking it further on each pass than the last, and pulls all the way off between passes rather than during one.",
+            explicit = "{G} [v_deep] {R+} cock, further every pass, and pulls all the way off between passes and not during one.",
             acts = setOf("oral", "deep_oral"),
             timers = listOf(tm("Deeper", 90), tm("Held deep", 45))
         ),
@@ -80,8 +80,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_oral_ice", intensity = 3, family = F_SEX, cats = setOf(ORAL, SENSORY),
             title = "Cold mouth",
-            base = "{G} holds #ice# in his mouth, then [v_suck] {R} cold, warms up for forty-five seconds and does it a second time.",
-            explicit = "{G} holds #ice# in his mouth for a slow count of twenty, then [v_suck] {R} cold, warms up for forty-five seconds and does it a second time.",
+            base = "{G} holds #ice# in his mouth, then [v_suck] {R} while his mouth is still cold, warms up for forty-five seconds and does it a second time.",
+            explicit = "{G} holds #ice# in his mouth for a slow count of twenty, then [v_suck] {R} while his mouth is still cold, warms up for forty-five seconds and does it a second time.",
             acts = setOf("oral", "cold_sensation"), equip = setOf(Equipment.ICE),
             timers = listOf(tm("Cold", 45), tm("Warm", 45), tm("Cold again", 45))
         ),
@@ -569,8 +569,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_rest_cuffs_tease", intensity = 4, family = F_SEX, cats = setOf(BONDAGE),
             title = "Cuffed and teased",
-            base = "{R} is restrained with #cuffs# and {G} [v_tease] him with hands and mouth without finishing anything.",
-            explicit = "{R} is locked in #cuffs# and {G} [v_tease] him with hands and mouth and finishes nothing he starts.",
+            base = "{R} is restrained with #cuffs# and {G} [v_tease] him with hands and mouth, and takes both off him for a slow count of ten every time {R} says he is close.",
+            explicit = "{R} is locked in #cuffs# and {G} [v_tease] him with hands and mouth, and pulls both off him for a slow count of ten every time {R} says he is close.",
             acts = setOf("restraint"), equip = setOf(Equipment.CUFFS),
             blocks = setOf(Boundary.NO_RESTRAINTS), timers = listOf(tm("Cuffed and teased", 150))
         ),
@@ -586,15 +586,15 @@ internal object ConsiderationsSexual {
             id = "cs_rest_held_wrists", intensity = 3, family = F_SEX, cats = setOf(BONDAGE, ROUGH),
             title = "Wrists held",
             base = "{G} holds {R+} wrists above his head with one hand and strokes his cock with the other.",
-            explicit = "{G} pins {R+} wrists above his head with one hand and uses his hands on him with the other.",
+            explicit = "{G} pins {R+} wrists above his head with one hand and works his cock with the other.",
             acts = setOf("pinning"), blocks = setOf(Boundary.NO_ROUGH_SEX),
             timers = listOf(tm("Held", 120))
         ),
         c(
             id = "cs_rest_spreader", intensity = 4, family = F_SEX, cats = setOf(BONDAGE, ANAL),
             title = "Held open",
-            base = "{R} is put on #spreader_bar# so his legs stay apart and {G} strokes him with hands and mouth.",
-            explicit = "{R} is fixed onto #spreader_bar# so his legs cannot close and {G} uses his hands and mouth on him.",
+            base = "{R} is put on #spreader_bar# so his legs stay apart and {G} works his inner thighs, balls and cock with hands and mouth.",
+            explicit = "{R} is fixed onto #spreader_bar# so his legs cannot close and {G} works his inner thighs, balls and cock with hands and mouth.",
             acts = setOf("restraint", "anal_external"), equip = setOf(Equipment.SPREADER_BAR),
             blocks = setOf(Boundary.NO_RESTRAINTS), timers = listOf(tm("Set up", 45), tm("Stroked", 150))
         ),

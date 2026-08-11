@@ -450,7 +450,7 @@ internal object TermsLevel2 {
         t(
             id = "l2_kiss_after_oral", level = 2, cats = setOf(ORAL, KISSING),
             title = "Back up to his mouth",
-            base = "{G} [v_suck] {R} for two minutes, then comes all the way back up his body with [n_kiss_trail] and kisses him [adv_kiss_deep].",
+            base = "{G} [v_suck] {R} for two minutes, then works his way all the way back up his body with [n_kiss_trail] and kisses him [adv_kiss_deep].",
             explicit = "{G} [v_suck] {R} for two minutes, then kisses all the way back up his body with [n_kiss_trail] and kisses him [adv_kiss_deep] so he tastes himself.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "tongue_kissing"),

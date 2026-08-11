@@ -116,8 +116,8 @@ internal object TermsLevel5 {
         t(
             id = "l5_rough_wrestle", level = 5, cats = setOf(ROUGH),
             title = "Whoever ends up on top",
-            base = "{G} and {R} wrestle for position for two minutes. Whoever ends up on top pins the other down and uses his hands and mouth on his chest, stomach and cock for the next two.",
-            explicit = "{G} and {R} wrestle for it for two minutes. Whoever comes out on top pins the other flat and uses his hands and mouth on his chest, stomach and cock for the next two.",
+            base = "{G} and {R} wrestle for position for two minutes. Whoever ends up on top pins the other down and uses his hands and mouth on his chest, stomach and cock for the next two minutes.",
+            explicit = "{G} and {R} wrestle for it for two minutes. Whoever comes out on top pins the other flat and uses his hands and mouth on his chest, stomach and cock for the next two minutes.",
             benefit = MUTUAL, type = BenefitType.MUTUAL, mutual = true,
             acts = setOf("pinning", "rough_handling"),
             blocks = setOf(Boundary.NO_ROUGH_SEX),
@@ -158,8 +158,8 @@ internal object TermsLevel5 {
         t(
             id = "l5_oral_deep_hold", level = 5, cats = setOf(ORAL),
             title = "Held deep",
-            base = "{G} [v_deep] {R+} cock and stays down for a slow count of ten, three times over, coming all the way off between each.",
-            explicit = "{G} [v_deep] {R+} cock and holds there for a slow count of ten, three times over, coming all the way off between each one.",
+            base = "{G} [v_deep] {R+} cock and stays down for a slow count of ten, three times over, pulling all the way off between each.",
+            explicit = "{G} [v_deep] {R+} cock and holds there for a slow count of ten, three times over, pulling all the way off between each one.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "deep_oral"),
             timers = listOf(tm("Round 1", 45), tm("Round 2", 45), tm("Round 3", 45))
@@ -526,7 +526,21 @@ internal object TermsLevel5 {
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("degradation", "rough_handling", "dirty_talk"),
             blocks = setOf(Boundary.NO_DEGRADATION, Boundary.NO_ROUGH_SEX),
-            timers = listOf(tm("The scene", 180))
+            timers = listOf(tm("The scene", 180)),
+            says = listOf(
+                "You are here to be used and nothing else.",
+                "You do not get a say in any of this.",
+                "Look at the state of you.",
+                "You are going to take exactly what I give you.",
+                "This is all you are good for tonight."
+            ),
+            saysExplicit = listOf(
+                "You are here to be used and nothing fucking else.",
+                "You do not get a say in a single bit of this.",
+                "Look at the fucking state of you.",
+                "You are going to take exactly what I give you.",
+                "This is all you are good for tonight."
+            )
         ),
         t(
             id = "l5_bdsm_edged_restrained_denied", level = 5, cats = setOf(ORGASM_CONTROL, BONDAGE),
@@ -567,8 +581,8 @@ internal object TermsLevel5 {
         t(
             id = "l5_rule_belongs_tonight", level = 5, cats = setOf(POWER, LANGUAGE),
             title = "His for the rest of the night",
-            base = "{SUB} agrees out loud to [n_ownership] for the rest of the night, and {DOM} [v_own].",
-            explicit = "{SUB} says out loud that he agrees to [n_ownership] for the rest of the night, and {DOM} [v_own] in return.",
+            base = "{SUB} agrees out loud that he belongs to {DOM} for the rest of the night, and {DOM} [v_own] in return.",
+            explicit = "{SUB} says out loud that he belongs to {DOM} for the rest of the night and agrees to it, and {DOM} [v_own] in return.",
             benefit = MUTUAL, type = BenefitType.MUTUAL,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("ownership_language"),

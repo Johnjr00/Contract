@@ -112,19 +112,15 @@ object Lexicon {
             "adv_kiss",
             listOf("gently and slowly", "softly and slowly", "slowly and lightly"),
             listOf("slowly", "steadily", "firmly and slowly"),
-            listOf("hard", "hard and open-mouthed", "hard, with tongue"),
-            listOf("hard and wet", "hard and open-mouthed", "hard, with tongue the whole time")
+            listOf("hard", "hard and open-mouthed", "hard with tongue"),
+            listOf("hard and wet", "hard and open-mouthed", "hard and wet with tongue")
         )
         kv(
             "adv_kiss_deep",
-            listOf("deeply and unhurriedly", "slowly and deeply", "deeply, with his mouth open"),
-            listOf("deeply", "deeply and slowly", "deeply, with his mouth open"),
-            listOf("deep and wet", "deep, with tongue", "open-mouthed and deep"),
-            listOf(
-                "deep, with his tongue in his mouth",
-                "open-mouthed and deep, tongue included",
-                "deep, and does not break it to breathe"
-            )
+            listOf("deeply and unhurriedly", "slowly and deeply", "deeply and at length"),
+            listOf("deeply", "deeply and slowly", "as deeply as he can"),
+            listOf("deep and wet", "deep and open-mouthed", "as deep as he can"),
+            listOf("deep and sloppy", "deep and wet with tongue", "as deep and open-mouthed as he can")
         )
         k("v_bite", "grazes his teeth over", "nips at", "bites", "bites")
         kv(
@@ -136,9 +132,12 @@ object Lexicon {
         )
 
         // --- Hands and stroking -----------------------------------------------------------
+        // No "runs his hand over": several templates name the hand themselves, and that wording
+        // produced "while his hand runs his hand over the rest" and "runs his hand over the base
+        // with his hand". A verb key may not carry an instrument any more than an object.
         kv(
             "v_stroke",
-            listOf("strokes", "runs his hand over"),
+            listOf("strokes", "works"),
             listOf("strokes", "works"),
             listOf("jerks", "works"),
             listOf("jerks", "works")
@@ -264,7 +263,7 @@ object Lexicon {
         k("v_kneel_cmd", "asks him to kneel", "tells him to kneel", "orders him onto his knees", "puts him on his knees")
         k("n_dom_title", "the one in charge", "the one in charge", "the one who owns the room", "the one who owns him")
         k("n_sub_title", "the one following", "the one taking orders", "the one who obeys", "the one who obeys")
-        k("v_own", "calls him his", "calls him his", "tells him he belongs to him", "tells him he is his tonight")
+        k("v_own", "calls him his", "calls him his", "says out loud that he owns him", "says out loud that he owns him for the night")
         // No duration of its own: the templates supply "for the rest of the night", and the old
         // extreme value made that "his property for the night for the rest of the night".
         k("n_ownership", "belonging to him", "belonging to him", "being his", "being his property")
@@ -288,16 +287,16 @@ object Lexicon {
         k("v_come_in", "finishes inside", "comes inside", "comes inside", "unloads inside")
         k("n_orgasm", "release", "orgasm", "orgasm", "load")
         k("n_load", "what he has", "what he has", "his load", "every drop of his load")
-        k("v_edge", "brings him to the edge and stops", "edges him", "edges him", "edges him hard")
+        k("v_edge", "brings him right to the edge", "edges him", "edges him", "edges him hard")
         k("v_hold_back", "holds back", "holds back", "holds it", "does not let himself come")
 
         // --- Pace, tone and general intensity ---------------------------------------------
         kv(
             "adv_pace",
-            listOf("slowly", "at a slow, even speed"),
+            listOf("slowly", "unhurriedly"),
             listOf("steadily", "at one steady speed"),
-            listOf("hard", "hard, at one speed"),
-            listOf("hard and fast", "hard and fast, at one speed")
+            listOf("hard", "hard the whole way through"),
+            listOf("hard and fast", "hard and fast the whole way through")
         )
         k("adv_slow", "unhurriedly", "slowly", "slowly", "torturously slowly")
         k("adv_hard", "firmly", "hard", "hard", "at full force")
