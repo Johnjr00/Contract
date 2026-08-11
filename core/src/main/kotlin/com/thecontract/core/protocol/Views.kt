@@ -112,6 +112,7 @@ data class SetupForm(
     val explicitness: String,
     val finaleFormat: String,
     val stopWord: String,
+    val narrationEnabled: Boolean,
     val defaultMaybeCondition: String,
     val boundaries: List<String>,
     val equipment: List<String>,
@@ -229,6 +230,8 @@ data class ClientView(
     val blockedNotice: String? = null,
     val savedContracts: List<SavedContractSummary> = emptyList(),
     val stopWord: String? = null,
+    /** Rises when a player asks for the narration to be repeated. TV only. */
+    val narrationNonce: Int = 0,
     /** TV only. A phone is asking to take over an occupied slot and needs remote confirmation. */
     val reclaimRequest: ReclaimRequestView? = null
 )

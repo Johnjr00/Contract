@@ -45,6 +45,7 @@ import com.thecontract.core.protocol.SaveContract
 import com.thecontract.core.protocol.SaveProfile
 import com.thecontract.core.protocol.StartExecution
 import com.thecontract.core.protocol.StopAllTimers
+import com.thecontract.core.protocol.ReadAgain
 import com.thecontract.core.protocol.SubmitSetup
 import com.thecontract.core.protocol.TimerCommand
 import com.thecontract.core.protocol.UpdateSetup
@@ -205,6 +206,14 @@ class GameEngine {
             }
 
             is SubmitSetup -> requireP1(es, slot) { handleSubmitSetup(es, action, now) }
+
+            // Nothing about the game changes; the counter is what the television watches to
+            // know it has been asked to say the same thing over again.
+            is ReadAgain -> ok(
+                es,
+                es.state.copy(narrationNonce = es.state.narrationNonce + 1, updatedAtMs = now),
+                es.undoStack
+            )
 
             is SaveProfile -> handleSaveProfile(es, slot, action, now)
 

@@ -798,6 +798,7 @@
         dominantSlot: form.dominantSlot,
         analRoles: Object.assign({}, form.analRoles),
         erectionDifficulty: Object.assign({}, form.erectionDifficulty),
+        narrationEnabled: form.narrationEnabled !== false,
         sessionLength: form.sessionLength,
         explicitness: form.explicitness,
         finaleFormat: form.finaleFormat,
@@ -894,6 +895,15 @@
     card.appendChild(field("Default condition for a Maybe", selectFor(form.options.maybeCondition,
       d.defaultMaybeCondition, function (v) { d.defaultMaybeCondition = v; })));
 
+    var narr = el("label", "check");
+    var ncb = document.createElement("input");
+    ncb.type = "checkbox";
+    ncb.checked = !!d.narrationEnabled;
+    ncb.addEventListener("change", function () { d.narrationEnabled = ncb.checked; });
+    narr.appendChild(ncb);
+    narr.appendChild(el("span", null, "TV reads instructions out loud"));
+    card.appendChild(narr);
+
     card.appendChild(el("h3", null, "Shared hard boundaries"));
     card.appendChild(checkList(form.options.boundaries, d.boundaries, function (id, on) {
       toggle(d.boundaries, id, on);
@@ -932,6 +942,7 @@
         analRole: d.analRoles.PLAYER_2,
         erectionDifficulty: !!d.erectionDifficulty.PLAYER_2
       },
+      narrationEnabled: !!d.narrationEnabled,
       sessionLength: d.sessionLength,
       explicitness: d.explicitness,
       finaleFormat: d.finaleFormat,
@@ -950,6 +961,7 @@
     var arg = i < 0 ? null : id.slice(i + 1);
 
     switch (head) {
+      case "read_again": return act({ type: "read_again" });
       case "sign": return act({ type: "proposal_response", response: "SIGN" });
       case "counteroffer": return act({ type: "proposal_response", response: "COUNTEROFFER" });
       case "bundle": return act({ type: "proposal_response", response: "BUNDLE" });

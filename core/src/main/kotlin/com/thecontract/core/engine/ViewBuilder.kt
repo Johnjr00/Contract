@@ -27,6 +27,7 @@ import com.thecontract.core.protocol.ConsiderationCard
 import com.thecontract.core.protocol.DraftView
 import com.thecontract.core.protocol.ExecutionView
 import com.thecontract.core.protocol.JoinInfo
+import com.thecontract.core.protocol.Narration
 import com.thecontract.core.protocol.ProfileForm
 import com.thecontract.core.protocol.ProfileItem
 import com.thecontract.core.protocol.ProfileSection
@@ -157,6 +158,7 @@ object ViewBuilder {
             explicitness = setup.explicitness.name,
             finaleFormat = setup.finaleFormat.name,
             stopWord = setup.stopWord,
+            narrationEnabled = setup.narrationEnabled,
             defaultMaybeCondition = setup.defaultMaybeCondition.name,
             boundaries = setup.boundaries.map { it.name },
             equipment = setup.equipment.map { it.name },
@@ -230,6 +232,26 @@ object ViewBuilder {
 
     @Suppress("CyclomaticComplexMethod", "LongMethod")
     fun phoneView(
+        s: GameState,
+        slot: Slot,
+        connections: Map<Slot, ConnectionState>,
+        nowMs: Long,
+        canGoBack: Boolean
+    ): ClientView = withReadAgain(s, phoneViewBody(s, slot, connections, nowMs, canGoBack))
+
+    /**
+     * "Read it again" sits on both phones, because the television is the shared screen and
+     * either man may have missed it. It appears from the *television's* phase rather than the
+     * phone's, so the button is only ever there when there is something being read.
+     */
+    private fun withReadAgain(s: GameState, view: ClientView): ClientView =
+        if (!s.setup.narrationEnabled || s.pause.paused || !Narration.narratesNow(s.phase)) {
+            view
+        } else {
+            view.copy(choices = view.choices + Choice("read_again", "Read it again", kind = "nav"))
+        }
+
+    private fun phoneViewBody(
         s: GameState,
         slot: Slot,
         connections: Map<Slot, ConnectionState>,
@@ -715,7 +737,7 @@ object ViewBuilder {
         savedContracts: List<SavedContractSummary> = emptyList()
     ): ClientView {
         val base = baseView("tv", s, null, connections, nowMs, canGoBack = false)
-            .copy(join = join, savedContracts = savedContracts)
+            .copy(join = join, savedContracts = savedContracts, narrationNonce = s.narrationNonce)
         val n = s.negotiation
         val current = n.current
 

@@ -22,7 +22,14 @@ data class SharedSetup(
     val stopWord: String = "red",
     val defaultMaybeCondition: MaybeCondition = MaybeCondition.GENTLER,
     val boundaries: Set<Boundary> = emptySet(),
-    val equipment: Set<Equipment> = emptySet()
+    val equipment: Set<Equipment> = emptySet(),
+    /**
+     * Whether the television reads instructions out loud.
+     *
+     * Speech is public by its nature, so this only ever applies to what is already on the TV —
+     * never to a private list open on one phone. See [com.thecontract.core.protocol.Narration].
+     */
+    val narrationEnabled: Boolean = true
 ) {
     fun player(slot: Slot): PlayerSetup = if (slot == Slot.PLAYER_1) player1 else player2
 
@@ -210,6 +217,12 @@ data class GameState(
     val pause: PauseState = PauseState(),
     /** Set while the draft is open so it can be closed back into the exact prior state. */
     val draftReviewOpen: Boolean = false,
+    /**
+     * Bumped by the "Read it again" button. The television narrates whenever the text it would
+     * speak changes, so raising this counter is all a replay needs to be: the key changes, and
+     * the same words are spoken again.
+     */
+    val narrationNonce: Int = 0,
     /**
      * Bounded ring of client action ids already applied. Makes every mutation idempotent, so a
      * double tap, a retry after a dropped WebSocket or a replayed message cannot double-sign a
