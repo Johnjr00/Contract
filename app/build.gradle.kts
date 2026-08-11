@@ -51,6 +51,10 @@ android {
         versionCode = buildNumber
         versionName = "1.0.$buildNumber"
         resourceConfigurations += listOf("en")
+        // The Shield and every other current Android TV box are 64-bit ARM. Shipping the other
+        // three ABIs of the speech runtime would add about 90 MB to an already large artifact
+        // for hardware this app does not run on.
+        ndk { abiFilters += "arm64-v8a" }
     }
 
     signingConfigs {

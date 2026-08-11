@@ -36,6 +36,27 @@ object ServerHolder {
     var manager: SessionManager? = null
         private set
 
+    /**
+     * What the narrator is doing, for the small line on the television.
+     *
+     * [realTimeFactor] is seconds of computation per second of speech, measured on this actual
+     * box rather than estimated from somebody else's benchmark — above 1.0 means the machine
+     * cannot generate speech as fast as it is spoken, which is the number that decides whether
+     * a heavier voice is usable here.
+     */
+    data class NarrationStatus(
+        val speaking: Boolean = false,
+        val realTimeFactor: Double? = null,
+        val failed: Boolean = false
+    )
+
+    private val _narration = MutableStateFlow(NarrationStatus())
+    val narration: StateFlow<NarrationStatus> = _narration.asStateFlow()
+
+    internal fun publishNarration(update: (NarrationStatus) -> NarrationStatus) {
+        _narration.value = update(_narration.value)
+    }
+
     /** Whether the local server is listening, and on which port. */
     data class ServerStatus(val running: Boolean, val port: Int)
 

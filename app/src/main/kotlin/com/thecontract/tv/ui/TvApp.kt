@@ -19,6 +19,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -27,6 +29,7 @@ import com.thecontract.core.protocol.ClientView
 import com.thecontract.core.protocol.ConsiderationCard
 import com.thecontract.core.protocol.TermCard
 import com.thecontract.core.protocol.TimerView
+import com.thecontract.tv.ServerHolder
 
 /**
  * The television surface.
@@ -93,6 +96,7 @@ fun TvApp(
                         Spacer(Modifier.height(12.dp))
                         BasicText("Waiting…", style = TvType.muted)
                     }
+                    NarrationLine()
                 }
 
                 view.blockedNotice?.let { notice ->
@@ -324,6 +328,30 @@ private fun SuggestionLists(lists: List<com.thecontract.core.model.Suggestions>)
         }
     }
 }
+
+/**
+ * A one-line note on what the narrator is doing.
+ *
+ * Speech on this hardware is generated at roughly the speed it is spoken, so there is a gap
+ * between a term appearing and the first word of it. Saying so is better than silence that
+ * looks like a fault. The measured factor is shown because it is the number that decides
+ * whether this box can carry a heavier voice, and it can only be measured here.
+ */
+@Composable
+private fun NarrationLine() {
+    val status by ServerHolder.narration.collectAsState()
+    val text = when {
+        status.failed -> "Narration unavailable on this device."
+        status.speaking -> "Reading aloud…" + rtfSuffix(status.realTimeFactor)
+        status.realTimeFactor != null -> "Narration ready" + rtfSuffix(status.realTimeFactor)
+        else -> return
+    }
+    Spacer(Modifier.height(12.dp))
+    BasicText(text, style = TvType.muted)
+}
+
+private fun rtfSuffix(rtf: Double?): String =
+    rtf?.let { " · ${(it * 100).toInt() / 100.0}x real time" } ?: ""
 
 @Composable
 private fun TermPanel(term: TermCard, label: String) {

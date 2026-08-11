@@ -13,6 +13,7 @@ import android.os.IBinder
 import android.os.PowerManager
 import com.thecontract.core.engine.GameEngine
 import com.thecontract.core.server.ContractServer
+import com.thecontract.core.protocol.Narration
 import com.thecontract.core.server.SessionManager
 import com.thecontract.tv.ContractLog
 import com.thecontract.tv.R
@@ -20,6 +21,7 @@ import com.thecontract.tv.ServerHolder
 import com.thecontract.tv.data.RoomStateStore
 import com.thecontract.tv.net.AndroidNetworkMonitor
 import com.thecontract.tv.ui.ChimePlayer
+import com.thecontract.tv.ui.NarrationPlayer
 import com.thecontract.tv.ui.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -46,6 +48,8 @@ class ContractService : Service() {
     private var tickJob: Job? = null
     private var chimeJob: Job? = null
     private var chime: ChimePlayer? = null
+    private var narrationJob: Job? = null
+    private var narrator: NarrationPlayer? = null
     private var server: ContractServer? = null
     private var monitor: AndroidNetworkMonitor? = null
     private var wakeLock: PowerManager.WakeLock? = null
@@ -87,6 +91,7 @@ class ContractService : Service() {
         startForegroundCompat()
 
         chime = ChimePlayer(applicationContext)
+        narrator = NarrationPlayer(applicationContext).also { it.warmUp() }
 
         val store = RoomStateStore(applicationContext)
         manager = SessionManager(store, GameEngine())
@@ -118,6 +123,29 @@ class ContractService : Service() {
             while (isActive) {
                 delay(TICK_MS)
                 runCatching { manager.tick() }
+            }
+        }
+
+        // Read the screen out loud, from the same published TV view the screen itself renders.
+        // The engine decides what may be spoken; this only has to notice when the answer
+        // changes, because the view republishes on every tick whether anything moved or not.
+        narrationJob = scope.launch {
+            var spokenKey: String? = null
+            ServerHolder.tvView.collect { view ->
+                val enabled = manager.sessionRecord?.state?.setup?.narrationEnabled ?: true
+                val line = Narration.script(view, enabled)
+                when {
+                    line == null -> {
+                        // Nothing to say on this screen: cut off whatever the last one was, so
+                        // a term is not still being read over the screen that replaced it.
+                        if (spokenKey != null) runCatching { narrator?.stop() }
+                        spokenKey = null
+                    }
+                    line.key != spokenKey -> {
+                        spokenKey = line.key
+                        runCatching { narrator?.speak(line.text) }
+                    }
+                }
             }
         }
 
@@ -177,6 +205,9 @@ class ContractService : Service() {
         chimeJob?.cancel()
         chime?.release()
         chime = null
+        narrationJob?.cancel()
+        narrator?.release()
+        narrator = null
         monitor?.stop()
         runCatching { server?.stop() }
         server = null
