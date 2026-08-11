@@ -48,6 +48,8 @@ class NarrationPlayer(private val context: Context) {
         const val TAIL_SILENCE_SAMPLES = 4000
         /** Quiet period after a failed download before another is started. */
         const val RETRY_COOLDOWN_NANOS = 60_000_000_000L
+        /** How long shutdown waits for a running generation before freeing the engine. */
+        const val SHUTDOWN_JOIN_MS = 2000L
     }
 
     /**
@@ -77,6 +79,10 @@ class NarrationPlayer(private val context: Context) {
     /** Set after a failed download, so a television with no network is not retried every tick. */
     @Volatile
     private var retryAfterNanos = 0L
+
+    /** The thread generating right now, so shutdown can wait for it rather than free under it. */
+    @Volatile
+    private var speaking: Thread? = null
 
     /** Measured seconds of compute per second of speech, or null until something has been said. */
     @Volatile
@@ -193,24 +199,58 @@ class NarrationPlayer(private val context: Context) {
     fun speak(text: String) {
         if (text.isBlank()) return
         val mine = generation.incrementAndGet()
-        thread(name = "narration", isDaemon = true) { run(text, mine) }
+        // Let whoever is speaking notice they are stale and wind up before a second voice starts.
+        unblockCurrentTrack()
+        val t = thread(name = "narration", isDaemon = true, start = false) { run(text, mine) }
+        speaking = t
+        t.start()
     }
 
     /** Stops mid-sentence and produces nothing further until the next [speak]. */
     fun stop() {
         generation.incrementAndGet()
-        synchronized(trackLock) { releaseTrack() }
+        unblockCurrentTrack()
         ServerHolder.publishNarration { it.copy(speaking = false) }
+    }
+
+    /**
+     * Cuts a sentence short without destroying anything.
+     *
+     * Pausing and flushing are safe to do to a track another thread is writing to; releasing it
+     * is not, and that distinction is the whole reason this method exists. Flushing discards what
+     * is queued, which frees buffer space and lets a blocked write return, at which point the
+     * thread that owns the track notices its generation is stale and tears it down itself.
+     */
+    private fun unblockCurrentTrack() {
+        synchronized(trackLock) {
+            track?.let {
+                runCatching { if (it.playState == AudioTrack.PLAYSTATE_PLAYING) it.pause() }
+                runCatching { it.flush() }
+            }
+        }
     }
 
     fun release() {
         stop()
+        // The native engine cannot be freed underneath a generation that is still running inside
+        // it. Waiting is bounded: the flush above has already unblocked the writer.
+        runCatching { speaking?.join(SHUTDOWN_JOIN_MS) }
         synchronized(engineLock) {
             runCatching { tts?.free() }
             tts = null
         }
     }
 
+    /**
+     * Generates and plays one passage.
+     *
+     * **A track belongs to the thread that made it, and only that thread ever releases it.** The
+     * audio is written from here while [stop] and the next [speak] run on other threads, and
+     * `AudioTrack.release` frees the native object immediately — so releasing another thread's
+     * track pulls it out from under a blocked `write`, which is a use-after-free and takes the
+     * whole app down. Other threads may only ask this one to stop, by way of [unblockCurrentTrack]
+     * and the generation counter.
+     */
     private fun run(text: String, mine: Long) {
         val engine = engine() ?: return
         if (generation.get() != mine) return
@@ -219,28 +259,41 @@ class NarrationPlayer(private val context: Context) {
         val startedAt = System.nanoTime()
         var samplesProduced = 0L
 
-        val out = synchronized(trackLock) {
-            if (generation.get() != mine) return
-            releaseTrack()
-            newTrack(sampleRate).also { track = it }
-        } ?: return
+        val out = newTrack(sampleRate) ?: return
+        synchronized(trackLock) {
+            if (generation.get() != mine) {
+                runCatching { out.release() }
+                return
+            }
+            // Published so others can pause and flush it. Its predecessor, if any, is left for
+            // its own thread to release.
+            track = out
+        }
 
         ServerHolder.publishNarration { it.copy(speaking = true) }
         runCatching {
             out.play()
+            // Nothing may be thrown out of this callback: it is invoked from C++ across JNI,
+            // where an exception unwinding out of it is not caught, it is undefined. Any failure
+            // becomes a 0 instead, which is the documented way to ask the generator to stop.
             engine.generateWithCallback(text = text, sid = SPEAKER_ID, speed = 1.0f) { chunk ->
-                if (generation.get() != mine) {
+                runCatching {
+                    if (generation.get() != mine) {
+                        0
+                    } else {
+                        samplesProduced += chunk.size
+                        write(out, chunk, mine)
+                        1
+                    }
+                }.getOrElse {
+                    ContractLog.w("Narration chunk dropped: ${it.message}")
                     0
-                } else {
-                    samplesProduced += chunk.size
-                    write(out, chunk)
-                    1
                 }
             }
             if (generation.get() == mine) {
                 // Without this the track stops the instant the last chunk is queued and eats
                 // the final syllable.
-                write(out, FloatArray(TAIL_SILENCE_SAMPLES))
+                write(out, FloatArray(TAIL_SILENCE_SAMPLES), mine)
                 val seconds = samplesProduced.toDouble() / sampleRate
                 if (seconds > 0.5) {
                     val rtf = (System.nanoTime() - startedAt) / 1e9 / seconds
@@ -250,17 +303,28 @@ class NarrationPlayer(private val context: Context) {
             }
         }.onFailure { ContractLog.w("Narration failed: ${it.message}") }
 
-        synchronized(trackLock) {
-            if (generation.get() == mine) {
-                releaseTrack()
-                ServerHolder.publishNarration { it.copy(speaking = false) }
-            }
+        val current = synchronized(trackLock) {
+            // Only clear the shared reference if it is still this track; a newer passage may
+            // already have published its own, and that one is not ours to disturb.
+            if (track === out) track = null
+            generation.get() == mine
         }
+        // Outside the lock, and only ever by the thread that made it.
+        runCatching { if (out.playState == AudioTrack.PLAYSTATE_PLAYING) out.pause() }
+        runCatching { out.flush() }
+        runCatching { out.stop() }
+        runCatching { out.release() }
+        if (current) ServerHolder.publishNarration { it.copy(speaking = false) }
     }
 
-    private fun write(out: AudioTrack, samples: FloatArray) {
+    /**
+     * Blocking write, in a loop, checking on every pass whether this passage still matters — so a
+     * flush from another thread ends it promptly instead of grinding through the whole buffer.
+     */
+    private fun write(out: AudioTrack, samples: FloatArray, mine: Long) {
         var offset = 0
         while (offset < samples.size) {
+            if (generation.get() != mine) return
             val n = out.write(samples, offset, samples.size - offset, AudioTrack.WRITE_BLOCKING)
             if (n <= 0) return
             offset += n
@@ -296,13 +360,4 @@ class NarrationPlayer(private val context: Context) {
             .build()
     }.onFailure { ContractLog.w("No audio track for narration: ${it.message}") }.getOrNull()
 
-    private fun releaseTrack() {
-        track?.let {
-            runCatching { if (it.playState == AudioTrack.PLAYSTATE_PLAYING) it.pause() }
-            runCatching { it.flush() }
-            runCatching { it.stop() }
-            runCatching { it.release() }
-        }
-        track = null
-    }
 }
