@@ -58,6 +58,8 @@ data class TermCard(
     val conditions: List<String> = emptyList(),
     val amendments: List<String> = emptyList(),
     val timers: List<TimerView> = emptyList(),
+    /** Suggested lines, shown under the instruction as suggestions rather than orders. */
+    val examples: List<String> = emptyList(),
     val climax: Boolean = false,
     val mutual: Boolean = false
 )
@@ -71,7 +73,9 @@ data class ConsiderationCard(
     val recipientName: String,
     val mutual: Boolean,
     val equipment: List<String> = emptyList(),
-    val timers: List<TimerView> = emptyList()
+    val timers: List<TimerView> = emptyList(),
+    /** Suggested lines, shown under the instruction as suggestions rather than orders. */
+    val examples: List<String> = emptyList()
 )
 
 @Serializable
@@ -129,7 +133,8 @@ data class SignedTermCard(
     val considerationInstruction: String?,
     val signedBy: List<String>,
     val closingForName: String? = null,
-    val timers: List<TimerView> = emptyList()
+    val timers: List<TimerView> = emptyList(),
+    val examples: List<String> = emptyList()
 )
 
 @Serializable

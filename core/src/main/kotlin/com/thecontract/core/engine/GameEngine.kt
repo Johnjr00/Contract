@@ -523,7 +523,9 @@ class GameEngine {
 
         val ctx = GameContext.of(s)
         val term = ContentLibrary.termsById[termId] ?: return reject(es, CODE_INVALID, "Unknown term.")
-        val e = EligibilityEngine.evaluate(term, ctx)
+        // Same binding preference the candidate list was filtered on, or the trade could be
+        // signed the other way round from the one that kept the benefit alternating.
+        val e = EligibilityEngine.evaluate(term, ctx, ProposalSelector.preferredBinding(s, term))
         if (e !is Eligibility.Ok) return reject(es, CODE_INVALID, "That term is no longer compatible.")
 
         val undo = pushUndo(es)
@@ -586,7 +588,7 @@ class GameEngine {
         val options = ConsiderationSelector
             .options(
                 s, ctx, performer, recipient, mutualRequired = mutual, stronger = stronger,
-                limit = if (current.term.climax) 9 else 6
+                limit = if (current.term.climax) 12 else 10
             )
             .map { Renderer.renderConsideration(it, performer, recipient, ctx) }
 

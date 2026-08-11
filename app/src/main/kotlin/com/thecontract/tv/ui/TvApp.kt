@@ -307,6 +307,22 @@ private fun JoinPanel(
     }
 }
 
+/**
+ * Suggested lines for an instruction that tells a man to talk without telling him what to say.
+ * Labelled as suggestions, because a list sitting under an instruction otherwise reads as more
+ * of the instruction.
+ */
+@Composable
+private fun SpokenExamples(examples: List<String>) {
+    if (examples.isEmpty()) return
+    Spacer(Modifier.height(12.dp))
+    BasicText("Things he could say — suggestions only", style = TvType.label)
+    examples.forEach {
+        Spacer(Modifier.height(4.dp))
+        BasicText("• $it", style = TvType.muted)
+    }
+}
+
 @Composable
 private fun TermPanel(term: TermCard, label: String) {
     TvCard {
@@ -321,6 +337,7 @@ private fun TermPanel(term: TermCard, label: String) {
             Spacer(Modifier.height(12.dp))
             BasicText(term.instruction, style = TvType.body)
         }
+        SpokenExamples(term.examples)
         if (term.equipment.isNotEmpty()) {
             Spacer(Modifier.height(12.dp))
             BasicText("Uses: ${term.equipment.joinToString(", ")}", style = TvType.muted)
@@ -352,6 +369,7 @@ private fun ConsiderationPanel(consideration: ConsiderationCard) {
         BasicText(consideration.title, style = TvType.title)
         Spacer(Modifier.height(12.dp))
         BasicText(consideration.instruction, style = TvType.body)
+        SpokenExamples(consideration.examples)
         if (consideration.timers.isNotEmpty()) {
             Spacer(Modifier.height(10.dp))
             BasicText(timingLine(consideration.timers), style = TvType.muted)

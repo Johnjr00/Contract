@@ -24,11 +24,14 @@ object Renderer {
 
     private const val MASSAGE_FIRST_SECONDS = 300
 
-    fun context(ctx: GameContext, binding: PartyBinding): RenderContext = RenderContext(
+    fun context(ctx: GameContext, binding: PartyBinding, itemId: String = ""): RenderContext = RenderContext(
         setup = ctx.setup,
         binding = binding,
         explicitness = ctx.setup.explicitness,
-        availableEquipment = ctx.setup.equipment
+        availableEquipment = ctx.setup.equipment,
+        // Stable per item, so a term reads the same every time it is shown, and different from
+        // the next term that happens to use the same lexicon keys.
+        variantSeed = itemId.hashCode()
     )
 
     private fun timerId(ownerId: String, index: Int) = "$ownerId#t$index"
@@ -53,6 +56,22 @@ object Renderer {
         }
     }
 
+    /**
+     * Suggested lines for the register in play, name tokens resolved.
+     *
+     * Empty for the overwhelming majority of the library: only an instruction that tells a man
+     * to talk without telling him what to say carries any.
+     */
+    private fun renderExamples(base: List<String>, explicit: List<String>, rc: RenderContext): List<String> {
+        val chosen = when (rc.explicitness) {
+            com.thecontract.core.model.Explicitness.EROTIC,
+            com.thecontract.core.model.Explicitness.DIRECT -> base
+            com.thecontract.core.model.Explicitness.FILTHY,
+            com.thecontract.core.model.Explicitness.EXTREME -> explicit.ifEmpty { base }
+        }
+        return chosen.map { StyleEngine.render(it, rc) }
+    }
+
     fun renderTerm(
         term: Term,
         binding: PartyBinding,
@@ -61,7 +80,7 @@ object Renderer {
         amendments: List<Amendment> = emptyList(),
         extraAmendmentLabels: List<String> = emptyList()
     ): RenderedTerm {
-        val rc = context(ctx, binding)
+        val rc = context(ctx, binding, term.id)
         val instruction = StyleEngine.renderInstruction(term.base, term.explicit, term.extremeTail, rc)
         var rendered = RenderedTerm(
             termId = term.id,
@@ -75,6 +94,7 @@ object Renderer {
             benefitExplanation = BenefitAnalysis.explanation(term, binding, ctx.setup),
             equipmentUsed = equipmentUsed(term.requiredEquipment, term.genericToy, rc),
             categories = term.categories,
+            examples = renderExamples(term.examples, term.examplesExplicit, rc),
             analPenetration = term.analPenetration,
             climax = term.climax,
             mutual = term.mutual,
@@ -92,7 +112,7 @@ object Renderer {
         ctx: GameContext
     ): RenderedConsideration {
         val binding = PartyBinding(performer, recipient)
-        val rc = context(ctx, binding)
+        val rc = context(ctx, binding, action.id)
         return RenderedConsideration(
             actionId = action.id,
             title = StyleEngine.render(action.title, rc).removeSuffix("."),
@@ -102,7 +122,8 @@ object Renderer {
             recipient = recipient,
             mutual = action.mutual,
             intensity = action.intensity,
-            equipmentUsed = equipmentUsed(action.requiredEquipment, action.genericToy, rc)
+            equipmentUsed = equipmentUsed(action.requiredEquipment, action.genericToy, rc),
+            examples = renderExamples(action.examples, action.examplesExplicit, rc)
         )
     }
 

@@ -260,7 +260,21 @@ internal object ConsiderationsNonSexual {
             base = "{G} sucks {R+} ear and, between passes, [tone_whisper] into it and [v_praise].",
             explicit = "{G} sucks {R+} ear and, in the gaps, [tone_whisper] into it and [v_praise], with his lips touching the ear as he says it.",
             acts = setOf("ear_play", "explicit_praise"),
-            timers = listOf(tm("Ear and whispering", 90))
+            timers = listOf(tm("Ear and whispering", 90)),
+            says = listOf(
+                "You are so good at this.",
+                "I could stay here all night.",
+                "That is exactly right.",
+                "You feel incredible.",
+                "I have been wanting to do this all day."
+            ),
+            saysExplicit = listOf(
+                "You are so fucking good at this.",
+                "I could stay here all night.",
+                "That is exactly right, good boy.",
+                "You feel fucking incredible.",
+                "I have been wanting this all day."
+            )
         ),
         c(
             id = "cn_ear_instructions", intensity = 3, family = F_EAR, cats = setOf(EAR_PLAY, LANGUAGE),
@@ -268,7 +282,21 @@ internal object ConsiderationsNonSexual {
             base = "{G} sucks {R+} ear and [v_talk_dirty], spelling out exactly what he intends to do to him later.",
             explicit = "{G} sucks {R+} ear and [v_talk_dirty], spelling out in detail exactly what he is going to do to him later.",
             acts = setOf("ear_play", "dirty_talk"),
-            timers = listOf(tm("Talking at his ear", 120))
+            timers = listOf(tm("Talking at his ear", 120)),
+            says = listOf(
+                "Later I am putting you on your back.",
+                "I am going to have my mouth on you before the night is over.",
+                "I am going to take my time opening you up.",
+                "You are going to end up asking me to finish.",
+                "I am not going to be quick about any of it."
+            ),
+            saysExplicit = listOf(
+                "Later I am putting you on your back and fucking you.",
+                "I am going to have my mouth on your cock before the night is out.",
+                "I am going to open you up and take my time doing it.",
+                "You are going to end up begging me to let you come.",
+                "I am not going to be quick about a single bit of it."
+            )
         ),
         c(
             id = "cn_ear_moaning", intensity = 2, family = F_EAR, cats = setOf(EAR_PLAY),

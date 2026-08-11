@@ -25,7 +25,7 @@ object ContentLibrary {
     val allTerms: List<Term> = regularTerms + climaxTerms
 
     val considerations: List<ConsiderationAction> =
-        ConsiderationsNonSexual.actions + ConsiderationsSexual.actions
+        ConsiderationsNonSexual.actions + ConsiderationsSexual.actions + ConsiderationsMutual.actions
 
     val preferences: List<Preference> = PreferenceLibrary.all
 

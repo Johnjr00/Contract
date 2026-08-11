@@ -42,29 +42,79 @@ class RenderSweepTest {
         }
     )
 
+    /**
+     * A lexicon key offers several wordings per register and the seed decides which one an item
+     * gets, so rendering each item once would leave most of the alternatives unread. Walking the
+     * seed through [Lexicon.SEED_CYCLE] takes every key through every one of its wordings in
+     * every template that uses it.
+     */
+    private fun sweepSeeds(): IntRange = 0 until Lexicon.SEED_CYCLE
+
     @Test
     fun `sweep every rendered instruction`() {
         val failures = mutableListOf<String>()
+        val binding = PartyBinding(Slot.PLAYER_1, Slot.PLAYER_2)
         for (explicitness in Explicitness.entries) {
             val c = ctx(explicitness)
-            val binding = PartyBinding(Slot.PLAYER_1, Slot.PLAYER_2)
-            (ContentLibrary.regularTerms + ContentLibrary.climaxTerms).forEach { term ->
-                val text = Renderer.renderTerm(term, binding, c).instruction
-                val problems = ContentRules.problems(text, names)
-                if (problems.isNotEmpty()) {
-                    failures += "TERM ${term.id} [$explicitness] ${problems.joinToString("; ")}\n    $text"
+            for (seed in sweepSeeds()) {
+                (ContentLibrary.regularTerms + ContentLibrary.climaxTerms).forEach { term ->
+                    val rc = Renderer.context(c, binding).copy(variantSeed = seed)
+                    val text = com.thecontract.core.style.StyleEngine
+                        .renderInstruction(term.base, term.explicit, term.extremeTail, rc)
+                    val problems = ContentRules.problems(text, names)
+                    if (problems.isNotEmpty()) {
+                        failures += "TERM ${term.id} [$explicitness seed $seed] ${problems.joinToString("; ")}\n    $text"
+                    }
+                }
+                ContentLibrary.considerations.forEach { action ->
+                    val rc = Renderer.context(c, binding).copy(variantSeed = seed)
+                    val text = com.thecontract.core.style.StyleEngine
+                        .renderInstruction(action.base, action.explicit, action.extremeTail, rc)
+                    val problems = ContentRules.problems(text, names)
+                    if (problems.isNotEmpty()) {
+                        failures += "CONS ${action.id} [$explicitness seed $seed] ${problems.joinToString("; ")}\n    $text"
+                    }
                 }
             }
-            ContentLibrary.considerations.forEach { action ->
-                val text = Renderer.renderConsideration(action, Slot.PLAYER_1, Slot.PLAYER_2, c).instruction
-                val problems = ContentRules.problems(text, names)
-                if (problems.isNotEmpty()) {
-                    failures += "CONS ${action.id} [$explicitness] ${problems.joinToString("; ")}\n    $text"
+        }
+        failures.distinct().take(60).forEach(::println)
+        assertEquals(0, failures.distinct().size, "rendered instructions above cannot be carried out as written")
+    }
+
+    /**
+     * Repetition is a content defect in its own right. A wording that reaches the screen in a
+     * large share of the library stops registering — twenty-four separate kissing terms once all
+     * read "deep, wet and messy" — so no single lexicon wording may dominate its own key.
+     */
+    @Test
+    fun `no single wording dominates the library`() {
+        val binding = PartyBinding(Slot.PLAYER_1, Slot.PLAYER_2)
+        val failures = mutableListOf<String>()
+        val items = (ContentLibrary.regularTerms + ContentLibrary.climaxTerms)
+            .map { it.id to listOf(it.base, it.explicit) }
+            .plus(ContentLibrary.considerations.map { it.id to listOf(it.base, it.explicit) })
+
+        for (explicitness in Explicitness.entries) {
+            val c = ctx(explicitness)
+            Lexicon.keys.forEach { key ->
+                val options = Lexicon.alternatives(key, explicitness)
+                if (options.size < 2) return@forEach
+                val users = items.filter { (_, templates) -> templates.any { "[$key]" in it } }
+                if (users.size < options.size * 2) return@forEach
+                val counts = users.groupingBy { (id, _) ->
+                    com.thecontract.core.style.Lexicon
+                        .resolve(key, explicitness, Renderer.context(c, binding, id).variantSeed + key.hashCode())
+                }.eachCount()
+                // With the seed spread evenly, no wording should take more than three quarters
+                // of the items that use the key.
+                val worst = counts.maxBy { it.value }
+                if (worst.value > users.size * 3 / 4) {
+                    failures += "[$key] $explicitness: \"${worst.key}\" covers ${worst.value} of ${users.size} items"
                 }
             }
         }
         failures.forEach(::println)
-        assertEquals(0, failures.size, "rendered instructions above cannot be carried out as written")
+        assertEquals(0, failures.size, "wordings above are repeated across too much of the library")
     }
 
     /**
@@ -110,13 +160,14 @@ class RenderSweepTest {
         )
         val failures = mutableListOf<String>()
         Lexicon.keys.filter { it.startsWith("v_") }.forEach { key ->
-            Lexicon.variants(key).forEachIndexed { i, value ->
-                val register = Explicitness.entries[i]
-                if (carriesItsOwnObject.containsMatchIn(value)) {
-                    failures += "[$key] $register = \"$value\" already carries its own object"
-                }
-                if (value != value.trim() || value.endsWith(".") || value.endsWith(",")) {
-                    failures += "[$key] $register = \"$value\" is not a clean drop-in"
+            Explicitness.entries.forEach { register ->
+                Lexicon.alternatives(key, register).forEach { value ->
+                    if (carriesItsOwnObject.containsMatchIn(value)) {
+                        failures += "[$key] $register = \"$value\" already carries its own object"
+                    }
+                    if (value != value.trim() || value.endsWith(".") || value.endsWith(",")) {
+                        failures += "[$key] $register = \"$value\" is not a clean drop-in"
+                    }
                 }
             }
         }

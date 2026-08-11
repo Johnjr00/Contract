@@ -36,6 +36,9 @@ object ContentValidator {
     const val MIN_TERMS = 202
     const val MIN_CONSIDERATIONS = 120
     const val MIN_PREFERENCES = 132
+
+    /** How many lines are suggested for an instruction that tells a man to talk. */
+    const val EXAMPLE_COUNT = 5
     val MIN_PER_LEVEL = mapOf(1 to 42, 2 to 40, 3 to 40, 4 to 40, 5 to 40)
 
     private val PLAYER_A = "Alex"
@@ -76,6 +79,7 @@ object ContentValidator {
         problems += validateRenderedText()
         problems += validateEquipmentGating()
         problems += validateLexicon()
+        problems += validateSpokenExamples()
         return problems
     }
 
@@ -411,6 +415,39 @@ object ContentValidator {
         }
     }
 
+    /**
+     * Suggested lines for an instruction that tells a man to talk.
+     *
+     * Five is the count, and both registers carry their own five, because a measured line in an
+     * Extremely-filthy game reads as somebody else's script. They are suggestions, so nothing
+     * here checks that a player uses them — only that what he is shown is complete, is spoken
+     * English rather than a stage direction, and does not name a player the other man is not.
+     */
+    private fun validateSpokenExamples(): List<Problem> = buildList {
+        fun check(where: String, base: List<String>, explicit: List<String>) {
+            if (base.isEmpty() && explicit.isEmpty()) return
+            if (base.size != EXAMPLE_COUNT) add(Problem(where, "has ${base.size} suggested lines, needs $EXAMPLE_COUNT"))
+            if (explicit.size != EXAMPLE_COUNT) {
+                add(Problem(where, "has ${explicit.size} coarse suggested lines, needs $EXAMPLE_COUNT"))
+            }
+            (base + explicit).forEach { line ->
+                if (line.isBlank()) add(Problem(where, "blank suggested line"))
+                if (line.trim() != line) add(Problem(where, "suggested line has stray whitespace: '$line'"))
+                if (line.isNotEmpty() && line.last() !in ".!?") {
+                    add(Problem(where, "suggested line does not end with sentence punctuation: '$line'"))
+                }
+                if (femaleTerms.containsMatchIn(line)) add(Problem(where, "gendered wording in '$line'"))
+                if (placeholderPattern.containsMatchIn(line.replace(Regex("""\{[A-Z+]+\}"""), ""))) {
+                    add(Problem(where, "unresolved placeholder in '$line'"))
+                }
+            }
+            if (base.distinct().size != base.size) add(Problem(where, "repeats a suggested line"))
+            if (explicit.distinct().size != explicit.size) add(Problem(where, "repeats a coarse suggested line"))
+        }
+        ContentLibrary.allTerms.forEach { check("term ${it.id}", it.examples, it.examplesExplicit) }
+        ContentLibrary.considerations.forEach { check("consideration ${it.id}", it.examples, it.examplesExplicit) }
+    }
+
     private fun validateLexicon(): List<Problem> = buildList {
         val used = mutableSetOf<String>()
         fun scan(where: String, text: String) {
@@ -434,10 +471,22 @@ object ContentValidator {
         Lexicon.keys.forEach { key ->
             val variants = Lexicon.variants(key)
             if (variants.size != 4) add(Problem("lexicon $key", "must have four registers"))
-            variants.forEachIndexed { i, v ->
-                if (v.isBlank()) add(Problem("lexicon $key", "register ${i + 1} is blank"))
-                if (v != v.trim()) add(Problem("lexicon $key", "register ${i + 1} has stray whitespace"))
-                if (femaleTerms.containsMatchIn(v)) add(Problem("lexicon $key", "gendered wording in '$v'"))
+            // Every alternative reaches the screen, so every alternative is held to the same
+            // rules as the primary — not just the one the report happens to print.
+            Explicitness.entries.forEach { register ->
+                val options = Lexicon.alternatives(key, register)
+                if (options.isEmpty()) add(Problem("lexicon $key", "$register has no wording"))
+                if (options.size > Lexicon.MAX_ALTERNATIVES) {
+                    add(Problem("lexicon $key", "$register has ${options.size} alternatives, more than the sweep covers"))
+                }
+                if (options.distinct().size != options.size) {
+                    add(Problem("lexicon $key", "$register repeats one of its alternatives"))
+                }
+                options.forEach { v ->
+                    if (v.isBlank()) add(Problem("lexicon $key", "$register has a blank wording"))
+                    if (v != v.trim()) add(Problem("lexicon $key", "$register wording '$v' has stray whitespace"))
+                    if (femaleTerms.containsMatchIn(v)) add(Problem("lexicon $key", "gendered wording in '$v'"))
+                }
             }
             // Erotic and Extremely filthy must actually differ, or the register does nothing.
             if (variants[0] == variants[3] && key.startsWith("v_")) {

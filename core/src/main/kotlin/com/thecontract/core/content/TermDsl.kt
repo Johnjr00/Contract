@@ -38,6 +38,8 @@ internal fun t(
     gCon: PartyConstraint = PartyConstraint.ANY,
     rCon: PartyConstraint = PartyConstraint.ANY,
     mutual: Boolean = false,
+    says: List<String> = emptyList(),
+    saysExplicit: List<String> = emptyList(),
     tail: String? = null,
     climax: Boolean = false
 ): Term = Term(
@@ -62,6 +64,8 @@ internal fun t(
     timers = timers,
     mutual = mutual,
     extremeTail = tail,
+    examples = says,
+    examplesExplicit = saysExplicit,
     climax = climax
 )
 
@@ -86,7 +90,9 @@ internal fun c(
     timers: List<TimerSpec> = emptyList(),
     mutual: Boolean = false,
     pCock: Boolean = false,
-    tail: String? = null
+    tail: String? = null,
+    says: List<String> = emptyList(),
+    saysExplicit: List<String> = emptyList()
 ): ConsiderationAction = ConsiderationAction(
     id = id,
     intensity = intensity,
@@ -107,5 +113,7 @@ internal fun c(
     timers = timers,
     mutual = mutual,
     usesPerformersCock = pCock,
-    extremeTail = tail
+    extremeTail = tail,
+    examples = says,
+    examplesExplicit = saysExplicit
 )

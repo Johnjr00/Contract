@@ -120,6 +120,31 @@ h3 { font-size: 14px; margin: 16px 0 6px; color: var(--muted); text-transform: u
   color: var(--muted);
 }
 
+.examples {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--line);
+  background: var(--panel-2);
+  border-radius: 6px;
+}
+
+.examples-head {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.examples-list {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.examples-list li { margin: 2px 0; }
+
 .notice {
   border-left: 3px solid var(--warn);
   padding: 8px 12px;

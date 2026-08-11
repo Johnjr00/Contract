@@ -119,6 +119,18 @@ object ProposalSelector {
     private fun owedBeneficiary(state: GameState): Slot? = lastBeneficiary(state)?.other
 
     /**
+     * The binding a term should be rendered with to keep the benefit alternating, or null when
+     * nothing is owed yet or the term has no side that can benefit.
+     *
+     * The engine re-evaluates a bundled second term when the initiator picks it, and without this
+     * it re-evaluated with no preference at all — so the binding the candidate list was filtered
+     * on was not the binding the term was signed under, and a trade could hand the same man two
+     * turns running.
+     */
+    fun preferredBinding(state: GameState, term: Term): PartyBinding? =
+        owedBeneficiary(state)?.let { bindingFavouring(term, it) }
+
+    /**
      * The binding that puts [owed] on the winning side of this term, or null if the term has no
      * winning side. Which slot benefits is fixed by the term's own structure, so the only lever
      * is which man is cast as the giver and which as the receiver.
@@ -336,7 +348,7 @@ object ConsiderationSelector {
         recipient: Slot,
         mutualRequired: Boolean,
         stronger: Boolean = false,
-        limit: Int = 6
+        limit: Int = 10
     ): List<ConsiderationAction> {
         // The act is a ceiling, not a centre. Consideration climbs with the game, so the opening
         // of a session offers hands, mouths and ears and nothing below the waist, and the last
@@ -357,9 +369,16 @@ object ConsiderationSelector {
             return EligibilityEngine.evaluateConsideration(action, performer, recipient, ctx) is Eligibility.Ok
         }
 
-        val eligible = ContentLibrary.considerations
-            .filter { it.intensity in floor..ceiling && offerable(it) }
-            .ifEmpty { ContentLibrary.considerations.filter { it.intensity <= ceiling && offerable(it) } }
+        // The window is where the offer should come from; everything below it up to the ceiling
+        // is what the offer is topped up from when the window cannot fill a full list on its own.
+        // Widening beats showing him three options and calling it a choice, and the scoring below
+        // keeps the window's own actions at the head of the list either way.
+        val inWindow = ContentLibrary.considerations.filter { it.intensity in floor..ceiling && offerable(it) }
+        val eligible = if (inWindow.size >= limit) {
+            inWindow
+        } else {
+            ContentLibrary.considerations.filter { it.intensity <= ceiling && offerable(it) }
+        }
         if (eligible.isEmpty()) {
             // Never leave him with nothing: relax reciprocity, but never the ceiling, and never
             // offer the performer something he gets off on.

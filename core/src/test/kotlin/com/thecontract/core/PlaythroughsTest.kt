@@ -330,8 +330,22 @@ class PlaythroughsTest {
         )
     )
 
-    /** One line of content, with enough context to find it again in the source. */
-    private data class Line(val screen: String, val id: String, val title: String, val text: String, val timing: String)
+    /**
+     * One line of content, with enough context to find it again in the source.
+     *
+     * [rules] is false for the suggested spoken lines. They are first- and second-person speech
+     * — "You are so good at this." — and [ContentRules] is written for third-person instructions,
+     * so it reads every one of them as a pronoun with nobody behind it. They are still printed,
+     * because reading them by eye is the only check that matters for them.
+     */
+    private data class Line(
+        val screen: String,
+        val id: String,
+        val title: String,
+        val text: String,
+        val timing: String,
+        val rules: Boolean = true
+    )
 
     private fun timing(timers: List<com.thecontract.core.protocol.TimerView>): String =
         if (timers.isEmpty()) "" else timers.joinToString(" · ") { "${it.label} ${it.totalSeconds}s" }
@@ -352,6 +366,12 @@ class PlaythroughsTest {
         }
         view.term?.takeIf { it.instruction.isNotBlank() }
             ?.let { into += Line("term", it.termId, it.title, it.instruction, timing(it.timers)) }
+        (listOfNotNull(view.term, view.bundledTerm) + view.termOptions).forEach { t ->
+            t.examples.forEach { into += Line("term suggestion", t.termId, t.title, it, "", rules = false) }
+        }
+        (listOfNotNull(view.consideration) + view.considerationOptions).forEach { c ->
+            c.examples.forEach { into += Line("consideration suggestion", c.actionId, c.title, it, "", rules = false) }
+        }
         view.bundledTerm?.let { into += Line("bundled term", it.termId, it.title, it.instruction, timing(it.timers)) }
         view.termOptions.forEach {
             into += Line("term option", it.termId, it.title, it.instruction, timing(it.timers))
@@ -482,6 +502,7 @@ class PlaythroughsTest {
                 totalLines++
                 report.append("\n[${line.screen}] ${line.id} — ${line.title}\n    ${line.text}\n")
                 if (line.timing.isNotEmpty()) report.append("    timing: ${line.timing}\n")
+                if (!line.rules) return@forEach
                 ContentRules.problems(line.text, names).forEach { problem ->
                     failures += "${game.label}\n  [${line.screen}] ${line.id}: $problem\n  ${line.text}"
                     report.append("    *** $problem\n")

@@ -54,6 +54,14 @@ data class Term(
     val timers: List<TimerSpec> = emptyList(),
     val mutual: Boolean = false,
     val extremeTail: String? = null,
+    /**
+     * Lines a player could actually say, for an instruction that tells him to talk without
+     * telling him what to say — "talks filth", "spells out what he is going to do to him",
+     * "says out loud who he belongs to". Suggestions, not part of the instruction: he is free to
+     * say something else. Split by register on the same rule as [base] and [explicit].
+     */
+    val examples: List<String> = emptyList(),
+    val examplesExplicit: List<String> = emptyList(),
     /** Climax terms are negotiated separately at the end and always execute last. */
     val climax: Boolean = false
 ) {
@@ -97,7 +105,10 @@ data class ConsiderationAction(
      * is not a payment. The selector leaves these out of what it offers.
      */
     val usesPerformersCock: Boolean = false,
-    val extremeTail: String? = null
+    val extremeTail: String? = null,
+    /** Lines he could say, for an action that tells him to talk. See [Term.examples]. */
+    val examples: List<String> = emptyList(),
+    val examplesExplicit: List<String> = emptyList()
 )
 
 @Serializable
@@ -132,7 +143,9 @@ data class RenderedTerm(
     /** Set by the "Save for finale" amendment or Maybe condition. */
     val deferToEnd: Boolean = false,
     /** Set by the "Trade only" amendment or the "Only as part of a trade" Maybe condition. */
-    val requiresTrade: Boolean = false
+    val requiresTrade: Boolean = false,
+    /** Suggested lines for an instruction that tells this player to talk. Never mandatory. */
+    val examples: List<String> = emptyList()
 ) {
     val totalSeconds: Int get() = timers.sumOf { it.seconds }
 }
@@ -151,5 +164,7 @@ data class RenderedConsideration(
     val recipient: Slot,
     val mutual: Boolean,
     val intensity: Int,
-    val equipmentUsed: List<String>
+    val equipmentUsed: List<String>,
+    /** Suggested lines for an action that tells the performer to talk. Never mandatory. */
+    val examples: List<String> = emptyList()
 )

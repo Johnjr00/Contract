@@ -161,8 +161,19 @@ object ContentRules {
             ),
             "singular noun after one of/both of/each of"
         ),
+        /**
+         * Lexicon verbs are third-person singular, so dropping one after "{G} and {R}" produces
+         * "Marcus and Dan lie head to toe and sucks each other". Matching any `\w+s` here caught
+         * "kiss each other's necks" as well, which is correct English — the verb list is explicit
+         * so that a plural whose base form happens to end in s is left alone.
+         */
         Rule(
-            Regex("\\b(?:Marcus|Dan) and (?:Marcus|Dan)\\b[^.]*?\\b\\w+s each other\\b"),
+            Regex(
+                "\\b(?:Marcus|Dan) and (?:Marcus|Dan)\\b[^.]*?\\b(?:sucks|kisses|licks|rims|" +
+                    "strokes|jerks|works|holds|grips|fingers|finger-fucks|tongues|eats|edges|" +
+                    "teases|fucks|spanks|smacks|kneads|massages|rubs|pins|takes|pushes|pulls) " +
+                    "each other\\b"
+            ),
             "singular verb with two subjects"
         )
     )
@@ -214,12 +225,51 @@ object ContentRules {
     }
 
     /**
+     * Words that narrow a plural subject back down to one man, so that "he" and "his" after them
+     * are correct. "each other" is deliberately not one of them — it is what two men do to each
+     * other, and treating it as singular is what let the defect below through.
+     */
+    private val SINGULARISER =
+        ci("\\beach\\b(?!\\s+other)|\\bone\\b|\\bthe other\\b|\\bwhoever\\b|\\bneither\\b|\\beither\\b")
+
+    /**
+     * "he" or "his" in a clause whose subject is both men.
+     *
+     * Reciprocal content is the only place this can happen, and it is invisible in the source:
+     * the templates say `{G} and {R}`, and the singular pronoun arrives from a lexicon wording
+     * that is perfectly correct after one man — "suck each other as fast and as hard as *he* can
+     * keep up", "work each other's inner thighs with *his* full weight behind it". A clause that
+     * has already named one of them ("each one", "the other", "whoever is face down") is fine.
+     */
+    fun pluralSubjectPronoun(text: String, names: List<String>): String? {
+        val bothMen = Regex("\\b(${names.joinToString("|")}) and (${names.joinToString("|")})\\b")
+        // What makes a later "he" legitimate: one of the two named again as a new subject, or a
+        // word that picks one of them out.
+        val establishesOne = Regex(
+            "\\b(?:${names.joinToString("|")})\\b|" + SINGULARISER.pattern,
+            RegexOption.IGNORE_CASE
+        )
+        val singular = Regex("\\b(?:he|his)\\b", RegexOption.IGNORE_CASE)
+        for (sentence in text.split(Regex("(?<=[.!?])\\s+"))) {
+            val pair = bothMen.find(sentence) ?: continue
+            val rest = sentence.substring(pair.range.last + 1)
+            val pronoun = singular.find(rest) ?: continue
+            val established = establishesOne.find(rest)?.range?.first ?: Int.MAX_VALUE
+            if (pronoun.range.first < established) {
+                return rest.substring(pronoun.range.first).trim().take(60)
+            }
+        }
+        return null
+    }
+
+    /**
      * Everything wrong with one rendered instruction. Empty means the line is fit to put in front
      * of two people who have to act on it without asking each other what it meant.
      */
     fun problems(text: String, names: List<String>): List<String> = buildList {
         if (danglingPronoun(text, names)) add("pronoun before any name")
         if (objectWithNoOwner(text, names)) add("\"him\" with only one man named")
+        pluralSubjectPronoun(text, names)?.let { add("singular pronoun with two subjects: \"$it\"") }
         if (Regex("\\b(\\w+) \\1\\b", RegexOption.IGNORE_CASE).containsMatchIn(text)) add("doubled word")
         if (text.contains("  ")) add("double space")
         if (!text.trimEnd().endsWith(".")) add("no full stop")

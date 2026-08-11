@@ -572,7 +572,21 @@ internal object TermsLevel5 {
             benefit = MUTUAL, type = BenefitType.MUTUAL,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("ownership_language"),
-            timers = listOf(tm("Agreeing to it", 60))
+            timers = listOf(tm("Agreeing to it", 60)),
+            says = listOf(
+                "I agree to be yours for the rest of the night.",
+                "For the rest of tonight I belong to you.",
+                "I am yours until the morning and I agree to it.",
+                "Everything I do for the rest of the night is yours to decide.",
+                "I am giving you the rest of the night."
+            ),
+            saysExplicit = listOf(
+                "I agree to be yours for the rest of the fucking night.",
+                "For the rest of tonight I belong to you.",
+                "I am yours to use until the morning and I agree to it.",
+                "Everything I do for the rest of the night is yours to decide.",
+                "I am giving you the rest of the night, all of it."
+            )
         ),
         t(
             id = "l5_rule_obeys_first_time", level = 5, cats = setOf(POWER),
@@ -602,7 +616,21 @@ internal object TermsLevel5 {
             benefit = MUTUAL, type = BenefitType.MUTUAL,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("permission_control", "dirty_talk"),
-            timers = listOf(tm("Rule in force", 60))
+            timers = listOf(tm("Rule in force", 60)),
+            says = listOf(
+                "I am nowhere near.",
+                "I am about halfway.",
+                "I am getting close.",
+                "I am very close.",
+                "One more and I am there."
+            ),
+            saysExplicit = listOf(
+                "I am nowhere fucking near.",
+                "I am about halfway there.",
+                "I am getting close.",
+                "I am right on the edge.",
+                "One more and I am gone."
+            )
         )
     )
 }

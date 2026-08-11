@@ -779,7 +779,21 @@ internal object ConsiderationsSexual {
             base = "{G} moves down {R+} body with hands and mouth and names what he likes about each part.",
             explicit = "{G} moves down {R+} body with hands and mouth and says out loud exactly what he likes about every part.",
             acts = setOf("body_worship", "explicit_praise"),
-            timers = listOf(tm("Chest and arms", 60), tm("Stomach", 45), tm("Thighs", 60))
+            timers = listOf(tm("Chest and arms", 60), tm("Stomach", 45), tm("Thighs", 60)),
+            says = listOf(
+                "I love your shoulders.",
+                "This is my favourite part of you.",
+                "I think about your chest all the time.",
+                "Your stomach drives me mad.",
+                "I could spend an hour on your thighs."
+            ),
+            saysExplicit = listOf(
+                "I love your fucking shoulders.",
+                "This is my favourite part of you.",
+                "I think about your chest all the time.",
+                "Your stomach drives me fucking mad.",
+                "I could spend an hour on these thighs."
+            )
         ),
         c(
             id = "cs_other_nipples", intensity = 2, family = F_SEX, cats = setOf(BODY_WORSHIP),
@@ -827,7 +841,21 @@ internal object ConsiderationsSexual {
             base = "{G} [v_talk_dirty] into {R+} ear, describing what he intends to do later, hands still.",
             explicit = "{G} [v_talk_dirty] straight into {R+} ear, spelling out what he is going to do later, and keeps his hands completely still.",
             acts = setOf("dirty_talk", "ear_play"),
-            timers = listOf(tm("Talking", 120))
+            timers = listOf(tm("Talking", 120)),
+            says = listOf(
+                "Later I am going to put you on your back.",
+                "I am going to have my mouth on you before the night is over.",
+                "I am going to open you up slowly.",
+                "You are going to end up asking me to finish.",
+                "I have been thinking about this all day."
+            ),
+            saysExplicit = listOf(
+                "Later I am going to put you on your back and fuck you.",
+                "I am going to have my mouth on your cock before the night is out.",
+                "I am going to open you up and take my time.",
+                "You are going to end up begging me to let you come.",
+                "I have been thinking about this all fucking day."
+            )
         ),
         c(
             id = "cs_other_music_full_body", intensity = 2, family = F_SEX, cats = setOf(BODY_WORSHIP),

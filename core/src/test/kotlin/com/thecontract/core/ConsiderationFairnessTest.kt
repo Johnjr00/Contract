@@ -83,6 +83,41 @@ class ConsiderationFairnessTest {
         assertTrue(selectionScreens >= 5, "too few unbalanced consideration screens to judge: $selectionScreens")
     }
 
+    /**
+     * The man who is owed picks the payment, so the list has to be long enough to be a choice.
+     * Ten for a single term and twelve for a closing one, and a balanced term is held to the same
+     * count as a one-sided one — reciprocal offers used to come from a pool of six actions across
+     * three bands, so a balanced term late in a game could reach his phone with one option on it.
+     */
+    @Test
+    fun `every consideration list is a full list`() {
+        var lists = 0
+        var balancedLists = 0
+        playAndInspect { h, _ ->
+            val s = h.state()
+            if (s.phase != GamePhase.CONSIDERATION_PRIVATE_SELECTION &&
+                s.phase != GamePhase.CLOSING_TERM_CONSIDERATION
+            ) {
+                return@playAndInspect
+            }
+            val current = s.negotiation.current ?: return@playAndInspect
+            if (current.considerationOptions.isEmpty()) return@playAndInspect
+            val expected = if (current.term.climax) 12 else 10
+            assertEquals(
+                expected, current.considerationOptions.size,
+                "${current.term.termId} offered ${current.considerationOptions.size} options"
+            )
+            assertEquals(
+                expected, current.considerationOptions.map { it.actionId }.distinct().size,
+                "${current.term.termId} offered the same action twice"
+            )
+            lists++
+            if (current.beneficiary == null) balancedLists++
+        }
+        assertTrue(lists >= 5, "too few consideration lists to judge: $lists")
+        assertTrue(balancedLists >= 1, "no balanced term came up, so reciprocal offers went unchecked")
+    }
+
     @Test
     fun `consideration never runs ahead of the act it is offered in`() {
         var checked = 0

@@ -93,13 +93,27 @@ internal object TermsLevel4 {
         t(
             id = "l4_bond_collar", level = 4, cats = setOf(BONDAGE, POWER),
             title = "Collared",
-            base = "{DOM} puts #collar# on {SUB} and it stays on for the rest of the scene.",
+            base = "{DOM} puts #collar# on {SUB}, says out loud what wearing it means for the rest of the night, and it stays on for the rest of the scene.",
             explicit = "{DOM} buckles #collar# onto {SUB}, says out loud what wearing it means for the rest of the night, and it does not come off again.",
             benefit = MUTUAL, type = BenefitType.MUTUAL,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("collaring", "ownership_language"),
             equip = setOf(Equipment.COLLAR),
-            timers = listOf(tm("Collaring him", 60))
+            timers = listOf(tm("Collaring him", 60)),
+            says = listOf(
+                "While this is on, you do what I say.",
+                "This stays on until I take it off.",
+                "You are mine for as long as you are wearing this.",
+                "Once this is buckled, you do not decide anything tonight.",
+                "This is how the rest of the night works."
+            ),
+            saysExplicit = listOf(
+                "While this is on your neck, you do exactly what I say.",
+                "This stays on until I take it off, and not a second before.",
+                "You are mine for as long as you are wearing this.",
+                "Once this is buckled you do not decide a fucking thing tonight.",
+                "This is how the rest of the night goes."
+            )
         ),
         t(
             id = "l4_bond_leash", level = 4, cats = setOf(BONDAGE, POWER),
@@ -361,7 +375,21 @@ internal object TermsLevel4 {
             benefit = MUTUAL, type = BenefitType.MUTUAL,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("ownership_language"),
-            timers = listOf(tm("Saying it", 60))
+            timers = listOf(tm("Saying it", 60)),
+            says = listOf(
+                "I belong to you tonight.",
+                "I am yours for the rest of the night.",
+                "Tonight I am yours.",
+                "You have me until the morning.",
+                "I am yours, and I will do what you say."
+            ),
+            saysExplicit = listOf(
+                "I belong to you tonight.",
+                "I am yours, all fucking night.",
+                "Tonight I am yours to use.",
+                "You own me until the morning.",
+                "I am yours and I will do whatever you tell me."
+            )
         ),
         t(
             id = "l4_own_marking_kisses", level = 4, cats = setOf(POWER, BODY_WORSHIP),
@@ -392,7 +420,21 @@ internal object TermsLevel4 {
             benefit = MUTUAL, type = BenefitType.MUTUAL,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("explicit_praise", "commands"),
-            timers = listOf(tm("First task", 60), tm("Second task", 60), tm("Third task", 60))
+            timers = listOf(tm("First task", 60), tm("Second task", 60), tm("Third task", 60)),
+            says = listOf(
+                "That is exactly what I asked for.",
+                "Good.",
+                "Right the first time.",
+                "That is what I wanted.",
+                "Perfect."
+            ),
+            saysExplicit = listOf(
+                "That is exactly what I fucking asked for.",
+                "Good boy.",
+                "Right the first time.",
+                "That is what I wanted from you.",
+                "Perfect."
+            )
         ),
         t(
             id = "l4_own_collar_service", level = 4, cats = setOf(POWER, BONDAGE),

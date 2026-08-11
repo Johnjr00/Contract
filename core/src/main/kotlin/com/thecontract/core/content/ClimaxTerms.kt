@@ -37,15 +37,28 @@ internal object ClimaxTerms {
         t(
             id = "cx_top_inside_on_back", level = 5, cats = setOf(CLIMAX, ANAL), climax = true,
             title = "He finishes inside him, face to face",
-            base = "{G} lies on his back with his legs up. {R} [v_enter] him with #lubricant#, moves [adv_thrust_slow] for two minutes, then [adv_thrust_hard] until he [v_come_in] him. He stays inside for a slow count of twenty, then withdraws. If the timer runs out first, he keeps the same hard rhythm without stopping until he finishes.",
-            explicit = "{G} lies back with his legs up and stays there. {R} [v_enter] him with #lubricant#, fucks him [adv_thrust_slow] for two minutes, then goes [adv_thrust_hard] until he [v_come_in] him and gives him [n_load]. He stays buried for a slow count of twenty, then pulls out. If the timer ends first he keeps that exact rhythm going until he is done.",
+            base = "{G} lies on his back with his legs up. {R} [v_enter] him with #lubricant#, moves [adv_thrust_slow] for two minutes, then [adv_thrust_hard] until he [v_come_in] him. He says out loud what he is doing as he does it. He stays inside for a slow count of twenty, then withdraws. If the timer runs out first, he keeps the same hard rhythm without stopping until he finishes.",
+            explicit = "{G} lies back with his legs up and stays there. {R} [v_enter] him with #lubricant#, fucks him [adv_thrust_slow] for two minutes, then goes [adv_thrust_hard] until he [v_come_in] him and gives him [n_load]. He tells him exactly what he is doing to him the whole way through. He stays buried for a slow count of twenty, then pulls out. If the timer ends first he keeps that exact rhythm going until he is done.",
             benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
             acts = setOf("bottoming"), anal = true,
             rCon = PartyConstraint.TOP, gCon = PartyConstraint.BOTTOM,
             erection = PartyRef.RECEIVER,
             equip = setOf(Equipment.LUBRICANT),
             timers = listOf(tm("Slow", 120), tm("Hard until he finishes", 180), tm("Staying inside", 20)),
-            tail = "He tells him exactly what he is doing while he does it."
+            says = listOf(
+                "I am all the way in.",
+                "I am not slowing down now.",
+                "I am going to finish inside you.",
+                "I am nearly there.",
+                "I am coming, right now."
+            ),
+            saysExplicit = listOf(
+                "I am all the fucking way in.",
+                "I am not slowing down now.",
+                "I am going to come inside you.",
+                "I am nearly there.",
+                "I am coming, right fucking now."
+            )
         ),
         t(
             id = "cx_top_inside_from_behind", level = 5, cats = setOf(CLIMAX, ANAL), climax = true,
@@ -204,7 +217,21 @@ internal object ClimaxTerms {
             benefit = RECEIVER, type = BenefitType.EAR_PLAY_RECIPIENT,
             acts = setOf("ear_play", "dirty_talk"),
             equip = setOf(Equipment.LUBRICANT),
-            timers = listOf(tm("Talking and stroking him", 240))
+            timers = listOf(tm("Talking and stroking him", 240)),
+            says = listOf(
+                "I am not stopping until you finish.",
+                "You are going to come for me.",
+                "I can feel how close you are.",
+                "Do not hold it back.",
+                "Let go, I have got you."
+            ),
+            saysExplicit = listOf(
+                "I am not stopping until you come.",
+                "You are going to fucking come for me.",
+                "I can feel how close you are.",
+                "Do not hold any of it back.",
+                "Let it go, right now."
+            )
         ),
         t(
             id = "cx_bottom_makeout_and_toy", level = 5, cats = setOf(CLIMAX, KISSING, TOYS), climax = true,
@@ -312,7 +339,21 @@ internal object ClimaxTerms {
             explicit = "{R} strokes his own cock while {G} tells him exactly how fast, how tight and when to slow down, all the way through until he [v_come]. If the timer ends first {G} keeps directing him until he is done.",
             benefit = RECEIVER, type = BenefitType.SERVICE_RECIPIENT,
             acts = setOf("dirty_talk", "commands"),
-            timers = listOf(tm("Until he finishes", 240))
+            timers = listOf(tm("Until he finishes", 240)),
+            says = listOf(
+                "Slower.",
+                "Tighter than that.",
+                "Faster now, do not stop.",
+                "Take your hand off.",
+                "Now finish."
+            ),
+            saysExplicit = listOf(
+                "Slower.",
+                "Grip it tighter than that.",
+                "Faster, and do not fucking stop.",
+                "Take your hand off it.",
+                "Now come."
+            )
         ),
         t(
             id = "cx_np_hand_and_makeout", level = 5, cats = setOf(CLIMAX, HANDS, KISSING), climax = true,

@@ -67,7 +67,21 @@ internal object TermsLevel3 {
             benefit = RECEIVER, type = BenefitType.FINGERING_RECIPIENT,
             acts = setOf("fingering", "dirty_talk"), anal = true,
             equip = setOf(Equipment.LUBRICANT), rCon = PartyConstraint.BOTTOM,
-            timers = listOf(tm("Slicking him up", 90))
+            timers = listOf(tm("Slicking him up", 90)),
+            says = listOf(
+                "I am getting you ready for me.",
+                "This is so you can take me later.",
+                "You are being opened up so I can fuck you tonight.",
+                "By the end of this you are going to take all of me.",
+                "I am doing this now so nothing stops me later."
+            ),
+            saysExplicit = listOf(
+                "I am getting your hole ready for my cock.",
+                "This is so you can take every inch of me later.",
+                "You are being opened up so I can fuck you properly tonight.",
+                "By the end of this you are taking all of me and you are going to like it.",
+                "I am doing this now so nothing stops me later."
+            )
         ),
         t(
             id = "l3_anal_gloves", level = 3, cats = setOf(ANAL, SENSORY),
@@ -97,7 +111,21 @@ internal object TermsLevel3 {
             benefit = RECEIVER, type = BenefitType.FINGERING_RECIPIENT,
             acts = setOf("fingering", "anal_external", "dirty_talk"), anal = true,
             equip = setOf(Equipment.LUBRICANT), rCon = PartyConstraint.BOTTOM,
-            timers = listOf(tm("Held open", 90), tm("Opened up", 90))
+            timers = listOf(tm("Held open", 90), tm("Opened up", 90)),
+            says = listOf(
+                "You are completely open right now.",
+                "I can see everything.",
+                "You are already slick.",
+                "You tighten every time I touch you there.",
+                "Nothing about you is hidden from me right now."
+            ),
+            saysExplicit = listOf(
+                "Your hole is wide open right now.",
+                "I can see every bit of you.",
+                "You are dripping already.",
+                "You clench every fucking time I touch it.",
+                "There is nothing about you I cannot see right now."
+            )
         ),
         t(
             id = "l3_anal_finger_and_suck", level = 3, cats = setOf(ANAL, ORAL),
@@ -397,7 +425,21 @@ internal object TermsLevel3 {
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("climax_permission", "commands"),
             erection = PartyRef.RECEIVER,
-            timers = listOf(tm("Stroking him", 120), tm("Holding on", 60))
+            timers = listOf(tm("Stroking him", 120), tm("Holding on", 60)),
+            says = listOf(
+                "You can finish now.",
+                "Go ahead.",
+                "Now.",
+                "Let go.",
+                "You have got it, finish."
+            ),
+            saysExplicit = listOf(
+                "Come. Now.",
+                "Go on, let it go.",
+                "You can come.",
+                "Now, and do not hold anything back.",
+                "Give it to me."
+            )
         ),
         t(
             id = "l3_orgasm_edge_mutual", level = 3, cats = setOf(ORGASM_CONTROL, HANDS),

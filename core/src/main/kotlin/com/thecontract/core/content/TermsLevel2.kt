@@ -366,7 +366,21 @@ internal object TermsLevel2 {
             explicit = "{G} strokes {R} with his hands and [v_praise], again every twenty seconds, and does not go quiet once.",
             benefit = RECEIVER, type = BenefitType.SERVICE_RECIPIENT,
             acts = setOf("explicit_praise"),
-            timers = listOf(tm("Talking and touching", 120))
+            timers = listOf(tm("Talking and touching", 120)),
+            says = listOf(
+                "You are doing exactly what I want.",
+                "Good.",
+                "That is perfect, keep going.",
+                "You are taking that so well.",
+                "I like watching you like this."
+            ),
+            saysExplicit = listOf(
+                "You are doing exactly what I fucking want.",
+                "Good boy.",
+                "That is perfect, keep going.",
+                "You take it so fucking well.",
+                "I love watching you like this."
+            ),
         ),
         t(
             id = "l2_power_dirty_talk", level = 2, cats = setOf(POWER, LANGUAGE),
@@ -375,7 +389,21 @@ internal object TermsLevel2 {
             explicit = "{G} puts his mouth to {R+} ear and [v_talk_dirty], spelling out exactly what he is going to do to him later, and keeps his hands completely still while he does it.",
             benefit = RECEIVER, type = BenefitType.EAR_PLAY_RECIPIENT,
             acts = setOf("dirty_talk", "ear_play"),
-            timers = listOf(tm("Talking at his ear", 120))
+            timers = listOf(tm("Talking at his ear", 120)),
+            says = listOf(
+                "Later I am going to put you on your back and take my time.",
+                "I am going to have my mouth on you before the night is over.",
+                "I am going to open you up slowly and not rush any of it.",
+                "By the end of tonight you are going to be asking me to finish.",
+                "I have been thinking about doing this to you all week."
+            ),
+            saysExplicit = listOf(
+                "Later I am going to put you on your back and fuck you.",
+                "I am going to have my mouth on your cock before the night is out.",
+                "I am going to open you up and take my fucking time doing it.",
+                "By the end of tonight you are going to be begging me to let you come.",
+                "I am going to use you until I am done with you."
+            )
         ),
         t(
             id = "l2_anal_external", level = 2, cats = setOf(ANAL),

@@ -167,8 +167,8 @@ internal object TermsLevel1 {
         t(
             id = "l1_kiss_long_makeout", level = 1, cats = setOf(KISSING),
             title = "Long make-out",
-            base = "{G} and {R} kiss [adv_kiss_deep] with nothing else happening — no hands below the waist, no moving on.",
-            explicit = "{G} and {R} make out [adv_kiss_deep] and do nothing else. No hands below the waist, no moving on, no coming up for air until the timer says so.",
+            base = "{G} and {R} kiss deeply and slowly with nothing else happening — no hands below the waist, no moving on.",
+            explicit = "{G} and {R} make out deep and open-mouthed and do nothing else. No hands below the waist, no moving on, no coming up for air until the timer says so.",
             benefit = MUTUAL, type = BenefitType.MUTUAL, mutual = true,
             acts = setOf("long_making_out"),
             timers = listOf(tm("Making out", 180))
@@ -291,7 +291,21 @@ internal object TermsLevel1 {
             explicit = "{G} sucks {R+} ear and, in the gaps, [tone_whisper] straight into it and [v_praise], with his lips touching the ear as he says it.",
             benefit = RECEIVER, type = BenefitType.EAR_PLAY_RECIPIENT,
             acts = setOf("ear_play", "explicit_praise"),
-            timers = listOf(tm("Ear and whispering", 90))
+            timers = listOf(tm("Ear and whispering", 90)),
+            says = listOf(
+                "You are so good at this.",
+                "That is exactly right.",
+                "I could stay here all night.",
+                "You feel incredible.",
+                "Do not stop doing that."
+            ),
+            saysExplicit = listOf(
+                "You are so fucking good at this.",
+                "That is exactly right, good boy.",
+                "You take that so well.",
+                "You feel fucking incredible.",
+                "Do not stop, not for a second."
+            ),
         ),
         t(
             id = "l1_ear_moaning", level = 1, cats = setOf(EAR_PLAY, LANGUAGE),
@@ -338,7 +352,21 @@ internal object TermsLevel1 {
             explicit = "{G} moves down {R+} body with hands and mouth and says out loud, part by part, exactly what he likes about it. He does not skip a single part.",
             benefit = RECEIVER, type = BenefitType.SERVICE_RECIPIENT,
             acts = setOf("body_worship", "explicit_praise"),
-            timers = listOf(tm("Chest and arms", 60), tm("Stomach", 45), tm("Thighs", 60))
+            timers = listOf(tm("Chest and arms", 60), tm("Stomach", 45), tm("Thighs", 60)),
+            says = listOf(
+                "I love your shoulders.",
+                "This is my favourite part of you.",
+                "I think about your chest all the time.",
+                "Your stomach drives me mad.",
+                "I could spend an hour on your thighs."
+            ),
+            saysExplicit = listOf(
+                "I love your fucking shoulders.",
+                "This is my favourite part of you.",
+                "I think about your chest all the time.",
+                "Your stomach drives me fucking mad.",
+                "I could spend an hour on these thighs."
+            ),
         ),
         t(
             id = "l1_worship_nipples", level = 1, cats = setOf(BODY_WORSHIP),
