@@ -23,6 +23,7 @@ import com.thecontract.tv.net.AndroidNetworkMonitor
 import com.thecontract.tv.ui.ChimePlayer
 import com.thecontract.tv.ui.NarrationPlayer
 import com.thecontract.tv.ui.MainActivity
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -44,7 +45,16 @@ import kotlinx.coroutines.runBlocking
  */
 class ContractService : Service() {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    /**
+     * A supervisor stops one failed job cancelling its siblings; it does nothing about the
+     * failure itself, which goes to the thread's default handler and takes the process with it.
+     * These jobs watch the screen for the whole evening, so a single unforeseen exception in one
+     * of them would end the game. The handler makes that a logged fault instead.
+     */
+    private val scope = CoroutineScope(
+        SupervisorJob() + Dispatchers.Default +
+            CoroutineExceptionHandler { _, e -> ContractLog.w("Background job failed: $e") }
+    )
     private var tickJob: Job? = null
     private var chimeJob: Job? = null
     private var chime: ChimePlayer? = null
@@ -138,7 +148,7 @@ class ContractService : Service() {
                 // wants narration — that is the pairing screen, minutes before the first term,
                 // rather than making the first term the thing that waits for it. Gated on the
                 // setting, so a table that has turned narration off never fetches 139 MB.
-                if (setup?.narrationEnabled == true) narrator?.prepare()
+                if (setup?.narrationEnabled == true) runCatching { narrator?.prepare() }
                 val line = Narration.script(view, enabled)
                 when {
                     line == null -> {

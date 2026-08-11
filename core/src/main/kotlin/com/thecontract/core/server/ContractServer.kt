@@ -52,25 +52,31 @@ class ContractServer(
         handshake: IHTTPSession
     ) : WebSocket(handshake) {
 
+        // Every callback below runs on this socket's own reader thread, and an exception reaching
+        // the top of a thread on Android kills the process. These are the last line of defence
+        // for that: a phone disconnecting at an awkward moment, or sending something unforeseen,
+        // must never be able to take the television down in the middle of a game.
+
         override fun onOpen() {
             sockets[clientId] = this
-            manager.onClientConnected(clientId)
+            runCatching { manager.onClientConnected(clientId) }.onFailure { it.printStackTrace() }
         }
 
         override fun onClose(code: WebSocketFrame.CloseCode?, reason: String?, initiatedByRemote: Boolean) {
             sockets.remove(clientId)
-            manager.onClientDisconnected(clientId)
+            runCatching { manager.onClientDisconnected(clientId) }.onFailure { it.printStackTrace() }
         }
 
         override fun onMessage(message: WebSocketFrame) {
-            manager.onMessage(clientId, message.textPayload)
+            runCatching { manager.onMessage(clientId, message.textPayload) }
+                .onFailure { it.printStackTrace() }
         }
 
         override fun onPong(pong: WebSocketFrame?) = Unit
 
         override fun onException(exception: IOException?) {
             sockets.remove(clientId)
-            manager.onClientDisconnected(clientId)
+            runCatching { manager.onClientDisconnected(clientId) }.onFailure { it.printStackTrace() }
         }
     }
 

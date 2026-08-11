@@ -309,13 +309,34 @@ class SessionManager(
         onMessage(clientId, message)
     }
 
+    /**
+     * Handles one message from one phone.
+     *
+     * Wrapped, because of where this runs. It is called on the web socket's own reader thread,
+     * and on Android an exception that reaches the top of any thread kills the whole process —
+     * so without this, a single unforeseen failure while handling a tap on somebody's phone
+     * takes the television down mid-game and loses the evening. Nothing a phone can send is
+     * worth that. The phone is told its action did not land; the game carries on.
+     */
     fun onMessage(clientId: String, message: ClientMessage) {
-        when (message) {
-            is Ping -> transport?.send(clientId, Pong(message.t))
-            is Hello -> handleHello(clientId, message.deviceId, message.resumeToken)
-            is ClaimSlot -> handleHello(clientId, message.deviceId, null)
-            is Reconnect -> handleHello(clientId, message.deviceId, message.resumeToken)
-            is PlayerActionMessage -> handlePlayerAction(clientId, message)
+        runCatching {
+            when (message) {
+                is Ping -> transport?.send(clientId, Pong(message.t))
+                is Hello -> handleHello(clientId, message.deviceId, message.resumeToken)
+                is ClaimSlot -> handleHello(clientId, message.deviceId, null)
+                is Reconnect -> handleHello(clientId, message.deviceId, message.resumeToken)
+                is PlayerActionMessage -> handlePlayerAction(clientId, message)
+            }
+        }.onFailure { failure ->
+            runCatching {
+                transport?.send(
+                    clientId,
+                    ErrorMessage("INTERNAL", "The TV could not carry out that action. Try again.")
+                )
+            }
+            // Android routes this to logcat, which is where anyone diagnosing it will look.
+            System.err.println("Failed to handle $message from $clientId")
+            failure.printStackTrace()
         }
     }
 

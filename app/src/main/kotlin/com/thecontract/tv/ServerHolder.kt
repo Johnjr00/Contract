@@ -6,6 +6,7 @@ import com.thecontract.core.server.SessionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 /**
  * The single point of contact between the foreground service that owns the server and the
@@ -65,8 +66,13 @@ object ServerHolder {
     private val _narration = MutableStateFlow(NarrationStatus())
     val narration: StateFlow<NarrationStatus> = _narration.asStateFlow()
 
+    /**
+     * Atomic, because these arrive from several threads at once — the download reports progress
+     * while the player reports that it has started speaking. Read-modify-write on `.value` loses
+     * one of them, which is how a finished download can leave a progress line on screen forever.
+     */
     internal fun publishNarration(update: (NarrationStatus) -> NarrationStatus) {
-        _narration.value = update(_narration.value)
+        _narration.update(update)
     }
 
     /** Whether the local server is listening, and on which port. */

@@ -101,23 +101,33 @@ class NarrationPlayer(private val context: Context) {
         tts?.let { return it }
         if (loadFailed) return null
 
-        val source = VoiceInstaller.resolve(
-            context = context,
-            onProgress = { p ->
-                ServerHolder.publishNarration {
-                    it.copy(
-                        failed = false,
-                        failureNote = null,
-                        download = ServerHolder.NarrationStatus.Download(p.bytesDone, p.bytesTotal)
-                    )
+        // Guarded rather than trusted: this reaches the filesystem and the network, and it is
+        // called from a bare thread, where anything thrown reaches the top of that thread and
+        // takes the whole process down with it.
+        val source = runCatching {
+            VoiceInstaller.resolve(
+                context = context,
+                onProgress = { p ->
+                    ServerHolder.publishNarration {
+                        it.copy(
+                            failed = false,
+                            failureNote = null,
+                            download = ServerHolder.NarrationStatus.Download(p.bytesDone, p.bytesTotal)
+                        )
+                    }
+                },
+                onFailure = { note ->
+                    ServerHolder.publishNarration {
+                        it.copy(failed = true, failureNote = note, speaking = false, download = null)
+                    }
                 }
-            },
-            onFailure = { note ->
-                ServerHolder.publishNarration {
-                    it.copy(failed = true, failureNote = note, speaking = false, download = null)
-                }
+            )
+        }.onFailure {
+            ServerHolder.publishNarration { s ->
+                s.copy(failed = true, failureNote = "The voice could not be installed.", download = null)
             }
-        ) ?: return null
+            ContractLog.w("Voice install failed: ${it.message}")
+        }.getOrNull() ?: return null
 
         ServerHolder.publishNarration { it.copy(download = null, failed = false, failureNote = null) }
 
@@ -170,7 +180,8 @@ class NarrationPlayer(private val context: Context) {
         if (!preparing.compareAndSet(false, true)) return
         thread(name = "narration-warmup", isDaemon = true) {
             try {
-                engine()
+                runCatching { engine() }
+                    .onFailure { ContractLog.w("Voice preparation failed: ${it.message}") }
             } finally {
                 if (tts == null) {
                     // Freed for another attempt, because the usual reason for getting here is a
@@ -187,7 +198,8 @@ class NarrationPlayer(private val context: Context) {
     /** Loads the model if it is already here, but never starts a download on its own. */
     fun warmUp() {
         thread(name = "narration-precheck", isDaemon = true) {
-            if (VoiceInstaller.ready(context)) engine()
+            runCatching { if (VoiceInstaller.ready(context)) engine() }
+                .onFailure { ContractLog.w("Narration warm-up failed: ${it.message}") }
         }
     }
 
@@ -201,7 +213,10 @@ class NarrationPlayer(private val context: Context) {
         val mine = generation.incrementAndGet()
         // Let whoever is speaking notice they are stale and wind up before a second voice starts.
         unblockCurrentTrack()
-        val t = thread(name = "narration", isDaemon = true, start = false) { run(text, mine) }
+        val t = thread(name = "narration", isDaemon = true, start = false) {
+            runCatching { run(text, mine) }
+                .onFailure { ContractLog.w("Narration aborted: ${it.message}") }
+        }
         speaking = t
         t.start()
     }
