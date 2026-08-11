@@ -4,6 +4,7 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
+import android.os.Process
 import com.k2fsa.sherpa.onnx.OfflineTts
 import com.k2fsa.sherpa.onnx.OfflineTtsConfig
 import com.k2fsa.sherpa.onnx.OfflineTtsModelConfig
@@ -43,7 +44,18 @@ class NarrationPlayer(private val context: Context) {
     private companion object {
         /** Speaker 5 of the ten in the Supertonic bundle. */
         const val SPEAKER_ID = 5
-        const val THREADS = 4
+
+        /**
+         * Two of the Shield's four cores, not all four.
+         *
+         * A term takes ten or twenty seconds to generate, and at four threads that is ten or
+         * twenty seconds with every core of a 2015 Tegra X1 saturated while Compose is drawing
+         * and the server is answering two phones. Starving the main thread that long does not
+         * look like slow speech, it looks like the app dying: Android's watchdog declares it
+         * unresponsive and kills it. Speech that takes somewhat longer to start is a far better
+         * trade than a television that stops.
+         */
+        const val THREADS = 2
         /** Trailing silence so the last word is not clipped by the track draining. */
         const val TAIL_SILENCE_SAMPLES = 4000
         /** Quiet period after a failed download before another is started. */
@@ -179,6 +191,7 @@ class NarrationPlayer(private val context: Context) {
         if (loadFailed || System.nanoTime() < retryAfterNanos) return
         if (!preparing.compareAndSet(false, true)) return
         thread(name = "narration-warmup", isDaemon = true) {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND)
             try {
                 runCatching { engine() }
                     .onFailure { ContractLog.w("Voice preparation failed: ${it.message}") }
@@ -198,6 +211,7 @@ class NarrationPlayer(private val context: Context) {
     /** Loads the model if it is already here, but never starts a download on its own. */
     fun warmUp() {
         thread(name = "narration-precheck", isDaemon = true) {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND)
             runCatching { if (VoiceInstaller.ready(context)) engine() }
                 .onFailure { ContractLog.w("Narration warm-up failed: ${it.message}") }
         }
@@ -214,6 +228,7 @@ class NarrationPlayer(private val context: Context) {
         // Let whoever is speaking notice they are stale and wind up before a second voice starts.
         unblockCurrentTrack()
         val t = thread(name = "narration", isDaemon = true, start = false) {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND)
             runCatching { run(text, mine) }
                 .onFailure { ContractLog.w("Narration aborted: ${it.message}") }
         }
