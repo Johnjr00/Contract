@@ -106,8 +106,8 @@ internal object TermsLevel3 {
         t(
             id = "l3_anal_spread_open", level = 3, cats = setOf(ANAL, VISUAL),
             title = "Held open",
-            base = "{R} holds himself open on his knees while {G} rubs his hole with #lubricant# and says out loud what he sees.",
-            explicit = "{R} gets on his knees and holds himself open with his own hands while {G} rubs his hole with #lubricant# and describes out loud exactly what he is looking at.",
+            base = "{R} holds himself open on his knees while {G} rubs his hole with #lubricant#, then works one finger into him, and says out loud what he sees.",
+            explicit = "{R} gets on his knees and holds himself open with his own hands while {G} rubs his hole with #lubricant# and then pushes one finger into him, and describes out loud exactly what he is looking at.",
             benefit = RECEIVER, type = BenefitType.FINGERING_RECIPIENT,
             acts = setOf("fingering", "anal_external", "dirty_talk"), anal = true,
             equip = setOf(Equipment.LUBRICANT), rCon = PartyConstraint.BOTTOM,

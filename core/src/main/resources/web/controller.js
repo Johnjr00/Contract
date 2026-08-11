@@ -455,18 +455,20 @@
   }
 
   /**
-   * Suggested lines for an instruction that tells a man to talk without telling him what to
-   * say. Suggestions, not orders — the wording says so, because a numbered list under an
-   * instruction otherwise reads as part of it.
+   * Labelled suggestion lists for an instruction that tells a man to do something without
+   * telling him what — things he could say, positions he could use. Suggestions, not orders;
+   * the heading says so, because a list under an instruction otherwise reads as part of it.
    */
-  function appendExamples(card, examples) {
-    if (!examples || !examples.length) return;
-    var box = el("div", "examples");
-    box.appendChild(el("div", "examples-head", "Things he could say \u2014 suggestions only"));
-    var list = el("ul", "examples-list");
-    examples.forEach(function (line) { list.appendChild(el("li", null, line)); });
-    box.appendChild(list);
-    card.appendChild(box);
+  function appendSuggestions(card, lists) {
+    (lists || []).forEach(function (group) {
+      if (!group || !group.items || !group.items.length) return;
+      var box = el("div", "examples");
+      box.appendChild(el("div", "examples-head", group.heading));
+      var list = el("ul", "examples-list");
+      group.items.forEach(function (line) { list.appendChild(el("li", null, line)); });
+      box.appendChild(list);
+      card.appendChild(box);
+    });
   }
 
   function renderTerm(t, label) {
@@ -480,7 +482,7 @@
       t.equipment.forEach(function (e) { eq.appendChild(el("span", "tag", e)); });
       card.appendChild(eq);
     }
-    appendExamples(card, t.examples);
+    appendSuggestions(card, t.suggestions);
     (t.conditions || []).forEach(function (c) { card.appendChild(el("div", "notice", "Condition: " + c)); });
     (t.amendments || []).forEach(function (a) { card.appendChild(el("div", "notice", "Amendment: " + a)); });
 
@@ -508,7 +510,7 @@
     card.appendChild(el("h3", null, selectable ? "Consideration option" : "Consideration"));
     card.appendChild(el("h2", null, c.title));
     card.appendChild(el("p", "instruction", c.instruction));
-    appendExamples(card, c.examples);
+    appendSuggestions(card, c.suggestions);
     if (c.equipment && c.equipment.length) {
       var eq = el("div");
       c.equipment.forEach(function (e) { eq.appendChild(el("span", "tag", e)); });
@@ -625,7 +627,7 @@
           box.appendChild(el("div", "num", "Traded with"));
           box.appendChild(el("p", "instruction", t.bundledInstruction));
         }
-        appendExamples(box, t.examples);
+        appendSuggestions(box, t.suggestions);
         (t.conditions || []).forEach(function (c) { box.appendChild(el("span", "tag", "Condition: " + c)); });
         (t.amendments || []).forEach(function (a) { box.appendChild(el("span", "tag", "Amendment: " + a)); });
         if (t.considerationTitle) {

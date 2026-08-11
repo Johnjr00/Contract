@@ -2,6 +2,7 @@ package com.thecontract.core.protocol
 
 import com.thecontract.core.model.GamePhase
 import com.thecontract.core.model.Slot
+import com.thecontract.core.model.Suggestions
 import kotlinx.serialization.Serializable
 
 /**
@@ -58,8 +59,8 @@ data class TermCard(
     val conditions: List<String> = emptyList(),
     val amendments: List<String> = emptyList(),
     val timers: List<TimerView> = emptyList(),
-    /** Suggested lines, shown under the instruction as suggestions rather than orders. */
-    val examples: List<String> = emptyList(),
+    /** Labelled suggestion lists, shown under the instruction as suggestions rather than orders. */
+    val suggestions: List<Suggestions> = emptyList(),
     val climax: Boolean = false,
     val mutual: Boolean = false
 )
@@ -74,8 +75,8 @@ data class ConsiderationCard(
     val mutual: Boolean,
     val equipment: List<String> = emptyList(),
     val timers: List<TimerView> = emptyList(),
-    /** Suggested lines, shown under the instruction as suggestions rather than orders. */
-    val examples: List<String> = emptyList()
+    /** Labelled suggestion lists, shown under the instruction as suggestions rather than orders. */
+    val suggestions: List<Suggestions> = emptyList()
 )
 
 @Serializable
@@ -134,7 +135,7 @@ data class SignedTermCard(
     val signedBy: List<String>,
     val closingForName: String? = null,
     val timers: List<TimerView> = emptyList(),
-    val examples: List<String> = emptyList()
+    val suggestions: List<Suggestions> = emptyList()
 )
 
 @Serializable

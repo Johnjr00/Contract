@@ -125,7 +125,14 @@ internal object TermsLevel4 {
             acts = setOf("collaring", "commands", "ownership_language"),
             equip = setOf(Equipment.COLLAR, Equipment.LEASH),
             blocks = setOf(Boundary.NO_RESTRAINTS),
-            timers = listOf(tm("Position 1", 60), tm("Position 2", 60), tm("Position 3", 60))
+            timers = listOf(tm("Position 1", 60), tm("Position 2", 60), tm("Position 3", 60)),
+            positions = listOf(
+                "Down onto his knees at his feet.",
+                "On all fours at his side.",
+                "Bent over the edge of the bed.",
+                "Kneeling upright with his chest out and his hands behind him.",
+                "Face down with his hips pulled up."
+            )
         ),
         t(
             id = "l4_bond_restrained_oral", level = 4, cats = setOf(BONDAGE, ORAL),
@@ -301,7 +308,14 @@ internal object TermsLevel4 {
             benefit = MUTUAL, type = BenefitType.MUTUAL,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("commands"),
-            timers = listOf(tm("Position 1", 60), tm("Position 2", 60), tm("Position 3", 60), tm("Position 4", 60))
+            timers = listOf(tm("Position 1", 60), tm("Position 2", 60), tm("Position 3", 60), tm("Position 4", 60)),
+            positions = listOf(
+                "Kneeling upright, hands behind his back, eyes down.",
+                "On all fours with his forehead on the bed.",
+                "On his back, knees to his chest, holding them there himself.",
+                "Bent over the edge of the bed with his legs apart.",
+                "Standing with both hands flat on the wall and his feet back."
+            )
         ),
         t(
             id = "l4_service_hands_behind", level = 4, cats = setOf(POWER),

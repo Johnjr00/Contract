@@ -352,12 +352,19 @@ internal object TermsLevel2 {
         t(
             id = "l2_power_commands", level = 2, cats = setOf(POWER),
             title = "Doing as he is told",
-            base = "{DOM} gives {SUB} a short instruction every thirty seconds and {SUB} carries each one out without comment.",
+            base = "{DOM} names a new position every thirty seconds and {SUB} moves into it without comment.",
             explicit = "{DOM} [v_order] {SUB} into a new position every thirty seconds, naming it out loud, and {SUB} moves into it without a word back.",
             benefit = MUTUAL, type = BenefitType.MUTUAL,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("commands"),
-            timers = listOf(tm("Round 1", 30), tm("Round 2", 30), tm("Round 3", 30), tm("Round 4", 30))
+            timers = listOf(tm("Round 1", 30), tm("Round 2", 30), tm("Round 3", 30), tm("Round 4", 30)),
+            positions = listOf(
+                "On his back with his knees pulled up to his chest.",
+                "On his hands and knees with his head down.",
+                "Kneeling upright with both hands behind his back.",
+                "Face down and flat, arms stretched above his head.",
+                "Sitting on the edge of the bed with his legs apart."
+            )
         ),
         t(
             id = "l2_power_praise", level = 2, cats = setOf(POWER, LANGUAGE),

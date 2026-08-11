@@ -49,7 +49,14 @@ internal object TermsLevel5 {
             benefit = RECEIVER, type = BenefitType.HANDLING_RECIPIENT,
             acts = setOf("rough_handling"),
             blocks = setOf(Boundary.NO_ROUGH_SEX),
-            timers = listOf(tm("Position 1", 45), tm("Position 2", 45), tm("Position 3", 45))
+            timers = listOf(tm("Position 1", 45), tm("Position 2", 45), tm("Position 3", 45)),
+            positions = listOf(
+                "Rolled onto his front with his hips pulled up.",
+                "Flat on his back with his knees pushed to his chest.",
+                "On his side with his top leg lifted and held.",
+                "Pulled to the edge of the bed with his legs over his shoulders.",
+                "Face down with both arms pinned above his head."
+            )
         ),
         t(
             id = "l5_rough_hair_kiss", level = 5, cats = setOf(ROUGH, KISSING),
@@ -148,8 +155,8 @@ internal object TermsLevel5 {
         t(
             id = "l5_oral_hands_in_hair", level = 5, cats = setOf(ORAL, ROUGH),
             title = "Both hands in his hair",
-            base = "{R} keeps both hands in {G+} hair and pulls him down onto his cock in a steady rhythm. {G} keeps his hands flat on the floor throughout.",
-            explicit = "{R} keeps both hands buried in {G+} hair and pulls him down onto his cock in a steady rhythm, all the way each time. {G} keeps his hands flat on the floor and does not push back.",
+            base = "{R} keeps both hands in {G+} hair and pulls his mouth down onto his cock in a steady rhythm. {G} keeps his hands flat on the floor throughout.",
+            explicit = "{R} keeps both hands buried in {G+} hair and pulls his mouth down onto his cock in a steady rhythm, all the way each time. {G} keeps his hands flat on the floor and does not push back.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "deep_oral", "harder_oral", "rough_hair_pulling"),
             blocks = setOf(Boundary.NO_ROUGH_SEX),
@@ -293,8 +300,8 @@ internal object TermsLevel5 {
         t(
             id = "l5_sex_escalating", level = 5, cats = setOf(ANAL, ROUGH),
             title = "Slow to hardest, a minute each",
-            base = "{G} starts [adv_thrust_slow] and moves up a level every minute, slow to steady to hard to hardest.",
-            explicit = "{G} starts [adv_thrust_slow] and goes up a level every minute, slow to steady to hard to hardest, without ever dropping back down.",
+            base = "{G} fucks {R} [adv_thrust_slow] to start with and moves up a level every minute, slow to steady to hard to hardest.",
+            explicit = "{G} fucks {R} [adv_thrust_slow] to start with and goes up a level every minute, slow to steady to hard to hardest, without ever dropping back down.",
             benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
             acts = setOf("topping", "hard_sex"), anal = true,
             gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
@@ -576,7 +583,14 @@ internal object TermsLevel5 {
             benefit = MUTUAL, type = BenefitType.MUTUAL,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("commands"),
-            timers = listOf(tm("Rule in force", 60))
+            timers = listOf(tm("Rule in force", 60)),
+            positions = listOf(
+                "On all fours with his knees apart.",
+                "Flat on his back with his legs open.",
+                "Kneeling upright with both hands behind his head.",
+                "Bent over the edge of the bed.",
+                "On his side with his top knee drawn up to his chest."
+            )
         ),
         t(
             id = "l5_rule_belongs_tonight", level = 5, cats = setOf(POWER, LANGUAGE),

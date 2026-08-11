@@ -78,7 +78,7 @@ object ViewBuilder {
         conditions = r.conditions,
         amendments = r.amendments,
         timers = timerViews(r.timers),
-        examples = r.examples,
+        suggestions = r.suggestions,
         climax = r.climax,
         mutual = r.mutual
     )
@@ -92,7 +92,7 @@ object ViewBuilder {
         mutual = c.mutual,
         equipment = c.equipmentUsed,
         timers = timerViews(c.timers),
-        examples = c.examples
+        suggestions = c.suggestions
     )
 
     private fun progress(s: GameState) = ProgressView(
@@ -135,7 +135,7 @@ object ViewBuilder {
             signedBy = signed.signedBySlots.map { s.setup.name(it) },
             closingForName = signed.closingFor?.let { s.setup.name(it) },
             timers = timerViews(signed.term.timers),
-            examples = signed.term.examples
+            suggestions = signed.term.suggestions
         )
     }
 

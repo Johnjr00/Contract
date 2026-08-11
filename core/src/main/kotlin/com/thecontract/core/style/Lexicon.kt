@@ -78,7 +78,15 @@ object Lexicon {
             listOf("sucks", "gets his mouth around", "gets his mouth all the way down on")
         )
         k("v_suck_slow", "sucks gently on", "sucks slowly on", "sucks hard and slow on", "sucks deep and slow on")
-        k("v_deep", "sinks slowly onto", "works his way down onto", "pushes his throat down onto", "forces himself down onto")
+        // Every wording names the mouth or the throat. "forces himself down onto his cock" never
+        // said what he was going down on it with, and reads as lowering himself onto it.
+        k(
+            "v_deep",
+            "sinks his mouth slowly down onto",
+            "works his mouth down onto",
+            "pushes his throat down onto",
+            "forces his throat down onto"
+        )
         k("v_lick", "traces his tongue over", "licks", "licks", "laps at")
         k("v_mouth", "attends to", "licks and sucks", "sucks and bites at", "sucks hard on")
         k("v_tongue", "circles his tongue around", "runs his tongue over", "drags his tongue over", "drags his tongue over")
@@ -197,14 +205,14 @@ object Lexicon {
         )
         k("v_finger_deep", "fingers deep into", "fingers deep into", "finger-fucks deep into", "finger-fucks hard into")
         k("v_open", "opens", "opens up", "opens up", "stretches open")
-        k("v_fuck", "takes", "fucks", "fucks", "fucks")
-        k("v_fuck_hard", "moves hard into", "fucks hard into", "drives hard into", "pounds")
+        k("v_fuck", "moves his cock inside", "fucks", "fucks", "fucks")
+        k("v_fuck_hard", "moves his cock hard into", "fucks hard into", "drives his cock hard into", "pounds")
         kv(
             "v_enter",
-            listOf("eases into", "slides slowly into"),
-            listOf("pushes into", "slides into"),
-            listOf("pushes into", "works his way into"),
-            listOf("shoves into", "drives into")
+            listOf("eases his cock into", "slides his cock slowly into"),
+            listOf("pushes his cock into", "slides his cock into"),
+            listOf("pushes his cock into", "works his cock into"),
+            listOf("shoves his cock into", "drives his cock into")
         )
         k("v_bottom_take", "takes", "takes", "takes", "takes every inch of")
         kv(

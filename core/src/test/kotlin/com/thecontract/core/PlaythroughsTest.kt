@@ -367,10 +367,14 @@ class PlaythroughsTest {
         view.term?.takeIf { it.instruction.isNotBlank() }
             ?.let { into += Line("term", it.termId, it.title, it.instruction, timing(it.timers)) }
         (listOfNotNull(view.term, view.bundledTerm) + view.termOptions).forEach { t ->
-            t.examples.forEach { into += Line("term suggestion", t.termId, t.title, it, "", rules = false) }
+            t.suggestions.forEach { group ->
+                group.items.forEach { into += Line("term suggestion", t.termId, group.heading, it, "", rules = false) }
+            }
         }
         (listOfNotNull(view.consideration) + view.considerationOptions).forEach { c ->
-            c.examples.forEach { into += Line("consideration suggestion", c.actionId, c.title, it, "", rules = false) }
+            c.suggestions.forEach { group ->
+                group.items.forEach { into += Line("consideration suggestion", c.actionId, group.heading, it, "", rules = false) }
+            }
         }
         view.bundledTerm?.let { into += Line("bundled term", it.termId, it.title, it.instruction, timing(it.timers)) }
         view.termOptions.forEach {

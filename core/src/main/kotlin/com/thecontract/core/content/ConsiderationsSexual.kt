@@ -308,8 +308,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_ranal_hard_behind", intensity = 5, family = F_SEX, cats = setOf(ANAL, ROUGH),
             title = "Hard from behind",
-            base = "{G} takes {R} from behind with #lubricant# [adv_thrust_hard] for the whole timer and does not slow down once.",
-            explicit = "{G} takes {R} from behind with #lubricant# [adv_thrust_hard] for the whole timer and does not slow down once.",
+            base = "{G} pushes his cock into {R} from behind with #lubricant# and fucks him [adv_thrust_hard] for the whole timer, and does not slow down once.",
+            explicit = "{G} shoves his cock into {R} from behind with #lubricant# and fucks him [adv_thrust_hard] for the whole timer, and does not slow down once.",
             acts = setOf("topping", "rough_anal"), anal = true, erection = PartyRef.GIVER,
             pCon = PartyConstraint.TOP, equip = setOf(Equipment.LUBRICANT),
             timers = listOf(tm("Pushing in", 45), tm("Hard", 150)),
@@ -675,7 +675,14 @@ internal object ConsiderationsSexual {
             base = "{G} [v_handle] {R} into three positions without asking, and {R} lets himself be moved.",
             explicit = "{G} [v_handle] {R} into three positions without warning, and {R} goes exactly where he is put.",
             acts = setOf("rough_handling"), blocks = setOf(Boundary.NO_ROUGH_SEX),
-            timers = listOf(tm("Position 1", 45), tm("Position 2", 45), tm("Position 3", 45))
+            timers = listOf(tm("Position 1", 45), tm("Position 2", 45), tm("Position 3", 45)),
+            positions = listOf(
+                "Rolled onto his front.",
+                "Flat on his back with his knees up.",
+                "On his side with his top leg lifted.",
+                "Pulled down the bed by the ankles.",
+                "Face down with his hips pulled up."
+            )
         ),
         c(
             id = "cs_rough_hair_kiss", intensity = 4, family = F_SEX, cats = setOf(ROUGH, KISSING),
@@ -688,8 +695,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_rough_oral", intensity = 5, family = F_SEX, cats = setOf(ROUGH, ORAL),
             title = "Rough oral",
-            base = "{R} keeps both hands in {G+} hair and pulls him all the way down in a steady rhythm, and {G} keeps his hands flat on the floor throughout.",
-            explicit = "{R} keeps both hands in {G+} hair and pulls him all the way down in a steady rhythm, and {G} keeps his hands flat on the floor and does not pull off.",
+            base = "{R} keeps both hands in {G+} hair and pulls his mouth all the way down onto his cock in a steady rhythm, and {G} keeps his hands flat on the floor throughout.",
+            explicit = "{R} keeps both hands in {G+} hair and pulls his mouth all the way down onto his cock in a steady rhythm, and {G} keeps his hands flat on the floor and does not pull off.",
             acts = setOf("oral", "harder_oral", "rough_hair_pulling"), blocks = setOf(Boundary.NO_ROUGH_SEX),
             timers = listOf(tm("Steady rhythm", 120))
         ),
@@ -699,7 +706,14 @@ internal object ConsiderationsSexual {
             base = "{G} handles {R} [adv_rough] with his hands, gripping him by the arms, hips and jaw and moving him into three different positions.",
             explicit = "{G} handles {R} [adv_rough] with his hands, gripping him by the arms, hips and jaw and shoving him into three different positions.",
             acts = setOf("rough_handling"), blocks = setOf(Boundary.NO_ROUGH_SEX),
-            timers = listOf(tm("Handled", 120))
+            timers = listOf(tm("Handled", 120)),
+            positions = listOf(
+                "Turned face down and held there.",
+                "Pulled upright onto his knees.",
+                "Laid flat on his back with his arms out.",
+                "Rolled onto his side with his top leg drawn up.",
+                "Bent forward over the edge of the bed."
+            )
         ),
         c(
             id = "cs_rough_pin_rim", intensity = 5, family = F_SEX, cats = setOf(ROUGH, RIMMING, ANAL),

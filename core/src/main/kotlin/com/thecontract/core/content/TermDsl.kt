@@ -40,6 +40,7 @@ internal fun t(
     mutual: Boolean = false,
     says: List<String> = emptyList(),
     saysExplicit: List<String> = emptyList(),
+    positions: List<String> = emptyList(),
     tail: String? = null,
     climax: Boolean = false
 ): Term = Term(
@@ -66,6 +67,7 @@ internal fun t(
     extremeTail = tail,
     examples = says,
     examplesExplicit = saysExplicit,
+    positions = positions,
     climax = climax
 )
 
@@ -92,7 +94,8 @@ internal fun c(
     pCock: Boolean = false,
     tail: String? = null,
     says: List<String> = emptyList(),
-    saysExplicit: List<String> = emptyList()
+    saysExplicit: List<String> = emptyList(),
+    positions: List<String> = emptyList()
 ): ConsiderationAction = ConsiderationAction(
     id = id,
     intensity = intensity,
@@ -115,5 +118,6 @@ internal fun c(
     usesPerformersCock = pCock,
     extremeTail = tail,
     examples = says,
-    examplesExplicit = saysExplicit
+    examplesExplicit = saysExplicit,
+    positions = positions
 )

@@ -80,6 +80,9 @@ object ContentValidator {
         problems += validateEquipmentGating()
         problems += validateLexicon()
         problems += validateSpokenExamples()
+        problems += validateSuggestionsMatchTheInstruction()
+        problems += validateOralNamesTheMouth()
+        problems += validatePenetrationNamesTheInstrument()
         return problems
     }
 
@@ -444,8 +447,138 @@ object ContentValidator {
             if (base.distinct().size != base.size) add(Problem(where, "repeats a suggested line"))
             if (explicit.distinct().size != explicit.size) add(Problem(where, "repeats a coarse suggested line"))
         }
-        ContentLibrary.allTerms.forEach { check("term ${it.id}", it.examples, it.examplesExplicit) }
-        ContentLibrary.considerations.forEach { check("consideration ${it.id}", it.examples, it.examplesExplicit) }
+        fun checkPositions(where: String, positions: List<String>) {
+            if (positions.isEmpty()) return
+            if (positions.size != EXAMPLE_COUNT) {
+                add(Problem(where, "suggests ${positions.size} positions, needs $EXAMPLE_COUNT"))
+            }
+            if (positions.distinct().size != positions.size) add(Problem(where, "repeats a suggested position"))
+            positions.forEach { line ->
+                if (line.isBlank()) add(Problem(where, "blank suggested position"))
+                if (line.trim() != line) add(Problem(where, "suggested position has stray whitespace: '$line'"))
+                if (line.isNotEmpty() && line.last() !in ".!?") {
+                    add(Problem(where, "suggested position does not end with sentence punctuation: '$line'"))
+                }
+                if (femaleTerms.containsMatchIn(line)) add(Problem(where, "gendered wording in '$line'"))
+            }
+        }
+        ContentLibrary.allTerms.forEach {
+            check("term ${it.id}", it.examples, it.examplesExplicit)
+            checkPositions("term ${it.id}", it.positions)
+        }
+        ContentLibrary.considerations.forEach {
+            check("consideration ${it.id}", it.examples, it.examplesExplicit)
+            checkPositions("consideration ${it.id}", it.positions)
+        }
+    }
+
+    /**
+     * Penetration has to name what does the penetrating.
+     *
+     * Same failure as the oral one: "eases into him with lube" reads as any of a cock, a finger
+     * or a toy, and a player is entitled to know which before he acts on it.
+     */
+    private fun validatePenetrationNamesTheInstrument(): List<Problem> = buildList {
+        val namesInstrument = Regex(
+            "\\b(?:cock|fingers?|finger-fuck\\w*|hand|fist|dildo|plug|toy|vibrator|wand|sleeve|" +
+                "tongue|fucks?|fucking|fucked|pounds?|rides?|riding|inch)",
+            RegexOption.IGNORE_CASE
+        )
+        fun check(where: String, text: String) {
+            if (!namesInstrument.containsMatchIn(text)) {
+                add(Problem(where, "penetration that never names what goes in: '${text.take(110)}'"))
+            }
+        }
+        for (explicitness in Explicitness.entries) {
+            val ctx = fullContext(explicitness = explicitness)
+            val binding = PartyBinding(Slot.PLAYER_1, Slot.PLAYER_2)
+            ContentLibrary.allTerms.filter { it.analPenetration }
+                .forEach { check("term ${it.id} [$explicitness]", Renderer.renderTerm(it, binding, ctx).instruction) }
+            ContentLibrary.considerations.filter { it.analPenetration }
+                .forEach {
+                    check(
+                        "consideration ${it.id} [$explicitness]",
+                        Renderer.renderConsideration(it, Slot.PLAYER_1, Slot.PLAYER_2, ctx).instruction
+                    )
+                }
+        }
+    }
+
+    /**
+     * A suggestion list only belongs on an item whose instruction asks for it, in every register.
+     *
+     * Two items once carried suggested lines in registers that never told anybody to talk — the
+     * collar term only said so in its coarse template, and the closing term only in its
+     * Extremely-filthy tail — so a player saw five things to say and no instruction to say them.
+     */
+    private fun validateSuggestionsMatchTheInstruction(): List<Problem> = buildList {
+        val asksForSpeech = Regex(
+            "\\[v_talk_dirty\\]|\\[v_praise\\]|\\[v_own\\]|\\[n_dirty_talk\\]|\\[tone_whisper\\]|" +
+                "\\bout loud\\b|\\btells him\\b|\\btalks\\b|\\bspelling out\\b|\\bdescrib\\w+|" +
+                "\\bnames (?:one thing|what|each place|a part)",
+            RegexOption.IGNORE_CASE
+        )
+        val asksForPosition = Regex("\\bposition", RegexOption.IGNORE_CASE)
+        fun check(where: String, base: String, explicit: String, speech: Boolean, positions: Boolean) {
+            if (speech) {
+                listOf("measured" to base, "coarse" to explicit).forEach { (which, text) ->
+                    if (!asksForSpeech.containsMatchIn(text)) {
+                        add(Problem(where, "suggests lines to say, but the $which template never asks him to talk"))
+                    }
+                }
+            }
+            if (positions) {
+                listOf("measured" to base, "coarse" to explicit).forEach { (which, text) ->
+                    if (!asksForPosition.containsMatchIn(text)) {
+                        add(Problem(where, "suggests positions, but the $which template never names one"))
+                    }
+                }
+            }
+        }
+        ContentLibrary.allTerms.forEach {
+            check(
+                "term ${it.id}", it.base, it.explicit + " " + (it.extremeTail ?: ""),
+                it.examples.isNotEmpty(), it.positions.isNotEmpty()
+            )
+        }
+        ContentLibrary.considerations.forEach {
+            check(
+                "consideration ${it.id}", it.base, it.explicit + " " + (it.extremeTail ?: ""),
+                it.examples.isNotEmpty(), it.positions.isNotEmpty()
+            )
+        }
+    }
+
+    /**
+     * Oral content has to name the mouth.
+     *
+     * `[v_deep]` resolving to "forces himself down onto" never said what he was going down on it
+     * with, and reads as lowering himself onto it rather than taking it in his throat. Category
+     * is the check rather than wording, so a new oral item cannot slip past by paraphrasing.
+     */
+    private fun validateOralNamesTheMouth(): List<Problem> = buildList {
+        val namesMouth = Regex(
+            "\\b(?:mouth|throat|lips?|tongue|sucks?|sucking|teeth|swallow|spits?|spit\\b)",
+            RegexOption.IGNORE_CASE
+        )
+        fun check(where: String, text: String) {
+            if (!namesMouth.containsMatchIn(text)) {
+                add(Problem(where, "oral content that never names the mouth: '${text.take(110)}'"))
+            }
+        }
+        for (explicitness in Explicitness.entries) {
+            val ctx = fullContext(explicitness = explicitness)
+            val binding = PartyBinding(Slot.PLAYER_1, Slot.PLAYER_2)
+            ContentLibrary.allTerms.filter { com.thecontract.core.model.Category.ORAL in it.categories }
+                .forEach { check("term ${it.id} [$explicitness]", Renderer.renderTerm(it, binding, ctx).instruction) }
+            ContentLibrary.considerations.filter { com.thecontract.core.model.Category.ORAL in it.categories }
+                .forEach {
+                    check(
+                        "consideration ${it.id} [$explicitness]",
+                        Renderer.renderConsideration(it, Slot.PLAYER_1, Slot.PLAYER_2, ctx).instruction
+                    )
+                }
+        }
     }
 
     private fun validateLexicon(): List<Problem> = buildList {

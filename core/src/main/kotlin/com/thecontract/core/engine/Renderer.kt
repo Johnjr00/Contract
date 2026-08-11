@@ -9,6 +9,7 @@ import com.thecontract.core.model.RenderedConsideration
 import com.thecontract.core.model.RenderedTerm
 import com.thecontract.core.model.RenderedTimer
 import com.thecontract.core.model.Slot
+import com.thecontract.core.model.Suggestions
 import com.thecontract.core.model.Term
 import com.thecontract.core.model.TimerSpec
 import com.thecontract.core.style.RenderContext
@@ -23,6 +24,9 @@ import com.thecontract.core.style.StyleEngine
 object Renderer {
 
     private const val MASSAGE_FIRST_SECONDS = 300
+
+    private const val SPOKEN_HEADING = "Things he could say — suggestions only"
+    private const val POSITION_HEADING = "Positions he could use — suggestions only"
 
     fun context(ctx: GameContext, binding: PartyBinding, itemId: String = ""): RenderContext = RenderContext(
         setup = ctx.setup,
@@ -57,19 +61,31 @@ object Renderer {
     }
 
     /**
-     * Suggested lines for the register in play, name tokens resolved.
+     * The labelled suggestion lists for one item, name tokens resolved.
      *
-     * Empty for the overwhelming majority of the library: only an instruction that tells a man
-     * to talk without telling him what to say carries any.
+     * Empty for the overwhelming majority of the library: only an instruction that tells a man to
+     * do something without telling him what carries any. Spoken lines are split by register on
+     * the same rule as the templates; positions are not, because a position is a physical
+     * arrangement of two bodies and reads the same however coarse the sentence around it is.
      */
-    private fun renderExamples(base: List<String>, explicit: List<String>, rc: RenderContext): List<String> {
-        val chosen = when (rc.explicitness) {
+    private fun renderSuggestions(
+        says: List<String>,
+        saysExplicit: List<String>,
+        positions: List<String>,
+        rc: RenderContext
+    ): List<Suggestions> = buildList {
+        val spoken = when (rc.explicitness) {
             com.thecontract.core.model.Explicitness.EROTIC,
-            com.thecontract.core.model.Explicitness.DIRECT -> base
+            com.thecontract.core.model.Explicitness.DIRECT -> says
             com.thecontract.core.model.Explicitness.FILTHY,
-            com.thecontract.core.model.Explicitness.EXTREME -> explicit.ifEmpty { base }
+            com.thecontract.core.model.Explicitness.EXTREME -> saysExplicit.ifEmpty { says }
         }
-        return chosen.map { StyleEngine.render(it, rc) }
+        if (spoken.isNotEmpty()) {
+            add(Suggestions(SPOKEN_HEADING, spoken.map { StyleEngine.render(it, rc) }))
+        }
+        if (positions.isNotEmpty()) {
+            add(Suggestions(POSITION_HEADING, positions.map { StyleEngine.render(it, rc) }))
+        }
     }
 
     fun renderTerm(
@@ -94,7 +110,7 @@ object Renderer {
             benefitExplanation = BenefitAnalysis.explanation(term, binding, ctx.setup),
             equipmentUsed = equipmentUsed(term.requiredEquipment, term.genericToy, rc),
             categories = term.categories,
-            examples = renderExamples(term.examples, term.examplesExplicit, rc),
+            suggestions = renderSuggestions(term.examples, term.examplesExplicit, term.positions, rc),
             analPenetration = term.analPenetration,
             climax = term.climax,
             mutual = term.mutual,
@@ -123,7 +139,7 @@ object Renderer {
             mutual = action.mutual,
             intensity = action.intensity,
             equipmentUsed = equipmentUsed(action.requiredEquipment, action.genericToy, rc),
-            examples = renderExamples(action.examples, action.examplesExplicit, rc)
+            suggestions = renderSuggestions(action.examples, action.examplesExplicit, action.positions, rc)
         )
     }
 
