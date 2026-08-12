@@ -61,8 +61,6 @@ Files worth knowing:
 ./gradlew :core:test                 # engine + content rules (fast, run this constantly)
 ./gradlew :app:testReleaseUnitTest   # app-side unit tests
 ./gradlew :app:assembleRelease       # APK -> app/build/outputs/apk/release/
-./gradlew :core:test --tests "*PlaythroughReadout*" --rerun-tasks
-                                     # writes core/build/playthrough-readout.txt
 ```
 
 Gradle works offline (`--offline`). Release builds are signed if `keystore.properties` exists.
@@ -228,14 +226,14 @@ displayed but not modelled in software (the pause button is the enforceable mech
 * **Alternation.** The man who came out ahead on the last one-sided term is not the man the next
   is bound to favour. It moves on a **signature**, not a proposal — a rejected term leaves the
   debt where it was. Balanced terms name nobody and pass no turn. It is a *preference* the
-  selector drops if nothing eligible survives with it. `BenefitAlternationTest` plays real games.
+  selector drops if nothing eligible survives with it.
 * **A trade is one contract item and two execution steps.** The two halves routinely have giver
   and receiver reversed, so each step carries its own instruction, clocks, controller and
   completer. They stay adjacent in the running order. `BundledTermExecutionTest`.
 * **Assumed preferences.** 56 of the 151 preferences are no longer asked and answer `YES`
   regardless of what is stored — a stale `NO` from an older profile must not survive. The records
   stay in the library because terms reference those activities by id. Two sections (Language,
-  Orgasm control) are empty and are not shown. `AssumedPreferenceTest`.
+  Orgasm control) are empty and are not shown.
 * **Persistence tolerates old saves.** `StoreJson` uses `ignoreUnknownKeys`, and a failed decode
   drops the session silently. When changing a persisted field, **rename rather than retype** so the
   old key is skipped instead of failing to parse, and provide a rebuild path.
@@ -251,7 +249,7 @@ displayed but not modelled in software (the pause button is the enforceable mech
   figure for both.
 * **Nothing in the content column can take focus**, so a remote cannot scroll it. Anything that
   overflows is *gone*. `FitToHeight` shrinks the column by lowering the density rather than
-  clipping. `TvLayoutBudgetTest` guards the arithmetic.
+  clipping.
 * The accessibility text scale is deliberately not carried through.
 
 ---
@@ -279,13 +277,28 @@ speech starts before the whole passage is generated. `SAMPLING_STEPS` is the qua
 ## 9. How to verify content changes
 
 1. `./gradlew :core:test` — the validator, the render sweep, the benefit rules, the playthroughs.
-2. Regenerate and **read** the readout:
-   `./gradlew :core:test --tests "*PlaythroughReadout*" --rerun-tasks`
-   → `core/build/playthrough-readout.txt`
+2. **Read the rendered output.** The suite catches everything expressible as a rule; it cannot
+   tell you whether an instruction can be carried out by two men in a room. Every issue marked
+   *(read)* above was found that way and would have shipped otherwise.
 
-The second step is not optional for content work. The suite catches everything expressible as a
-rule; it cannot tell you whether an instruction can be carried out by two men in a room. Every
-issue marked *(read)* above was found by reading rendered output and would have shipped otherwise.
+For step 2, play games through the test harness (`Harness`, `GameDriver`, `Setups` in
+`core/src/test/.../harness/`) and print each proposed term, each consideration option and the
+finale in order. Write that as a throwaway when you need it rather than leaving it in the suite —
+it always passes, so as a test it is noise.
 
 When adding terms, render them at the mildest and coarsest registers and read both — the coarse
 register substitutes different verbs and is where grammar breaks.
+
+---
+
+## 10. Tests
+
+Keep the suite small. A test earns its place by guarding a bug that actually happened, or a rule
+the game would silently break without it. Two exist for that reason:
+
+* `FinaleOnlyPenetrationTest` — intercourse and finishing stay in the closing terms (§4.2).
+* `BundledTermExecutionTest` — a trade performs as two steps, each with its own actors and clock.
+
+Do not add a test that restates a constant, re-checks something the validator already covers, or
+proves a value equals itself. If a check is worth having permanently, prefer adding it to
+`ContentValidator` — one place, one run, no new file.
