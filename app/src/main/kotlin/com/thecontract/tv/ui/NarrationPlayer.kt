@@ -62,12 +62,12 @@ class NarrationPlayer(private val context: Context) {
         /**
          * Flow-matching sampling steps.
          *
-         * Back to the library's default of five. It was cut to three for speed, and the voice came
-         * back unsteady — a flow-matching model asked for too few steps wanders in pitch and level
-         * within a phrase. The time that costs is bought back by the pre-roll below rather than by
-         * sampling more coarsely.
+         * Four. Three made the voice wander in pitch and level within a phrase — a flow-matching
+         * model asked for too few steps is unstable — and five is the library default but costs a
+         * quarter again in time on hardware that has none to spare. This is the dial: raise it if
+         * the voice sounds unsteady, lower it if the wait matters more than the voice.
          */
-        const val SAMPLING_STEPS = 5
+        const val SAMPLING_STEPS = 4
 
 
 
@@ -78,9 +78,10 @@ class NarrationPlayer(private val context: Context) {
          * generator could fill it and spent the whole passage underrunning — which is not heard as
          * silence but as the level pumping and the pitch wavering. On this hardware speech is
          * generated at roughly the speed it is spoken, so there is no headroom to recover from a
-         * stall; the only fix is to be a second ahead before the first word is let out.
+         * stall; the only fix is to be a little ahead before the first word is let out. Six
+         * hundred milliseconds is enough to stop the level pumping without being felt as delay.
          */
-        const val PREROLL_SECONDS = 1
+        const val PREROLL_MILLIS = 600
 
         /**
          * The track's own buffer, in seconds. A second of slack was not enough to ride out a
@@ -339,7 +340,7 @@ class NarrationPlayer(private val context: Context) {
         runCatching {
             // Deliberately not played yet: see PREROLL_SECONDS.
             var playing = false
-            val preroll = sampleRate * PREROLL_SECONDS
+            val preroll = sampleRate.toLong() * PREROLL_MILLIS / 1000
             // Nothing may be thrown out of this callback: it is invoked from C++ across JNI,
             // where an exception unwinding out of it is not caught, it is undefined. Any failure
             // becomes a 0 instead, which is the documented way to ask the generator to stop.

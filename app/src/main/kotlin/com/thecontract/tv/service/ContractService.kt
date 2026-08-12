@@ -152,9 +152,12 @@ class ContractService : Service() {
                 val line = Narration.script(view, enabled)
                 when {
                     line == null -> {
-                        // Nothing to say on this screen: cut off whatever the last one was, so
-                        // a term is not still being read over the screen that replaced it.
-                        if (spokenKey != null) runCatching { narrator?.stop() }
+                        // Nothing to say on *this* screen, which is not a reason to cut off the
+                        // last one. Answering a proposal moves straight to a consideration
+                        // selection, and that screen still carries the term being read — so
+                        // stopping here truncated the sentence the moment a player pressed
+                        // anything, which on hardware this slow is most of the way through it.
+                        // A passage is bounded anyway: the next thing worth speaking cancels it.
                         spokenKey = null
                     }
                     line.key != spokenKey -> {
