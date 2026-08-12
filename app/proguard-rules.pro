@@ -40,6 +40,23 @@
     native <methods>;
 }
 
+# The streaming callback is the same problem one step further out, and keeping the sherpa package
+# does not cover it: the lambda belongs to NarrationPlayer, not to sherpa.
+#
+# `generateWithCallbackImpl` is handed a Function1 and calls invoke([F)Ljava/lang/Integer; on it
+# from C++ for every chunk of audio. Kotlin compiles the lambda with that specialised method
+# alongside the erased invoke(Object)Object, and since only native code ever calls the specialised
+# one, R8 removes it as unreachable. The first chunk of the first term then aborts the process with
+#
+#   NoSuchMethodError: no non-static method "Ll1/k;.invoke([F)Ljava/lang/Integer;"
+#
+# which, like the field lookup above, is a runtime abort and not something the callback's own
+# runCatching could ever see. Matched on the exact signature so this keeps one method on one
+# lambda rather than every function object in the app.
+-keepclassmembers class * implements kotlin.jvm.functions.Function1 {
+    java.lang.Integer invoke(float[]);
+}
+
 # Room generated implementations.
 -keep class * extends androidx.room.RoomDatabase { <init>(); }
 -dontwarn androidx.room.paging.**

@@ -306,20 +306,25 @@ class NarrationPlayer(private val context: Context) {
             // Nothing may be thrown out of this callback: it is invoked from C++ across JNI,
             // where an exception unwinding out of it is not caught, it is undefined. Any failure
             // becomes a 0 instead, which is the documented way to ask the generator to stop.
-            engine.generateWithCallback(text = text, sid = SPEAKER_ID, speed = 1.0f) { chunk ->
-                runCatching {
-                    if (generation.get() != mine) {
+            engine.generateWithCallback(
+                text = text,
+                sid = SPEAKER_ID,
+                speed = 1.0f,
+                callback = ChunkSink { chunk ->
+                    runCatching {
+                        if (generation.get() != mine) {
+                            0
+                        } else {
+                            samplesProduced += chunk.size
+                            write(out, chunk, mine)
+                            1
+                        }
+                    }.getOrElse {
+                        ContractLog.w("Narration chunk dropped: ${it.message}")
                         0
-                    } else {
-                        samplesProduced += chunk.size
-                        write(out, chunk, mine)
-                        1
                     }
-                }.getOrElse {
-                    ContractLog.w("Narration chunk dropped: ${it.message}")
-                    0
                 }
-            }
+            )
             if (generation.get() == mine) {
                 // Without this the track stops the instant the last chunk is queued and eats
                 // the final syllable.
@@ -390,4 +395,26 @@ class NarrationPlayer(private val context: Context) {
             .build()
     }.onFailure { ContractLog.w("No audio track for narration: ${it.message}") }.getOrNull()
 
+}
+
+/**
+ * The streaming callback, as a declared class rather than a lambda.
+ *
+ * `generateWithCallbackImpl` is handed this object and calls `invoke([F)Ljava/lang/Integer;` on it
+ * from C++, once per chunk of audio. Written as a lambda it never survived a release build: Kotlin
+ * compiles lambdas through `invokedynamic`, the desugared class carries only the erased
+ * `invoke(Object)Object`, and the specialised method the native side asks for by name is never
+ * emitted at all — so no ProGuard rule could keep it, because there was nothing there to keep. The
+ * first chunk of the first term aborted the process with
+ *
+ *   NoSuchMethodError: no non-static method "Ll1/k;.invoke([F)Ljava/lang/Integer;"
+ *
+ * which is a runtime abort, not an exception the `runCatching` inside the callback could ever see.
+ *
+ * Declaring the class puts the method in the APK where the native lookup can find it. The
+ * signature is checked by NarrationCallbackTest against the compiled output, since nothing about
+ * this is visible in the source.
+ */
+internal class ChunkSink(private val onChunk: (FloatArray) -> Int) : (FloatArray) -> Int {
+    override fun invoke(p1: FloatArray): Int = onChunk(p1)
 }
