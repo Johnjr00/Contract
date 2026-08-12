@@ -659,6 +659,87 @@ internal object TermsLevel5 {
                 "I am right on the edge.",
                 "One more and I am gone."
             )
+        ),
+
+        // ---------------------------------------------------------------- added (8)
+        t(
+            id = "l5_pen_no_pause", level = 5, cats = setOf(ANAL, ROUGH),
+            title = "Without stopping",
+            base = "{G} [v_fuck_hard] {R} and does not stop or slow down once until the timer runs out.",
+            explicit = "{G} [v_fuck_hard] {R} and does not stop, slow or change anything until the timer is done.",
+            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
+            acts = setOf("topping", "hard_sex", "rough_anal"), anal = true,
+            equip = setOf(Equipment.LUBRICANT),
+            erection = PartyRef.GIVER,
+            timers = listOf(tm("Without stopping", 240))
+        ),
+        t(
+            id = "l5_bond_tied_and_edged", level = 5, cats = setOf(BONDAGE, ORGASM_CONTROL),
+            title = "Tied and kept there",
+            base = "{G} binds {R+} hands and takes him to the edge again and again, never letting him finish before the last timer ends.",
+            explicit = "{G} ties {R+} hands and [v_edge] over and over, and he does not come until the last timer has run out.",
+            benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
+            acts = setOf("restraint", "edging", "denial"),
+            equip = setOf(Equipment.ROPE),
+            timers = listOf(tm("First", 90), tm("Second", 90), tm("Last", 120))
+        ),
+        t(
+            id = "l5_impact_until_he_says", level = 5, cats = setOf(IMPACT, POWER),
+            title = "Until he says otherwise",
+            base = "{G} [v_spank] {R} steadily with an open hand, and {R} counts each one out loud and thanks him for it.",
+            explicit = "{G} [v_spank] {R} steadily with his open hand and {R} counts every one out loud and thanks him for each.",
+            benefit = RECEIVER, type = BenefitType.IMPACT_RECIPIENT,
+            acts = setOf("spanking", "degradation"),
+            timers = listOf(tm("Counting", 120))
+        ),
+        t(
+            id = "l5_oral_deep_and_held", level = 5, cats = setOf(ORAL, ROUGH),
+            title = "Held there",
+            base = "{G} [v_deep] {R+} cock and holds himself down on it for as long as he can, comes up for air, and goes back down again.",
+            explicit = "{G} [v_deep] {R+} cock and holds himself down on it as long as he can each time, up for air, then straight back down.",
+            benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
+            acts = setOf("oral", "deep_oral", "harder_oral"),
+            timers = listOf(tm("Down and up", 180))
+        ),
+        t(
+            id = "l5_pen_riding_to_finish", level = 5, cats = setOf(ANAL),
+            title = "He does the work",
+            base = "{R} rides {G} and sets the pace himself, and {G} keeps his hands off him and lets him do all of it.",
+            explicit = "{R} rides {G+} cock at whatever pace he wants, and {G} keeps his hands off and lets him do all the work.",
+            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
+            acts = setOf("topping"), anal = true,
+            equip = setOf(Equipment.LUBRICANT),
+            erection = PartyRef.GIVER,
+            timers = listOf(tm("His pace", 240))
+        ),
+        t(
+            id = "l5_toy_then_cock", level = 5, cats = setOf(TOYS, ANAL),
+            title = "Toy first",
+            base = "{G} works a toy into {R} until the first timer ends, pulls it out and [v_fuck] him for the second.",
+            explicit = "{G} [v_use_toy] a toy in {R} for the first timer, pulls it out and [v_fuck] him for the second, with no gap between.",
+            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
+            acts = setOf("anal_toys", "topping"), anal = true,
+            equip = setOf(Equipment.LUBRICANT), toy = true,
+            erection = PartyRef.GIVER,
+            timers = listOf(tm("Toy", 120), tm("Him", 180))
+        ),
+        t(
+            id = "l5_power_kneel_and_wait", level = 5, cats = setOf(POWER, LANGUAGE),
+            title = "Kneeling until told",
+            base = "{G} kneels in front of {R} and stays there, hands behind his own back, and does not move or speak until the timer ends.",
+            explicit = "{G} goes down on his knees in front of {R}, hands locked behind his own back, and does not move or speak until the timer is done.",
+            benefit = RECEIVER, type = BenefitType.SERVICE_RECIPIENT,
+            acts = setOf("kneeling", "commands", "ownership_language"),
+            timers = listOf(tm("Kneeling", 180))
+        ),
+        t(
+            id = "l5_rough_handled_into_place", level = 5, cats = setOf(ROUGH, POWER),
+            title = "Moved where he is wanted",
+            base = "{G} [v_handle] {R} onto his front, then onto his side, then onto his back, holding each until its timer ends before moving him again.",
+            explicit = "{G} [v_handle] {R} onto his front, then his side, then his back, holding each until its timer is done before moving him.",
+            benefit = RECEIVER, type = BenefitType.HANDLING_RECIPIENT,
+            acts = setOf("rough_handling", "pinning"),
+            timers = listOf(tm("First", 60), tm("Second", 60), tm("Third", 60))
         )
     )
 }

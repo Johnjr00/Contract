@@ -24,7 +24,7 @@ import com.thecontract.core.model.Term
 
 /**
  * Act IV — Authority. Bondage, impact, service protocols, ownership and control.
- * 40 terms (specification floor for level 4: 40).
+ * 48 terms (specification floor for level 4: 40).
  */
 internal object TermsLevel4 {
 
@@ -540,6 +540,85 @@ internal object TermsLevel4 {
             equip = setOf(Equipment.ROPE),
             blocks = setOf(Boundary.NO_ROLEPLAY, Boundary.NO_RESTRAINTS),
             timers = listOf(tm("The capture", 60), tm("Tied and stroked", 180))
+        ),
+
+        // ---------------------------------------------------------------- added (8)
+        t(
+            id = "l4_bond_hands_and_oral", level = 4, cats = setOf(BONDAGE, ORAL),
+            title = "Tied and used",
+            base = "{G} binds {R+} hands, then [v_suck] him until the timer ends, keeping him where he is with a hand on his hip.",
+            explicit = "{G} ties {R+} hands, then [v_suck] his cock and holds his hip down so he stays where he is put.",
+            benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
+            acts = setOf("restraint", "oral"),
+            equip = setOf(Equipment.CUFFS),
+            timers = listOf(tm("Tied", 150))
+        ),
+        t(
+            id = "l4_impact_counted_and_soothed", level = 4, cats = setOf(IMPACT),
+            title = "Struck and soothed",
+            base = "{G} [v_spank] {R} ten times, then rubs the same ground with an open hand for a slow count of twenty, and repeats that three times over.",
+            explicit = "{G} [v_spank] {R} ten times, then works the heat out of the same ground with an open palm, three rounds of it.",
+            benefit = RECEIVER, type = BenefitType.IMPACT_RECIPIENT,
+            acts = setOf("spanking"),
+            timers = listOf(tm("First round", 60), tm("Second round", 60), tm("Third round", 60))
+        ),
+        t(
+            id = "l4_power_blindfold_and_wait", level = 4, cats = setOf(POWER, SENSORY),
+            title = "Blind and waiting",
+            base = "{G} blindfolds {R} and touches him only now and then, leaving long gaps so {R} never knows when the next one is coming.",
+            explicit = "{G} blindfolds {R} and touches him at random, leaving long gaps between, so he never knows where or when the next one lands.",
+            benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
+            acts = setOf("blindfold", "sexual_service"),
+            equip = setOf(Equipment.BLINDFOLD),
+            timers = listOf(tm("Waiting", 180))
+        ),
+        t(
+            id = "l4_pen_held_down", level = 4, cats = setOf(ANAL, POWER),
+            title = "Held where he is",
+            base = "{G} [v_pin] {R} down by the shoulders and [v_fuck] him from behind, keeping him flat for the whole of it.",
+            explicit = "{G} [v_pin] {R} flat by the shoulders and [v_fuck] him from behind, and he stays down for the full timer.",
+            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
+            acts = setOf("topping", "pinning"), anal = true,
+            equip = setOf(Equipment.LUBRICANT),
+            erection = PartyRef.GIVER,
+            timers = listOf(tm("Held down", 180))
+        ),
+        t(
+            id = "l4_orgasm_permission_only", level = 4, cats = setOf(ORGASM_CONTROL, POWER),
+            title = "Only when told",
+            base = "{G} works {R} to the edge and back as often as he likes, and {R} does not finish until he is told he may.",
+            explicit = "{G} takes {R} to the edge and back as often as he wants, and {R} does not come until he is given permission.",
+            benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
+            acts = setOf("climax_permission", "edging", "permission_control"),
+            timers = listOf(tm("At his say-so", 240))
+        ),
+        t(
+            id = "l4_rim_hard_and_held", level = 4, cats = setOf(RIMMING, POWER),
+            title = "Held open",
+            base = "{G} holds {R} open with both hands and [v_rim_hard] him, and {R} keeps his position until the timer ends.",
+            explicit = "{G} holds {R} open with both hands and [v_rim_hard] him, and {R} holds the position for the full timer.",
+            benefit = RECEIVER, type = BenefitType.RIMMING_RECIPIENT,
+            acts = setOf("rimming", "commands"),
+            timers = listOf(tm("Held open", 150))
+        ),
+        t(
+            id = "l4_toy_two_at_once", level = 4, cats = setOf(TOYS),
+            title = "Two at once",
+            base = "{G} works a toy into {R} and holds a vibrator against him at the same time, keeping both going until the timer ends.",
+            explicit = "{G} [v_use_toy] a toy in {R} and holds a vibrator on his cock at the same time, both going for the full timer.",
+            benefit = RECEIVER, type = BenefitType.TOY_RECIPIENT,
+            acts = setOf("anal_toys", "vibration"), anal = true,
+            equip = setOf(Equipment.VIBRATOR, Equipment.LUBRICANT), toy = true,
+            timers = listOf(tm("Both", 180))
+        ),
+        t(
+            id = "l4_lang_told_what_he_is", level = 4, cats = setOf(LANGUAGE, POWER),
+            title = "Told what he is",
+            base = "{G} [v_talk_dirty] to {R} the whole time he works him, and {R} answers every time he is asked something.",
+            explicit = "{G} [v_talk_dirty] to {R} throughout and makes him answer, out loud, every time he is asked something.",
+            benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
+            acts = setOf("dirty_talk", "sexual_service"),
+            timers = listOf(tm("Talking", 150))
         )
     )
 }

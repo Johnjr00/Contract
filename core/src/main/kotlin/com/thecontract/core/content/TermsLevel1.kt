@@ -16,7 +16,7 @@ import com.thecontract.core.model.Term
 
 /**
  * Act I — Chemistry. Massage, kissing, ear play and body worship.
- * 42 terms (specification floor for level 1: 42).
+ * 50 terms (specification floor for level 1: 42).
  */
 internal object TermsLevel1 {
 
@@ -447,6 +447,80 @@ internal object TermsLevel1 {
             gPrefs = setOf("watching_porn"), rPrefs = setOf("watching_porn"),
             equip = setOf(Equipment.PORN),
             timers = listOf(tm("Watching and kissing", 180))
+        ),
+
+        // ---------------------------------------------------------------- added (8)
+        t(
+            id = "l1_massage_seated_shoulders", level = 1, cats = setOf(MASSAGE),
+            title = "Sat between his knees",
+            base = "{R} sits on the floor between {G+} knees. {G} [v_massage] {R+} shoulders [adv_pressure_firm], working out from the base of the neck to the point of each shoulder and back again.",
+            explicit = "{R} sits on the floor between {G+} knees and stays there. {G} [v_knead] his shoulders [adv_pressure_deep], base of the neck out to each shoulder and back, for the full timer.",
+            benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
+            acts = setOf("massage_neck_shoulders"),
+            timers = listOf(tm("Shoulders", 150))
+        ),
+        t(
+            id = "l1_massage_hands_fingers", level = 1, cats = setOf(MASSAGE),
+            title = "One hand at a time",
+            base = "{G} takes one of {R+} hands in both of his and [v_massage] the palm [adv_pressure_firm], then every finger from the base to the tip, before starting on the other.",
+            explicit = "{G} takes one of {R+} hands in both of his and [v_knead] the palm [adv_pressure_firm], then works every finger from base to tip, then does the other hand.",
+            benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
+            acts = setOf("massage_arms_hands"),
+            timers = listOf(tm("Left hand", 60), tm("Right hand", 60))
+        ),
+        t(
+            id = "l1_kiss_jaw_and_throat", level = 1, cats = setOf(KISSING),
+            title = "Jaw to collarbone",
+            base = "{G} kisses {R+} jaw and throat [adv_kiss], moving from just under the ear down to the collarbone and back up again.",
+            explicit = "{G} works {R+} jaw and throat with his mouth [adv_kiss_deep], ear down to the collarbone and back up, and does not stop until the timer does.",
+            benefit = RECEIVER, type = BenefitType.KISS_RECIPIENT,
+            acts = setOf("neck_kissing"),
+            timers = listOf(tm("Jaw and throat", 120))
+        ),
+        t(
+            id = "l1_kiss_hands_on_face", level = 1, cats = setOf(KISSING),
+            title = "Hands on his face",
+            base = "{G} and {R} make out [adv_kiss], and neither of them moves his hands from the other's face or hair for the whole of it.",
+            explicit = "{G} and {R} make out deeply, tongues and all, and keep their hands on each other's face and hair, nowhere else, for the full timer.",
+            benefit = MUTUAL, type = BenefitType.MUTUAL, mutual = true,
+            acts = setOf("long_making_out", "tongue_kissing"),
+            timers = listOf(tm("Making out", 180))
+        ),
+        t(
+            id = "l1_ear_breath_and_tongue", level = 1, cats = setOf(EAR_PLAY),
+            title = "Breath and tongue",
+            base = "{G} works {R+} ear with his tongue and with his breath, alternating between the two, one hand keeping {R+} head still.",
+            explicit = "{G} [v_tongue] {R+} ear and breathes into it in turn, one hand holding his head where it is, for the full timer.",
+            benefit = RECEIVER, type = BenefitType.EAR_PLAY_RECIPIENT,
+            acts = setOf("ear_play"),
+            timers = listOf(tm("Left ear", 60), tm("Right ear", 60))
+        ),
+        t(
+            id = "l1_worship_back_and_spine", level = 1, cats = setOf(BODY_WORSHIP),
+            title = "The length of his back",
+            base = "{R} lies face down. {G} works his mouth and hands up {R+} back, starting at the base of the spine and finishing at the back of the neck.",
+            explicit = "{R} goes face down and stays there. {G} [v_worship] his back with hands and mouth, base of the spine up to the neck, for the full timer.",
+            benefit = RECEIVER, type = BenefitType.SERVICE_RECIPIENT,
+            acts = setOf("body_worship"),
+            timers = listOf(tm("Base to shoulders", 90), tm("Shoulders to neck", 60))
+        ),
+        t(
+            id = "l1_sensory_warm_and_cold", level = 1, cats = setOf(SENSORY),
+            title = "Warm hands, cold hands",
+            base = "{G} runs both hands over {R+} chest and stomach, then cools one hand and goes over the same ground again so {R} feels the difference.",
+            explicit = "{G} runs both hands over {R+} chest and stomach, then cools one hand and covers the same ground again, slowly, so he feels every bit of the difference.",
+            benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
+            acts = setOf("cold_sensation"),
+            timers = listOf(tm("Warm", 60), tm("Cold", 90))
+        ),
+        t(
+            id = "l1_worship_shoulders_and_arms", level = 1, cats = setOf(BODY_WORSHIP),
+            title = "Arms and shoulders",
+            base = "{G} works his mouth and hands over {R+} shoulders and arms, taking one arm at a time from the shoulder down to the wrist.",
+            explicit = "{G} [v_worship] {R+} shoulders and arms with his mouth and hands, one arm at a time, shoulder down to the wrist, for the full timer.",
+            benefit = RECEIVER, type = BenefitType.SERVICE_RECIPIENT,
+            acts = setOf("body_worship"),
+            timers = listOf(tm("Left arm", 75), tm("Right arm", 75))
         )
     )
 }
