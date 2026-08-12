@@ -60,35 +60,43 @@ class NarrationPlayer(private val context: Context) {
         const val THREADS = 4
 
         /**
-         * Flow-matching sampling steps, down from the library's default of five.
+         * Flow-matching sampling steps.
          *
-         * The vector estimator is 75 MB of the model and is run once per step, so this is the
-         * single biggest term in how long a passage takes: three steps is two fifths less work
-         * than five for the part that dominates. Supertonic is trained to sample in few steps and
-         * holds up well here, but it is a quality dial, not a free win — raise it back towards
-         * five if the voice sounds thin or unsteady, and the wait grows in proportion.
+         * Back to the library's default of five. It was cut to three for speed, and the voice came
+         * back unsteady — a flow-matching model asked for too few steps wanders in pitch and level
+         * within a phrase. The time that costs is bought back by the pre-roll below rather than by
+         * sampling more coarsely.
          */
-        const val SAMPLING_STEPS = 3
+        const val SAMPLING_STEPS = 5
+
+
 
         /**
-         * How much of a passage to generate before the rest of it.
+         * How much audio to have in hand before letting the track play.
          *
-         * Seven in ten instructions in the catalogue are a single sentence, and the median first
-         * sentence is 118 characters — about eight and a half seconds of speech, all of which has
-         * to be generated before any of it can be heard. Cutting an opening clause off the front
-         * and generating that on its own gets the television talking while the remainder is still
-         * being worked out, which is most of what the wait actually was.
+         * Playback used to start on an empty buffer, so the track drained faster than the
+         * generator could fill it and spent the whole passage underrunning — which is not heard as
+         * silence but as the level pumping and the pitch wavering. On this hardware speech is
+         * generated at roughly the speed it is spoken, so there is no headroom to recover from a
+         * stall; the only fix is to be a second ahead before the first word is let out.
          */
-        const val LEAD_IN_CHARS = 70
+        const val PREROLL_SECONDS = 1
 
-        /** Below this a lead-in is not worth the seam it puts in the middle of a sentence. */
-        const val MIN_LEAD_IN_CHARS = 25
+        /**
+         * The track's own buffer, in seconds. A second of slack was not enough to ride out a
+         * garbage collection or the server answering a phone mid-sentence.
+         */
+        const val BUFFER_SECONDS = 6
+
         /** Trailing silence so the last word is not clipped by the track draining. */
         const val TAIL_SILENCE_SAMPLES = 4000
         /** Quiet period after a failed download before another is started. */
         const val RETRY_COOLDOWN_NANOS = 60_000_000_000L
         /** How long shutdown waits for a running generation before freeing the engine. */
         const val SHUTDOWN_JOIN_MS = 2000L
+
+        /** ENCODING_PCM_FLOAT. */
+        const val BYTES_PER_SAMPLE = 4
     }
 
     /**
@@ -329,7 +337,9 @@ class NarrationPlayer(private val context: Context) {
 
         ServerHolder.publishNarration { it.copy(speaking = true) }
         runCatching {
-            out.play()
+            // Deliberately not played yet: see PREROLL_SECONDS.
+            var playing = false
+            val preroll = sampleRate * PREROLL_SECONDS
             // Nothing may be thrown out of this callback: it is invoked from C++ across JNI,
             // where an exception unwinding out of it is not caught, it is undefined. Any failure
             // becomes a 0 instead, which is the documented way to ask the generator to stop.
@@ -340,6 +350,10 @@ class NarrationPlayer(private val context: Context) {
                     } else {
                         samplesProduced += chunk.size
                         write(out, chunk, mine)
+                        if (!playing && samplesProduced >= preroll) {
+                            out.play()
+                            playing = true
+                        }
                         1
                     }
                 }.getOrElse {
@@ -347,19 +361,25 @@ class NarrationPlayer(private val context: Context) {
                     0
                 }
             }
-            // Generated a segment at a time rather than all at once, so the first words are
-            // ready after a short opening clause instead of after the whole passage.
-            for (segment in leadInSegments(text)) {
-                if (generation.get() != mine) break
-                engine.generateWithConfigAndCallback(
-                    text = segment,
-                    config = GenerationConfig(
-                        sid = SPEAKER_ID,
-                        speed = 1.0f,
-                        numSteps = SAMPLING_STEPS
-                    ),
-                    callback = sink
-                )
+            // One call for the whole passage. The engine is configured for one sentence at a
+            // time, so it hands audio back sentence by sentence and each one plays while the
+            // next is generated — which is as early as speech can start on hardware that
+            // generates at about the speed it speaks.
+            //
+            // Splitting an opening clause off the front to start sooner does not work here, and
+            // the way it fails is worse than the wait: the clause plays out in a couple of
+            // seconds and the rest of the sentence needs eight or ten to generate, so the track
+            // runs dry at the seam and the voice stops mid-sentence at the comma.
+            engine.generateWithConfigAndCallback(
+                text = text,
+                config = GenerationConfig(sid = SPEAKER_ID, speed = 1.0f, numSteps = SAMPLING_STEPS),
+                callback = sink
+            )
+            // A passage shorter than the pre-roll never reached the threshold, so it is still
+            // sitting in the buffer unplayed.
+            if (!playing && generation.get() == mine) {
+                out.play()
+                playing = true
             }
             if (generation.get() == mine) {
                 // Without this the track stops the instant the last chunk is queued and eats
@@ -425,7 +445,7 @@ class NarrationPlayer(private val context: Context) {
                     .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
                     .build()
             )
-            .setBufferSizeInBytes(max(minBuffer, sampleRate * 4))
+            .setBufferSizeInBytes(max(minBuffer, sampleRate * BYTES_PER_SAMPLE * BUFFER_SECONDS))
             .setTransferMode(AudioTrack.MODE_STREAM)
             .setPerformanceMode(AudioTrack.PERFORMANCE_MODE_NONE)
             .build()
@@ -455,44 +475,3 @@ internal class ChunkSink(private val onChunk: (FloatArray) -> Int) : (FloatArray
     override fun invoke(p1: FloatArray): Int = onChunk(p1)
 }
 
-/**
- * Breaks a short opening clause off the front of a passage, leaving the rest whole.
- *
- * Generation cannot be heard until the segment it belongs to is finished, so the length of the
- * first segment *is* the wait before the television starts talking. Splitting only the front of
- * the passage keeps that wait to a couple of seconds while leaving the body of the sentence in one
- * piece, which is what the phrasing depends on — splitting throughout would start sooner still and
- * sound like a list being read out.
- *
- * A cut is only taken at a mark a speaker would pause on anyway, and only when it leaves enough on
- * either side to be worth it. A passage with no such mark near the front is left alone: a seam in
- * the middle of a clause is worse than waiting.
- */
-internal fun leadInSegments(
-    text: String,
-    leadIn: Int = NarrationPlayer.LEAD_IN_CHARS,
-    minLeadIn: Int = NarrationPlayer.MIN_LEAD_IN_CHARS
-): List<String> {
-    val trimmed = text.trim()
-    if (trimmed.length <= leadIn) return listOf(trimmed)
-
-    val window = trimmed.substring(0, leadIn)
-    val sentenceEnd = window.lastIndexOfAny(charArrayOf('.', '!', '?'))
-    val clauseMark = maxOf(
-        window.lastIndexOfAny(charArrayOf(';', ':')),
-        window.lastIndexOfAny(charArrayOf(','))
-    )
-    // A full stop is a whole sentence however short it is, so no minimum applies to it — "He
-    // stands." is a better opening than the sixty characters of the clause that follows it, and
-    // it gets the voice going in under a second. The minimum is there to stop a comma near the
-    // very start leaving a fragment like "Yes," hanging on its own.
-    val cut = when {
-        sentenceEnd >= 0 -> sentenceEnd
-        clauseMark >= minLeadIn -> clauseMark
-        else -> return listOf(trimmed)
-    }
-
-    val head = trimmed.substring(0, cut + 1).trim()
-    val tail = trimmed.substring(cut + 1).trim()
-    return if (head.isEmpty() || tail.isEmpty()) listOf(trimmed) else listOf(head, tail)
-}
