@@ -64,7 +64,18 @@ data class PrivateProfile(
     val maybeConditions: Map<String, MaybeCondition> = emptyMap(),
     val complete: Boolean = false
 ) {
-    fun answer(prefId: String): Answer = answers[prefId] ?: Answer.MAYBE
+    /**
+     * A preference the profile does not ask about is a Yes, whatever happens to be stored.
+     *
+     * Stored answers are ignored for those rather than merely defaulted, so a profile saved before
+     * a question was retired does not keep a stale No alive and quietly filter content the game no
+     * longer offers any way to decline. An unrecognised id is still a Maybe: that is a question
+     * this build does not know about, not one it has decided for the player.
+     */
+    fun answer(prefId: String): Answer = when {
+        PreferenceLibrary.byId[prefId]?.asked == false -> Answer.YES
+        else -> answers[prefId] ?: Answer.MAYBE
+    }
 }
 
 @Serializable

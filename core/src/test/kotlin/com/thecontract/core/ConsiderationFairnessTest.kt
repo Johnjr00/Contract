@@ -4,6 +4,7 @@ import com.thecontract.core.content.ContentLibrary
 import com.thecontract.core.engine.ConsiderationSelector
 import com.thecontract.core.harness.GameDriver
 import com.thecontract.core.harness.Harness
+import com.thecontract.core.harness.Plan
 import com.thecontract.core.harness.Setups
 import com.thecontract.core.model.Answer
 import com.thecontract.core.model.GamePhase
@@ -20,11 +21,11 @@ import kotlin.test.assertTrue
  */
 class ConsiderationFairnessTest {
 
-    private fun playAndInspect(check: (Harness, GameDriver) -> Unit) {
+    private fun playAndInspect(plan: Plan = Plan(), check: (Harness, GameDriver) -> Unit) {
         val h = Harness().startGame()
         val p1 = h.newPhone("one").join()
         val p2 = h.newPhone("two").join()
-        val driver = GameDriver(h, p1, p2)
+        val driver = GameDriver(h, p1, p2, plan)
         driver.submitSetup(Setups.broad(SessionLength.QUICK))
         driver.fillProfile(Slot.PLAYER_1, Setups.allAnswers(Answer.YES))
         driver.fillProfile(Slot.PLAYER_2, Setups.allAnswers(Answer.YES))
@@ -93,26 +94,39 @@ class ConsiderationFairnessTest {
     fun `every consideration list is a full list`() {
         var lists = 0
         var balancedLists = 0
-        playAndInspect { h, _ ->
-            val s = h.state()
-            if (s.phase != GamePhase.CONSIDERATION_PRIVATE_SELECTION &&
-                s.phase != GamePhase.CLOSING_TERM_CONSIDERATION
-            ) {
-                return@playAndInspect
+        // Several negotiations rather than one. Whether a balanced term comes up at all is a draw
+        // from the weighted pool, and a single game is one sample of it — the reciprocal-offer
+        // path went unchecked whenever that draw happened not to land, which is a property of the
+        // pool on the day rather than of the code under test.
+        val plans = listOf(
+            Plan(),
+            Plan(rejectAt = setOf(1, 3)),
+            Plan(counterAt = setOf(2)),
+            Plan(bundleAt = setOf(2)),
+            Plan(rejectAt = setOf(2), counterAt = setOf(4))
+        )
+        for (plan in plans) {
+            playAndInspect(plan) { h, _ ->
+                val s = h.state()
+                if (s.phase != GamePhase.CONSIDERATION_PRIVATE_SELECTION &&
+                    s.phase != GamePhase.CLOSING_TERM_CONSIDERATION
+                ) {
+                    return@playAndInspect
+                }
+                val current = s.negotiation.current ?: return@playAndInspect
+                if (current.considerationOptions.isEmpty()) return@playAndInspect
+                val expected = if (current.term.climax) 12 else 10
+                assertEquals(
+                    expected, current.considerationOptions.size,
+                    "${current.term.termId} offered ${current.considerationOptions.size} options"
+                )
+                assertEquals(
+                    expected, current.considerationOptions.map { it.actionId }.distinct().size,
+                    "${current.term.termId} offered the same action twice"
+                )
+                lists++
+                if (current.beneficiary == null) balancedLists++
             }
-            val current = s.negotiation.current ?: return@playAndInspect
-            if (current.considerationOptions.isEmpty()) return@playAndInspect
-            val expected = if (current.term.climax) 12 else 10
-            assertEquals(
-                expected, current.considerationOptions.size,
-                "${current.term.termId} offered ${current.considerationOptions.size} options"
-            )
-            assertEquals(
-                expected, current.considerationOptions.map { it.actionId }.distinct().size,
-                "${current.term.termId} offered the same action twice"
-            )
-            lists++
-            if (current.beneficiary == null) balancedLists++
         }
         assertTrue(lists >= 5, "too few consideration lists to judge: $lists")
         assertTrue(balancedLists >= 1, "no balanced term came up, so reciprocal offers went unchecked")
