@@ -22,6 +22,24 @@
 -keep class com.google.zxing.** { *; }
 -dontwarn com.google.zxing.**
 
+# sherpa-onnx reads these classes from C++, by name, and nothing in Kotlin references the fields
+# it looks up — so R8 sees them as free to rename and does.
+#
+# `newFromFile` walks the config object with GetFieldID/GetObjectField. A renamed field makes that
+# lookup return null, and using a null field id is not a Java exception a caller could catch: the
+# runtime aborts the whole process with SIGABRT. On a release build that is a crash a few seconds
+# after launch, as soon as the voice is loaded, with no stack trace in the app's own code — which
+# is what made it look for a long time like a fault in the narration thread rather than in the
+# build. Debug builds never showed it because minification is off there.
+#
+# The whole package is kept rather than the fields alone: every config class is walked the same
+# way, `GeneratedAudio` is constructed from native code, and the next model type added would
+# otherwise reintroduce this silently.
+-keep class com.k2fsa.sherpa.onnx.** { *; }
+-keepclasseswithmembernames,includedescriptorclasses class com.k2fsa.sherpa.onnx.** {
+    native <methods>;
+}
+
 # Room generated implementations.
 -keep class * extends androidx.room.RoomDatabase { <init>(); }
 -dontwarn androidx.room.paging.**
