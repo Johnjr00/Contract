@@ -607,6 +607,9 @@ private fun formatClock(remainingMs: Long): String {
  * screen of the final scene, where nothing is being proposed to anybody.
  */
 private fun termLabel(view: ClientView): String = when {
+    // A trade is performed as two steps. Saying so is what keeps the second from reading as a
+    // term nobody remembers agreeing to.
+    view.execution?.partOfTrade == true -> "Term in the scene · one half of a trade"
     view.execution != null -> "Term in the scene"
     view.phase == GamePhase.TERM_SIGNED -> "Signed term"
     view.phase in EARNING_PHASES -> "The term being earned"

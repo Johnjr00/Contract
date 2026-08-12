@@ -672,31 +672,36 @@ object ViewBuilder {
     }
 
     private fun executionView(s: GameState, slot: Slot?, base: ClientView, nowMs: Long): ClientView {
-        val idx = s.finale.executionOrder.getOrNull(s.finale.stepIndex)
-        val signed = idx?.let { s.negotiation.signed.getOrNull(it) }
+        val steps = FinaleOrdering.resolve(s)
+        val step = steps.getOrNull(s.finale.stepIndex)
+        val signed = step?.let { s.negotiation.signed.getOrNull(it.signedIndex) }
+        // The half this step performs, which for the second term of a trade is not the one the
+        // contract item leads with.
+        val rendered = step?.let { signed?.half(it.bundled) }
         // The heading and body already carry the title and the instruction, so the card beneath
         // them is here for the equipment, conditions, amendments and timers. Repeating the
         // instruction printed the same paragraph twice on the same screen, and the benefit
         // explanation is a negotiating aid — by now the term is signed and being performed, so
         // "he therefore earns his signature" is describing something that already happened.
-        val card = signed?.let { termCard(s, it.term).copy(instruction = "", benefitExplanation = "") }
+        val card = rendered?.let { termCard(s, it).copy(instruction = "", benefitExplanation = "") }
         val started = s.finale.stepStarted
         val marked = s.finale.stepIndex in s.finale.stepsCompleted
-        val lastStep = s.finale.stepIndex >= s.finale.executionOrder.lastIndex
+        val lastStep = s.finale.stepIndex >= steps.lastIndex
         val mayControl = TimerEngine.mayControl(s.timers, slot)
         val mayComplete = TimerEngine.mayComplete(s.timers, slot)
         return base.copy(
-            heading = signed?.term?.title ?: "Final scene",
-            body = signed?.term?.instruction ?: "",
+            heading = rendered?.title ?: "Final scene",
+            body = rendered?.instruction ?: "",
             term = card,
             execution = ExecutionView(
                 stepIndex = s.finale.stepIndex + 1,
-                stepCount = s.finale.executionOrder.size,
+                stepCount = steps.size,
                 started = started,
                 canPrevious = s.finale.stepIndex > 0,
                 canNext = s.finale.stepIndex in s.finale.stepsCompleted ||
-                    s.finale.stepIndex < s.finale.executionOrder.size,
+                    s.finale.stepIndex < steps.size,
                 term = card,
+                partOfTrade = signed?.bundledTerm != null,
                 stopWord = s.setup.stopWord
             ),
             choices = buildList {

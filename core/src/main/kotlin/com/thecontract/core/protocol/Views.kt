@@ -156,6 +156,11 @@ data class ExecutionView(
     val canPrevious: Boolean,
     val canNext: Boolean,
     val term: TermCard?,
+    /**
+     * True when this step is one half of a trade. The two halves are separate acts performed one
+     * after the other, and saying so is what stops the second looking like a term nobody agreed to.
+     */
+    val partOfTrade: Boolean = false,
     val stopWord: String
 )
 

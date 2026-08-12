@@ -118,9 +118,10 @@ class Game1BroadProfileTest {
         assertTrue(driver.timerStarts.size > 20, "timers were barely used: ${driver.timerStarts.size}")
 
         // The two climax terms always execute last.
-        val order = final.finale.executionOrder
-        assertEquals(final.negotiation.signed.size, order.size)
-        val lastTwo = order.takeLast(2).map { final.negotiation.signed[it] }
+        val order = final.finale.executionSteps
+        // One step per term performed, so a trade contributes two.
+        assertEquals(final.negotiation.signed.sumOf { it.allTerms.size }, order.size)
+        val lastTwo = order.takeLast(2).map { final.negotiation.signed[it.signedIndex] }
         assertTrue(lastTwo.all { it.closingFor != null }, "climax terms are not last in the running order")
 
         // TV and phones agree on the authoritative version.
@@ -148,7 +149,7 @@ class Game1BroadProfileTest {
             val final = driver.run()
             assertEquals(GamePhase.COMPLETED, final.phase, "order $order did not complete")
             assertEquals(order, final.finale.chosenOrder)
-            val lastTwo = final.finale.executionOrder.takeLast(2).map { final.negotiation.signed[it] }
+            val lastTwo = final.finale.executionSteps.takeLast(2).map { final.negotiation.signed[it.signedIndex] }
             assertTrue(lastTwo.all { it.closingFor != null }, "order $order moved a climax term earlier")
             assertEquals(final.version, h.tvView().version)
         }
@@ -177,8 +178,9 @@ class Game1BroadProfileTest {
         val (_, driver) = playBroadGame(finale = FinaleFormat.UNINTERRUPTED)
         val final = driver.run()
         assertEquals(FinaleOrder.SMOOTH_ESCALATION, final.finale.chosenOrder)
-        val regular = final.finale.executionOrder
-            .map { final.negotiation.signed[it] }
+        val regular = final.finale.executionSteps
+            .filterNot { it.bundled }
+            .map { final.negotiation.signed[it.signedIndex] }
             .filter { it.closingFor == null }
             .map { it.term.level }
         assertEquals(regular.sorted(), regular, "smooth escalation must run gentlest first")

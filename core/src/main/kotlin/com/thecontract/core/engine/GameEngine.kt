@@ -918,34 +918,17 @@ class GameEngine {
      * amendment move to the end of the regular block, and the two climax terms are always
      * last — ordinary reordering can never move them earlier.
      */
-    private fun startExecution(s: GameState, order: FinaleOrder): GameState {
-        val signed = s.negotiation.signed
-        val regularIdx = signed.indices.filter { signed[it].closingFor == null }
-        val closingIdx = signed.indices.filter { signed[it].closingFor != null }
-
-        val (deferred, normal) = regularIdx.partition { signed[it].term.deferToEnd }
-        val orderedNormal = when (order) {
-            FinaleOrder.SIGNED_ORDER -> normal
-            FinaleOrder.SMOOTH_ESCALATION -> normal.sortedBy { signed[it].term.level }
-            FinaleOrder.DOMINANTS_CUT -> normal.shuffled(Random(s.sessionId.hashCode().toLong() * 31 + 7))
-        }
-        val orderedDeferred = deferred.sortedBy { signed[it].term.level }
-
-        // Section 37: with anal penetration in the contract, the top's climax term comes first.
-        val orderedClosing = closingIdx.sortedByDescending { signed[it].term.analPenetration }
-
-        return s.copy(
-            phase = GamePhase.FINAL_EXECUTION,
-            timers = TimerEngine.empty,
-            finale = s.finale.copy(
-                chosenOrder = order,
-                executionOrder = orderedNormal + orderedDeferred + orderedClosing,
-                stepIndex = 0,
-                stepsCompleted = emptySet(),
-                stepStarted = false
-            )
+    private fun startExecution(s: GameState, order: FinaleOrder): GameState = s.copy(
+        phase = GamePhase.FINAL_EXECUTION,
+        timers = TimerEngine.empty,
+        finale = s.finale.copy(
+            chosenOrder = order,
+            executionSteps = FinaleOrdering.build(s, order),
+            stepIndex = 0,
+            stepsCompleted = emptySet(),
+            stepStarted = false
         )
-    }
+    )
 
     private fun handleStartExecution(es: EngineState, now: Long): ApplyResult {
         val s = es.state
@@ -953,22 +936,25 @@ class GameEngine {
         return handleExecutionCommand(es, null, "begin", now)
     }
 
-    private fun currentExecutionTerm(s: GameState): SignedTerm? {
-        val idx = s.finale.executionOrder.getOrNull(s.finale.stepIndex) ?: return null
-        return s.negotiation.signed.getOrNull(idx)
+    /** The term performed at the current step — one half of a trade, or a whole ordinary term. */
+    private fun currentExecutionTerm(s: GameState): RenderedTerm? {
+        val step = FinaleOrdering.resolve(s).getOrNull(s.finale.stepIndex) ?: return null
+        return s.negotiation.signed.getOrNull(step.signedIndex)?.half(step.bundled)
     }
 
     private fun handleExecutionCommand(es: EngineState, slot: Slot?, command: String, now: Long): ApplyResult {
         val s = es.state
         if (s.phase != GamePhase.FINAL_EXECUTION) return reject(es, CODE_PHASE, "Not in final execution.")
-        val signedTerm = currentExecutionTerm(s) ?: return reject(es, CODE_INVALID, "No term at this step.")
-        val term = signedTerm.term
+        val term = currentExecutionTerm(s) ?: return reject(es, CODE_INVALID, "No term at this step.")
 
         return when (command) {
             "begin" -> {
+                // This term's own clocks, controller and completer. A trade's second half is
+                // frequently the other man's to run and the other man's to sign off, so taking
+                // any of these from the first half put the wrong person in charge of it.
                 val board = TimerEngine.board(
                     context = term.instruction,
-                    timers = term.timers + (signedTerm.bundledTerm?.timers ?: emptyList()),
+                    timers = term.timers,
                     controller = if (term.mutual) null else term.giver,
                     bothMayControl = term.mutual,
                     completer = if (term.mutual) null else term.receiver
@@ -991,7 +977,7 @@ class GameEngine {
             }
 
             "next" -> {
-                val last = s.finale.stepIndex >= s.finale.executionOrder.lastIndex
+                val last = s.finale.stepIndex >= FinaleOrdering.resolve(s).lastIndex
                 if (last) {
                     ok(es, s.copy(phase = GamePhase.COMPLETED, completedAtMs = now, timers = TimerEngine.empty))
                 } else {

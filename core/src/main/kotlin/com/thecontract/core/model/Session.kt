@@ -98,7 +98,30 @@ data class SignedTerm(
     val regularSlotsConsumed: Int get() = if (bundledTerm != null) 2 else 1
 
     val allTerms: List<RenderedTerm> get() = listOfNotNull(term, bundledTerm)
+
+    /** The half of this item a given execution step performs. */
+    fun half(bundled: Boolean): RenderedTerm? = if (bundled) bundledTerm else term
 }
+
+/**
+ * One thing performed in the final scene.
+ *
+ * A trade is signed as a single contract item holding two terms, and for everything up to the
+ * finale that is the right shape: it is approved once, paid for with one consideration and
+ * occupies two slots as a unit. Performing it is the one place where that shape is wrong. The two
+ * halves are separate acts with their own instructions and their own timers, and — because the
+ * binding that keeps the benefit alternating casts the owed man as giver in one and receiver in
+ * the other — frequently with the giver and receiver the other way round. Run as a single step
+ * they took the first term's instruction, the first term's controller and the first term's
+ * completer, so the second was performed silently, timed against the wrong clock and marked
+ * complete by the wrong man.
+ */
+@Serializable
+data class ExecutionStep(
+    val signedIndex: Int,
+    /** True for the second term of a trade. */
+    val bundled: Boolean = false
+)
 
 @Serializable
 data class CurrentProposal(
@@ -190,8 +213,16 @@ data class FinaleState(
     val orderVotes: Map<Slot, FinaleOrder> = emptyMap(),
     val revealedBallot: List<FinaleOrder> = emptyList(),
     val chosenOrder: FinaleOrder? = null,
-    /** Signed-term indices in the order they will be executed. Climax terms always last. */
-    val executionOrder: List<Int> = emptyList(),
+    /**
+     * What is performed, in order. Climax terms always last, and the two halves of a trade always
+     * next to each other, because they were agreed as one thing.
+     *
+     * Named apart from the `executionOrder` list of plain indices this replaced, so a session
+     * saved by an older build decodes rather than being thrown away: the old key is now unknown
+     * and skipped, this one falls back to its default, and [com.thecontract.core.engine.FinaleOrdering]
+     * rebuilds the list from the signed contract.
+     */
+    val executionSteps: List<ExecutionStep> = emptyList(),
     val stepIndex: Int = 0,
     val stepsCompleted: Set<Int> = emptySet(),
     val stepStarted: Boolean = false
