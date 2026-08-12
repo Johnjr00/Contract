@@ -27,7 +27,7 @@ internal object TermsLevel1 {
             id = "l1_massage_neck_shoulders", level = 1, cats = setOf(MASSAGE),
             title = "Neck and shoulders",
             base = "{R} lies face down. {G} [v_massage] {R+} neck and shoulders [adv_pressure_firm], thumbs either side of the spine, moving from the base of the skull out to the point of each shoulder.",
-            explicit = "{R} goes face down and stays there. {G} straddles his hips and [v_knead] his neck and shoulders [adv_pressure_firm], thumbs either side of the spine, from the base of the skull out to each shoulder, for the full timer.",
+            explicit = "{R} goes face down and stays there. {G} straddles his hips and [v_knead] his neck and shoulders, thumbs either side of the spine and never on it, working from the base of the skull out to each shoulder, hard across the shoulders and light on the neck itself, for the full timer.",
             benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
             acts = setOf("massage_neck_shoulders"),
             timers = listOf(tm("Neck", 60), tm("Left shoulder", 45), tm("Right shoulder", 45))
@@ -507,8 +507,8 @@ internal object TermsLevel1 {
         t(
             id = "l1_sensory_warm_and_cold", level = 1, cats = setOf(SENSORY),
             title = "Warm hands, cold hands",
-            base = "{G} runs both hands over {R+} chest and stomach, then cools one hand and goes over the same ground again so {R} feels the difference.",
-            explicit = "{G} runs both hands over {R+} chest and stomach, then cools one hand and covers the same ground again, slowly, so he feels every bit of the difference.",
+            base = "{G} runs both hands over {R+} chest and stomach, then holds one hand round a glass of iced water for a slow count of twenty and goes over the same ground again so {R} feels the difference.",
+            explicit = "{G} runs both hands over {R+} chest and stomach, then chills one hand round a glass of iced water and covers the same ground again, slowly, so he feels every bit of the difference.",
             benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
             acts = setOf("cold_sensation"),
             timers = listOf(tm("Warm", 60), tm("Cold", 90))

@@ -438,8 +438,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_oral_harder_intro", level = 2, cats = setOf(ORAL),
             title = "A harder pace",
-            base = "{R} fucks {G+} mouth faster than usual and {G} keeps his lips sealed around him for the full time without pulling off.",
-            explicit = "{R} fucks {G+} mouth hard and {G} keeps his lips sealed around him for the full time, without pulling off once.",
+            base = "{R} fucks {G+} mouth faster than usual and {G} keeps his lips sealed around him for the full time, breaking only for breath.",
+            explicit = "{R} fucks {G+} mouth hard and {G} keeps his lips sealed around him for the full time, breaking only for breath.",
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "harder_oral"),
             blocks = setOf(Boundary.NO_ROUGH_SEX),

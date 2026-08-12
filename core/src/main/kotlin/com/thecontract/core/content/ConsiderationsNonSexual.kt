@@ -47,7 +47,7 @@ internal object ConsiderationsNonSexual {
             id = "cn_mass_neck_shoulders", intensity = 1, family = F_MASSAGE, cats = setOf(MASSAGE),
             title = "Neck and shoulders",
             base = "{G} kneads {R+} neck and both shoulders [adv_pressure_firm], thumbs either side of the spine.",
-            explicit = "{G} [v_knead] {R+} neck and shoulders [adv_pressure_firm], thumbs either side of the spine, for the full timer.",
+            explicit = "{G} [v_knead] {R+} neck and shoulders, thumbs either side of the spine and never on it, hard across the shoulders and light on the neck itself, for the full timer.",
             acts = setOf("massage_neck_shoulders"),
             timers = listOf(tm("Neck", 60), tm("Left shoulder", 45), tm("Right shoulder", 45))
         ),

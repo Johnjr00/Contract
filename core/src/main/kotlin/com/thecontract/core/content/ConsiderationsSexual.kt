@@ -96,8 +96,8 @@ internal object ConsiderationsSexual {
         c(
             id = "cs_oral_hard_pace", intensity = 4, family = F_SEX, cats = setOf(ORAL, ROUGH),
             title = "Harder oral",
-            base = "{R} fucks {G+} mouth hard and {G} keeps his lips sealed around him through all of it.",
-            explicit = "{R} fucks {G+} mouth hard and {G} keeps his lips sealed around him for the whole timer, without pulling off once.",
+            base = "{R} fucks {G+} mouth hard and {G} keeps his lips sealed around him, coming up for air whenever he needs it and going straight back down.",
+            explicit = "{R} fucks {G+} mouth hard and {G} keeps his lips sealed around him for the whole timer, off him only to breathe.",
             acts = setOf("oral", "harder_oral"), blocks = setOf(Boundary.NO_ROUGH_SEX),
             timers = listOf(tm("Hard pace", 90))
         ),
@@ -696,7 +696,7 @@ internal object ConsiderationsSexual {
             id = "cs_rough_oral", intensity = 5, family = F_SEX, cats = setOf(ROUGH, ORAL),
             title = "Rough oral",
             base = "{R} keeps both hands in {G+} hair and pulls his mouth all the way down onto his cock in a steady rhythm, and {G} keeps his hands flat on the floor throughout.",
-            explicit = "{R} keeps both hands in {G+} hair and pulls his mouth all the way down onto his cock in a steady rhythm, and {G} keeps his hands flat on the floor and does not pull off.",
+            explicit = "{R} keeps both hands in {G+} hair and pulls his mouth all the way down onto his cock in a steady rhythm, and {G} keeps his hands flat on the floor and comes off him only to breathe.",
             acts = setOf("oral", "harder_oral", "rough_hair_pulling"), blocks = setOf(Boundary.NO_ROUGH_SEX),
             timers = listOf(tm("Steady rhythm", 120))
         ),
