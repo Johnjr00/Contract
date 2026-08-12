@@ -38,6 +38,10 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
     maxHeapSize = "2g"
+    // Lets the readout generators be pointed somewhere other than the module's build directory:
+    //   ./gradlew :core:test --tests '*QuickPlaythroughsReadout' -Dcontract.readout=docs/x.txt
+    providers.systemProperty("contract.readout").orNull?.let { systemProperty("contract.readout", it) }
+    systemProperty("contract.rootDir", rootDir.absolutePath)
     testLogging {
         events("passed", "failed", "skipped")
         showStandardStreams = false
