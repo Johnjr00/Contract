@@ -340,12 +340,26 @@ internal object TermsLevel4 {
         t(
             id = "l4_service_ask_to_speak", level = 4, cats = setOf(POWER, LANGUAGE),
             title = "Silence unless asked",
-            base = "{SUB} does not speak during this term unless {DOM} asks him a direct question.",
-            explicit = "{SUB} says nothing at all for this term unless {DOM} asks him a direct question, and then answers only the question he was asked.",
+            base = "{DOM} asks {SUB} a direct question five times during this term, and {SUB} says nothing at all except to answer the one he was asked.",
+            explicit = "{DOM} asks {SUB} a direct question five times, and {SUB} stays silent throughout except to answer the one he was asked, in as few words as it takes.",
             benefit = MUTUAL, type = BenefitType.MUTUAL,
             gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
             acts = setOf("commands", "permission_control"),
-            timers = listOf(tm("Silence", 180))
+            timers = listOf(tm("Silence", 180)),
+            says = listOf(
+                "Do you want me to keep going?",
+                "Where do you want my hands?",
+                "How does that feel?",
+                "Do you want it harder or softer?",
+                "Are you still comfortable?"
+            ),
+            saysExplicit = listOf(
+                "Do you want more of that?",
+                "Where do you want my hands next?",
+                "How does that feel?",
+                "Harder, or slower?",
+                "Are you still good?"
+            )
         ),
         t(
             id = "l4_service_worship_on_command", level = 4, cats = setOf(POWER, BODY_WORSHIP),
@@ -573,21 +587,10 @@ internal object TermsLevel4 {
             timers = listOf(tm("Waiting", 180))
         ),
         t(
-            id = "l4_pen_held_down", level = 4, cats = setOf(ANAL, POWER),
-            title = "Held where he is",
-            base = "{G} [v_pin] {R} down by the shoulders and [v_fuck] him from behind, keeping him flat for the whole of it.",
-            explicit = "{G} [v_pin] {R} flat by the shoulders and [v_fuck] him from behind, and he stays down for the full timer.",
-            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
-            acts = setOf("topping", "pinning"), anal = true,
-            equip = setOf(Equipment.LUBRICANT),
-            erection = PartyRef.GIVER,
-            timers = listOf(tm("Held down", 180))
-        ),
-        t(
             id = "l4_orgasm_permission_only", level = 4, cats = setOf(ORGASM_CONTROL, POWER),
             title = "Only when told",
-            base = "{G} works {R} to the edge and back as often as he likes, and {R} does not finish until he is told he may.",
-            explicit = "{G} takes {R} to the edge and back as often as he wants, and {R} does not come until he is given permission.",
+            base = "{G} works {R} to the edge and back four times, stopping the moment {R} says he is close, and {R} does not come.",
+            explicit = "{G} takes {R} to the edge and back four times, hand off him the second he says he is close, and {R} does not come.",
             benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
             acts = setOf("climax_permission", "edging", "permission_control"),
             timers = listOf(tm("At his say-so", 240))

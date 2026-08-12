@@ -515,7 +515,7 @@ object ContentValidator {
         val asksForSpeech = Regex(
             "\\[v_talk_dirty\\]|\\[v_praise\\]|\\[v_own\\]|\\[n_dirty_talk\\]|\\[tone_whisper\\]|" +
                 "\\bout loud\\b|\\btells him\\b|\\btalks\\b|\\bspelling out\\b|\\bdescrib\\w+|" +
-                "\\bnames (?:one thing|what|each place|a part)",
+                "\\bnames (?:one thing|what|each place|a part)|\\ba direct question\\b",
             RegexOption.IGNORE_CASE
         )
         val asksForPosition = Regex("\\bposition", RegexOption.IGNORE_CASE)

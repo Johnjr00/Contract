@@ -322,8 +322,8 @@ internal object TermsLevel2 {
         t(
             id = "l2_service_ask_permission", level = 2, cats = setOf(POWER),
             title = "Asking first",
-            base = "For the length of this term, {SUB} asks out loud before he touches {DOM} anywhere, and waits for an answer each time.",
-            explicit = "For the whole of this term {SUB} asks out loud before he puts a hand anywhere on {DOM}, and waits for an actual answer every single time.",
+            base = "{SUB} puts a hand on {DOM} five times — his chest, his stomach, the back of his neck, his thigh, then his cock — asking out loud before each one and waiting for an answer, and holds each for a slow count of ten before he moves on.",
+            explicit = "{SUB} puts a hand on {DOM} five times — chest, stomach, the back of his neck, thigh, then his cock — asks out loud before each one and waits for an actual answer, and holds each for a slow count of ten before moving on.",
             benefit = MUTUAL, type = BenefitType.MUTUAL,
             gCon = PartyConstraint.SUBMISSIVE, rCon = PartyConstraint.DOMINANT,
             acts = setOf("permission_control", "commands"),

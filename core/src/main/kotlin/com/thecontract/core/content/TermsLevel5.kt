@@ -207,138 +207,6 @@ internal object TermsLevel5 {
 
         // ------------------------------------------------------------ hard sex (10)
         t(
-            id = "l5_sex_hard_behind", level = 5, cats = setOf(ANAL, ROUGH),
-            title = "Hard from behind",
-            base = "{G} [v_fuck_hard] {R} from behind with #lubricant#, [adv_thrust_hard], holding him by the hips.",
-            explicit = "{G} [v_fuck_hard] {R} from behind with #lubricant# [adv_thrust_hard], both hands locked on his hips, and does not slow down once.",
-            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
-            acts = setOf("topping", "hard_sex"), anal = true,
-            gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
-            erection = PartyRef.GIVER,
-            equip = setOf(Equipment.LUBRICANT),
-            blocks = setOf(Boundary.NO_ROUGH_SEX),
-            timers = listOf(tm("Pushing in", 45), tm("Hard", 180))
-        ),
-        t(
-            id = "l5_sex_hard_on_back", level = 5, cats = setOf(ANAL, ROUGH),
-            title = "Hard on his back",
-            base = "{R} lies on his back with his legs up and {G} [v_fuck_hard] him [adv_thrust_hard], face to face.",
-            explicit = "{R} lies back with his legs up and {G} [v_fuck_hard] him [adv_thrust_hard], face to face, with his full weight on him.",
-            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
-            acts = setOf("topping", "hard_sex"), anal = true,
-            gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
-            erection = PartyRef.GIVER,
-            equip = setOf(Equipment.LUBRICANT),
-            blocks = setOf(Boundary.NO_ROUGH_SEX),
-            timers = listOf(tm("Pushing in", 45), tm("Hard", 180))
-        ),
-        t(
-            id = "l5_sex_hard_bent_over", level = 5, cats = setOf(ANAL, ROUGH),
-            title = "Bent over and taken",
-            base = "{R} bends over #sturdy_chair# and {G} [v_fuck_hard] him there [adv_thrust_hard] without letting him stand up.",
-            explicit = "{R} is bent over #sturdy_chair# and {G} [v_fuck_hard] him [adv_thrust_hard] and does not let him straighten up once.",
-            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
-            acts = setOf("topping", "hard_sex"), anal = true,
-            gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
-            erection = PartyRef.GIVER,
-            equip = setOf(Equipment.LUBRICANT, Equipment.STURDY_CHAIR),
-            blocks = setOf(Boundary.NO_ROUGH_SEX),
-            timers = listOf(tm("Pushing in", 45), tm("Hard", 180))
-        ),
-        t(
-            id = "l5_sex_hard_hair", level = 5, cats = setOf(ANAL, ROUGH),
-            title = "Hard, with a fist in his hair",
-            base = "{G} [v_fuck_hard] {R} from behind and [v_pull_hair] his hair to keep his head up throughout.",
-            explicit = "{G} [v_fuck_hard] {R} from behind with a fist in his hair, keeping his head up off the bed for the whole term.",
-            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
-            acts = setOf("topping", "hard_sex", "rough_hair_pulling"), anal = true,
-            gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
-            erection = PartyRef.GIVER,
-            equip = setOf(Equipment.LUBRICANT),
-            blocks = setOf(Boundary.NO_ROUGH_SEX),
-            timers = listOf(tm("Pushing in", 45), tm("Hard", 180))
-        ),
-        t(
-            id = "l5_sex_hard_spanked", level = 5, cats = setOf(ANAL, ROUGH, IMPACT),
-            title = "Fucked and spanked",
-            base = "{G} [v_fuck_hard] {R} from behind and [v_spank] him every time he slows down or pulls away.",
-            explicit = "{G} [v_fuck_hard] {R} from behind and [v_spank] his ass every single time he pulls away or slows down.",
-            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
-            acts = setOf("topping", "hard_sex", "spanking"), anal = true,
-            gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
-            erection = PartyRef.GIVER,
-            equip = setOf(Equipment.LUBRICANT),
-            blocks = setOf(Boundary.NO_ROUGH_SEX, Boundary.NO_PAIN),
-            timers = listOf(tm("Pushing in", 45), tm("Hard", 180))
-        ),
-        t(
-            id = "l5_sex_hard_restrained", level = 5, cats = setOf(ANAL, ROUGH, BONDAGE),
-            title = "Tied and fucked hard",
-            base = "{R} is restrained with #cuffs# and {G} [v_fuck_hard] him [adv_thrust_hard] for the full time.",
-            explicit = "{R} is locked in #cuffs# and {G} [v_fuck_hard] him [adv_thrust_hard] for the entire term while he cannot move.",
-            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
-            acts = setOf("topping", "hard_sex", "restraint"), anal = true,
-            gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
-            erection = PartyRef.GIVER,
-            equip = setOf(Equipment.LUBRICANT, Equipment.CUFFS),
-            blocks = setOf(Boundary.NO_ROUGH_SEX, Boundary.NO_RESTRAINTS),
-            timers = listOf(tm("Tied", 45), tm("Hard", 180))
-        ),
-        t(
-            id = "l5_sex_hard_clamped", level = 5, cats = setOf(ANAL, ROUGH, TOYS),
-            title = "Clamped and fucked",
-            base = "{R} wears #nipple_clamps# while {G} [v_fuck_hard] him, and they stay on for the whole term.",
-            explicit = "{R} keeps #nipple_clamps# on the entire time {G} [v_fuck_hard] him, and they do not come off before the timer ends.",
-            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
-            acts = setOf("topping", "hard_sex", "nipple_clamps"), anal = true,
-            gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
-            erection = PartyRef.GIVER,
-            equip = setOf(Equipment.LUBRICANT, Equipment.NIPPLE_CLAMPS),
-            blocks = setOf(Boundary.NO_ROUGH_SEX, Boundary.NO_PAIN, Boundary.NO_MARKS),
-            timers = listOf(tm("Clamps on", 45), tm("Hard", 180))
-        ),
-        t(
-            id = "l5_sex_escalating", level = 5, cats = setOf(ANAL, ROUGH),
-            title = "Slow to hardest, a minute each",
-            base = "{G} fucks {R} [adv_thrust_slow] to start with and moves up a level every minute, slow to steady to hard to hardest.",
-            explicit = "{G} fucks {R} [adv_thrust_slow] to start with and goes up a level every minute, slow to steady to hard to hardest, without ever dropping back down.",
-            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
-            acts = setOf("topping", "hard_sex"), anal = true,
-            gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
-            erection = PartyRef.GIVER,
-            equip = setOf(Equipment.LUBRICANT),
-            blocks = setOf(Boundary.NO_ROUGH_SEX),
-            timers = listOf(tm("Slow", 60), tm("Steady", 60), tm("Hard", 60), tm("Hardest", 60))
-        ),
-        t(
-            id = "l5_sex_pinned_fucked", level = 5, cats = setOf(ANAL, ROUGH),
-            title = "Pinned and fucked",
-            base = "{G} [v_pin] {R+} wrists above his head and [v_fuck_hard] him from there without letting go.",
-            explicit = "{G} [v_pin] {R+} wrists above his head with one hand and [v_fuck_hard] him without ever letting go.",
-            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
-            acts = setOf("topping", "hard_sex", "pinning"), anal = true,
-            gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
-            erection = PartyRef.GIVER,
-            equip = setOf(Equipment.LUBRICANT),
-            blocks = setOf(Boundary.NO_ROUGH_SEX),
-            timers = listOf(tm("Pinned", 45), tm("Hard", 180))
-        ),
-        t(
-            id = "l5_sex_hard_until_told", level = 5, cats = setOf(ANAL, ROUGH, POWER),
-            title = "Four minutes, no change of pace",
-            base = "{G} [v_fuck_hard] {R} for the full four minutes and does not change depth or pace once.",
-            explicit = "{G} [v_fuck_hard] {R} for the full four minutes and does not change depth or pace once, start to finish.",
-            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
-            acts = setOf("topping", "hard_sex"), anal = true,
-            gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
-            erection = PartyRef.GIVER,
-            equip = setOf(Equipment.LUBRICANT),
-            blocks = setOf(Boundary.NO_ROUGH_SEX),
-            timers = listOf(tm("Hard", 240))
-        ),
-
-        // -------------------------------------------------------------- fisting (4)
-        t(
             id = "l5_fist_build", level = 5, cats = setOf(ANAL),
             title = "Building up to his whole hand",
             base = "{G} uses plenty of #lubricant# and builds from two fingers to four inside {R}, adding one more every two minutes.",
@@ -384,50 +252,6 @@ internal object TermsLevel5 {
         ),
 
         // ------------------------------------------------------------ rough anal (6)
-        t(
-            id = "l5_ranal_pinned", level = 5, cats = setOf(ANAL, ROUGH),
-            title = "Pinned flat and taken hard",
-            base = "{G} pins {R+} shoulders down with #lubricant# and fucks him [adv_thrust_hard] for the whole term, keeping him flat throughout.",
-            explicit = "{G} pins {R+} shoulders down with #lubricant# and fucks him [adv_thrust_hard] for the whole term, keeping him flat, and {R} takes every stroke.",
-            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
-            acts = setOf("topping", "rough_anal", "pinning"), anal = true, erection = PartyRef.GIVER,
-            gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
-            equip = setOf(Equipment.LUBRICANT),
-            timers = listOf(tm("Pushing in", 45), tm("Pinned and fucked", 180))
-        ),
-        t(
-            id = "l5_ranal_hair", level = 5, cats = setOf(ANAL, ROUGH),
-            title = "Hard, held by the hair",
-            base = "{G} takes {R} from behind with #lubricant#, keeps a fist in his hair and fucks him [adv_thrust_hard] for the whole term.",
-            explicit = "{G} takes {R} from behind with #lubricant#, keeps a fist closed in his hair to hold his head up, and fucks him [adv_thrust_hard] the whole way through.",
-            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
-            acts = setOf("topping", "rough_anal", "rough_hair_pulling"), anal = true, erection = PartyRef.GIVER,
-            gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
-            equip = setOf(Equipment.LUBRICANT),
-            timers = listOf(tm("Pushing in", 45), tm("Hard", 180))
-        ),
-        t(
-            id = "l5_ranal_folded", level = 5, cats = setOf(ANAL, ROUGH),
-            title = "Folded up and fucked hard",
-            base = "{R} goes on his back with his knees pushed to his chest and {G} fucks him [adv_thrust_hard] with #lubricant# for the whole term.",
-            explicit = "{R} goes on his back with his knees pushed to his chest and {G} fucks him [adv_thrust_hard] with #lubricant#, holding him folded the whole term.",
-            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
-            acts = setOf("topping", "rough_anal"), anal = true, erection = PartyRef.GIVER,
-            gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
-            equip = setOf(Equipment.LUBRICANT),
-            timers = listOf(tm("Pushing in", 45), tm("Hard", 180))
-        ),
-        t(
-            id = "l5_ranal_standing", level = 5, cats = setOf(ANAL, ROUGH),
-            title = "Bent over and pounded",
-            base = "{R} bends over #sturdy_chair# and {G} fucks him [adv_thrust_hard] with #lubricant# for the whole term without stopping.",
-            explicit = "{R} bends over #sturdy_chair# and holds on while {G} fucks him [adv_thrust_hard] with #lubricant# for the whole term without stopping once.",
-            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
-            acts = setOf("topping", "rough_anal"), anal = true, erection = PartyRef.GIVER,
-            gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
-            equip = setOf(Equipment.LUBRICANT, Equipment.STURDY_CHAIR),
-            timers = listOf(tm("Pushing in", 45), tm("Hard", 180))
-        ),
         t(
             id = "l5_ranal_dildo_hard", level = 5, cats = setOf(ANAL, ROUGH, TOYS),
             title = "The dildo, hard and fast",
@@ -663,21 +487,10 @@ internal object TermsLevel5 {
 
         // ---------------------------------------------------------------- added (8)
         t(
-            id = "l5_pen_no_pause", level = 5, cats = setOf(ANAL, ROUGH),
-            title = "Without stopping",
-            base = "{G} [v_fuck_hard] {R} and does not stop or slow down once until the timer runs out.",
-            explicit = "{G} [v_fuck_hard] {R} and does not stop, slow or change anything until the timer is done.",
-            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
-            acts = setOf("topping", "hard_sex", "rough_anal"), anal = true,
-            equip = setOf(Equipment.LUBRICANT),
-            erection = PartyRef.GIVER,
-            timers = listOf(tm("Without stopping", 240))
-        ),
-        t(
             id = "l5_bond_tied_and_edged", level = 5, cats = setOf(BONDAGE, ORGASM_CONTROL),
             title = "Tied and kept there",
-            base = "{G} binds {R+} hands and takes him to the edge again and again, never letting him finish before the last timer ends.",
-            explicit = "{G} ties {R+} hands and [v_edge] over and over, and he does not come until the last timer has run out.",
+            base = "{G} binds {R+} hands and takes him to the edge once in each of the three timers, and he does not come.",
+            explicit = "{G} ties {R+} hands and [v_edge] once in each of the three timers, and he does not come.",
             benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
             acts = setOf("restraint", "edging", "denial"),
             equip = setOf(Equipment.ROPE),
@@ -700,28 +513,6 @@ internal object TermsLevel5 {
             benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
             acts = setOf("oral", "deep_oral", "harder_oral"),
             timers = listOf(tm("Down and up", 180))
-        ),
-        t(
-            id = "l5_pen_riding_to_finish", level = 5, cats = setOf(ANAL),
-            title = "He does the work",
-            base = "{R} rides {G} and sets the pace himself, and {G} keeps his hands off him and lets him do all of it.",
-            explicit = "{R} rides {G+} cock at whatever pace he wants, and {G} keeps his hands off and lets him do all the work.",
-            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
-            acts = setOf("topping"), anal = true,
-            equip = setOf(Equipment.LUBRICANT),
-            erection = PartyRef.GIVER,
-            timers = listOf(tm("His pace", 240))
-        ),
-        t(
-            id = "l5_toy_then_cock", level = 5, cats = setOf(TOYS, ANAL),
-            title = "Toy first",
-            base = "{G} works a toy into {R} until the first timer ends, pulls it out and [v_fuck] him for the second.",
-            explicit = "{G} [v_use_toy] a toy in {R} for the first timer, pulls it out and [v_fuck] him for the second, with no gap between.",
-            benefit = RECEIVER, type = BenefitType.PENETRATION_RECIPIENT,
-            acts = setOf("anal_toys", "topping"), anal = true,
-            equip = setOf(Equipment.LUBRICANT), toy = true,
-            erection = PartyRef.GIVER,
-            timers = listOf(tm("Toy", 120), tm("Him", 180))
         ),
         t(
             id = "l5_power_kneel_and_wait", level = 5, cats = setOf(POWER, LANGUAGE),
