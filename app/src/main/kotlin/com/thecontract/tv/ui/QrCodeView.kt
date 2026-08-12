@@ -37,7 +37,10 @@ fun QrCodeView(matrix: List<String>, size: Dp = 320.dp, modifier: Modifier = Mod
             val cellHeight = this.size.height / rows
             for (y in 0 until rows) {
                 val row = matrix[y]
-                for (x in 0 until columns) {
+                // Bounded by this row rather than by the first one. A ragged matrix is not
+                // supposed to happen, but reading past the end of a string here throws on the
+                // main thread during composition, where nothing can catch it.
+                for (x in 0 until minOf(columns, row.length)) {
                     if (row[x] == '1') {
                         drawRect(
                             color = Color.Black,

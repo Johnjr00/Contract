@@ -2,6 +2,7 @@ package com.thecontract.core.protocol
 
 import com.thecontract.core.model.GamePhase
 import com.thecontract.core.model.Slot
+import com.thecontract.core.model.Suggestions
 import kotlinx.serialization.Serializable
 
 /**
@@ -58,6 +59,8 @@ data class TermCard(
     val conditions: List<String> = emptyList(),
     val amendments: List<String> = emptyList(),
     val timers: List<TimerView> = emptyList(),
+    /** Labelled suggestion lists, shown under the instruction as suggestions rather than orders. */
+    val suggestions: List<Suggestions> = emptyList(),
     val climax: Boolean = false,
     val mutual: Boolean = false
 )
@@ -71,7 +74,9 @@ data class ConsiderationCard(
     val recipientName: String,
     val mutual: Boolean,
     val equipment: List<String> = emptyList(),
-    val timers: List<TimerView> = emptyList()
+    val timers: List<TimerView> = emptyList(),
+    /** Labelled suggestion lists, shown under the instruction as suggestions rather than orders. */
+    val suggestions: List<Suggestions> = emptyList()
 )
 
 @Serializable
@@ -107,6 +112,7 @@ data class SetupForm(
     val explicitness: String,
     val finaleFormat: String,
     val stopWord: String,
+    val narrationEnabled: Boolean,
     val defaultMaybeCondition: String,
     val boundaries: List<String>,
     val equipment: List<String>,
@@ -129,7 +135,8 @@ data class SignedTermCard(
     val considerationInstruction: String?,
     val signedBy: List<String>,
     val closingForName: String? = null,
-    val timers: List<TimerView> = emptyList()
+    val timers: List<TimerView> = emptyList(),
+    val suggestions: List<Suggestions> = emptyList()
 )
 
 @Serializable
@@ -149,6 +156,11 @@ data class ExecutionView(
     val canPrevious: Boolean,
     val canNext: Boolean,
     val term: TermCard?,
+    /**
+     * True when this step is one half of a trade. The two halves are separate acts performed one
+     * after the other, and saying so is what stops the second looking like a term nobody agreed to.
+     */
+    val partOfTrade: Boolean = false,
     val stopWord: String
 )
 
@@ -223,6 +235,8 @@ data class ClientView(
     val blockedNotice: String? = null,
     val savedContracts: List<SavedContractSummary> = emptyList(),
     val stopWord: String? = null,
+    /** Rises when a player asks for the narration to be repeated. TV only. */
+    val narrationNonce: Int = 0,
     /** TV only. A phone is asking to take over an occupied slot and needs remote confirmation. */
     val reclaimRequest: ReclaimRequestView? = null
 )

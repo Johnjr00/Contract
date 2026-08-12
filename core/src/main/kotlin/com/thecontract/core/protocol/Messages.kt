@@ -20,6 +20,10 @@ sealed interface GameAction
 @Serializable @SerialName("submit_setup")
 data class SubmitSetup(val setup: SharedSetup) : GameAction
 
+/** "Read it again": asks the television to repeat whatever it last narrated. */
+@Serializable @SerialName("read_again")
+data object ReadAgain : GameAction
+
 @Serializable @SerialName("update_setup")
 data class UpdateSetup(val setup: SharedSetup) : GameAction
 

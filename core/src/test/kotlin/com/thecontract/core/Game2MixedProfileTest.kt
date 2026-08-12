@@ -14,6 +14,7 @@ import com.thecontract.core.model.Equipment
 import com.thecontract.core.model.FinaleOrder
 import com.thecontract.core.model.GamePhase
 import com.thecontract.core.model.PartyRef
+import com.thecontract.core.model.PreferenceLibrary
 import com.thecontract.core.model.PrivateProfile
 import com.thecontract.core.model.Slot
 import com.thecontract.core.protocol.ProtocolJson
@@ -192,7 +193,15 @@ class Game2MixedProfileTest {
         val setup = Setups.mixed()
         val answers = Setups.allAnswers(com.thecontract.core.model.Answer.MAYBE)
         val ctx = GameContext(setup, Slot.entries.associateWith { PrivateProfile(it, answers, complete = true) })
-        val term = ContentLibrary.regularTerms.first { it.activities.isNotEmpty() && it.requiredEquipment.isEmpty() }
+        // A term the profile still asks about. Terms built entirely from assumed activities —
+        // most of the massage vocabulary now — carry no Maybe to turn into a condition, so
+        // picking merely the first term with activities would prove nothing.
+        val term = ContentLibrary.regularTerms.first { t ->
+            t.requiredEquipment.isEmpty() && t.activities.any { a ->
+                PreferenceLibrary.byId[PreferenceLibrary.give(a)]?.asked == true ||
+                    PreferenceLibrary.byId[PreferenceLibrary.receive(a)]?.asked == true
+            }
+        }
         val binding = EligibilityEngine.candidateBindings(term, ctx).first()
         val plain = Renderer.renderTerm(term, binding, ctx)
         val conditions = EligibilityEngine.maybeConditions(term, binding, ctx)

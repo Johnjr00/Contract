@@ -27,6 +27,7 @@ import com.thecontract.core.protocol.ConsiderationCard
 import com.thecontract.core.protocol.DraftView
 import com.thecontract.core.protocol.ExecutionView
 import com.thecontract.core.protocol.JoinInfo
+import com.thecontract.core.protocol.Narration
 import com.thecontract.core.protocol.ProfileForm
 import com.thecontract.core.protocol.ProfileItem
 import com.thecontract.core.protocol.ProfileSection
@@ -78,6 +79,7 @@ object ViewBuilder {
         conditions = r.conditions,
         amendments = r.amendments,
         timers = timerViews(r.timers),
+        suggestions = r.suggestions,
         climax = r.climax,
         mutual = r.mutual
     )
@@ -90,7 +92,8 @@ object ViewBuilder {
         recipientName = s.setup.name(c.recipient),
         mutual = c.mutual,
         equipment = c.equipmentUsed,
-        timers = timerViews(c.timers)
+        timers = timerViews(c.timers),
+        suggestions = c.suggestions
     )
 
     private fun progress(s: GameState) = ProgressView(
@@ -132,7 +135,8 @@ object ViewBuilder {
             considerationInstruction = receipt?.instruction,
             signedBy = signed.signedBySlots.map { s.setup.name(it) },
             closingForName = signed.closingFor?.let { s.setup.name(it) },
-            timers = timerViews(signed.term.timers)
+            timers = timerViews(signed.term.timers),
+            suggestions = signed.term.suggestions
         )
     }
 
@@ -154,6 +158,7 @@ object ViewBuilder {
             explicitness = setup.explicitness.name,
             finaleFormat = setup.finaleFormat.name,
             stopWord = setup.stopWord,
+            narrationEnabled = setup.narrationEnabled,
             defaultMaybeCondition = setup.defaultMaybeCondition.name,
             boundaries = setup.boundaries.map { it.name },
             equipment = setup.equipment.map { it.name },
@@ -227,6 +232,26 @@ object ViewBuilder {
 
     @Suppress("CyclomaticComplexMethod", "LongMethod")
     fun phoneView(
+        s: GameState,
+        slot: Slot,
+        connections: Map<Slot, ConnectionState>,
+        nowMs: Long,
+        canGoBack: Boolean
+    ): ClientView = withReadAgain(s, phoneViewBody(s, slot, connections, nowMs, canGoBack))
+
+    /**
+     * "Read it again" sits on both phones, because the television is the shared screen and
+     * either man may have missed it. It appears from the *television's* phase rather than the
+     * phone's, so the button is only ever there when there is something being read.
+     */
+    private fun withReadAgain(s: GameState, view: ClientView): ClientView =
+        if (!s.setup.narrationEnabled || s.pause.paused || !Narration.narratesNow(s.phase)) {
+            view
+        } else {
+            view.copy(choices = view.choices + Choice("read_again", "Read it again", kind = "nav"))
+        }
+
+    private fun phoneViewBody(
         s: GameState,
         slot: Slot,
         connections: Map<Slot, ConnectionState>,
@@ -421,12 +446,21 @@ object ViewBuilder {
             GamePhase.CONSIDERATION_PRIVATE_SELECTION, GamePhase.CLOSING_TERM_CONSIDERATION -> {
                 if (current == null) return base.copy(heading = "Preparing", waiting = true)
                 val mutual = current.beneficiary == null
-                val mine = mutual || current.beneficiary == slot
+                // The player who gained less from the term is the one being paid, so he is the
+                // one who names the payment.
+                val mine = mutual || current.beneficiary?.other == slot
                 if (mine) {
+                    val payer = current.beneficiary?.let { s.setup.name(it) }
                     base.copy(
                         heading = "Choose your consideration",
-                        body = "You benefit more from this term, so you earn the signature. " +
-                            "This list is private — the TV shows nothing while you choose.",
+                        body = if (payer == null) {
+                            "Neither of you gains more from this term, so you both do this one. " +
+                                "This list is private — the TV shows nothing while you choose."
+                        } else {
+                            "$payer gains more from this term, so he owes you for it. Pick what he " +
+                                "does to earn your signature. This list is private — the TV shows " +
+                                "nothing while you choose."
+                        },
                         term = termCard(s, current.term),
                         bundledTerm = current.bundledTerm?.let { termCard(s, it) },
                         considerationOptions = current.considerationOptions.map { considerationCard(s, it) },
@@ -435,7 +469,8 @@ object ViewBuilder {
                 } else {
                     base.copy(
                         heading = "Waiting",
-                        body = "The other player is choosing what he will do to earn your signature.",
+                        body = "You gain more from this term, so you owe him for it. He is choosing " +
+                            "what you will do to earn his signature.",
                         waiting = true,
                         term = termCard(s, current.term)
                     )
@@ -608,7 +643,7 @@ object ViewBuilder {
 
     private fun relevantAmendmentChoices(s: GameState, r: RenderedTerm): List<Choice> {
         val term = ContentLibrary.termsById[r.termId] ?: return emptyList()
-        val ctx = GameContext(s.setup, s.profiles)
+        val ctx = GameContext.of(s)
         return Renderer.relevantAmendments(term, r)
             .filter { amendment ->
                 if (amendment != Amendment.ROLES_REVERSED) return@filter true
@@ -621,7 +656,7 @@ object ViewBuilder {
 
     private fun bundleOptionCard(s: GameState, termId: String): TermCard? {
         val term = ContentLibrary.termsById[termId] ?: return null
-        val ctx = GameContext(s.setup, s.profiles)
+        val ctx = GameContext.of(s)
         val e = EligibilityEngine.evaluate(term, ctx)
         if (e !is Eligibility.Ok) return null
         return termCard(s, Renderer.renderTerm(term, e.binding, ctx, EligibilityEngine.maybeConditions(term, e.binding, ctx)))
@@ -629,7 +664,7 @@ object ViewBuilder {
 
     private fun closingOptionCard(s: GameState, termId: String, finisher: Slot): TermCard? {
         val term = ContentLibrary.termsById[termId] ?: return null
-        val ctx = GameContext(s.setup, s.profiles)
+        val ctx = GameContext.of(s)
         val binding = PartyBinding(finisher.other, finisher)
         val e = EligibilityEngine.evaluate(term, ctx, preferredBinding = binding)
         if (e !is Eligibility.Ok || e.binding != binding) return null
@@ -637,30 +672,52 @@ object ViewBuilder {
     }
 
     private fun executionView(s: GameState, slot: Slot?, base: ClientView, nowMs: Long): ClientView {
-        val idx = s.finale.executionOrder.getOrNull(s.finale.stepIndex)
-        val signed = idx?.let { s.negotiation.signed.getOrNull(it) }
-        val card = signed?.let { termCard(s, it.term) }
+        val steps = FinaleOrdering.resolve(s)
+        val step = steps.getOrNull(s.finale.stepIndex)
+        val signed = step?.let { s.negotiation.signed.getOrNull(it.signedIndex) }
+        // The half this step performs, which for the second term of a trade is not the one the
+        // contract item leads with.
+        val rendered = step?.let { signed?.half(it.bundled) }
+        // The heading and body already carry the title and the instruction, so the card beneath
+        // them is here for the equipment, conditions, amendments and timers. Repeating the
+        // instruction printed the same paragraph twice on the same screen, and the benefit
+        // explanation is a negotiating aid — by now the term is signed and being performed, so
+        // "he therefore earns his signature" is describing something that already happened.
+        val card = rendered?.let { termCard(s, it).copy(instruction = "", benefitExplanation = "") }
         val started = s.finale.stepStarted
+        val marked = s.finale.stepIndex in s.finale.stepsCompleted
+        val lastStep = s.finale.stepIndex >= steps.lastIndex
         val mayControl = TimerEngine.mayControl(s.timers, slot)
         val mayComplete = TimerEngine.mayComplete(s.timers, slot)
         return base.copy(
-            heading = signed?.term?.title ?: "Final scene",
-            body = signed?.term?.instruction ?: "",
+            heading = rendered?.title ?: "Final scene",
+            body = rendered?.instruction ?: "",
             term = card,
             execution = ExecutionView(
                 stepIndex = s.finale.stepIndex + 1,
-                stepCount = s.finale.executionOrder.size,
+                stepCount = steps.size,
                 started = started,
                 canPrevious = s.finale.stepIndex > 0,
                 canNext = s.finale.stepIndex in s.finale.stepsCompleted ||
-                    s.finale.stepIndex < s.finale.executionOrder.size,
+                    s.finale.stepIndex < steps.size,
                 term = card,
+                partOfTrade = signed?.bundledTerm != null,
                 stopWord = s.setup.stopWord
             ),
             choices = buildList {
                 if (!started) add(Choice("exec:begin", "Begin this term"))
-                if (started && mayComplete) add(Choice("exec:complete", "Mark it complete"))
-                if (started) add(Choice("exec:next", "Next term", kind = "nav"))
+                // Marking a term complete used to leave its own button sitting there unchanged,
+                // so the only sign it had worked was the clock stopping. It is replaced by the
+                // fact of it, and moving on becomes the obvious next press.
+                if (started && marked) add(Choice("exec:done", "Marked complete", kind = "status"))
+                if (started && mayComplete && !marked) add(Choice("exec:complete", "Mark it complete"))
+                if (started) {
+                    if (lastStep) {
+                        add(Choice("exec:next", "Finish the contract"))
+                    } else {
+                        add(Choice("exec:next", "Next term", kind = if (marked) "action" else "nav"))
+                    }
+                }
                 if (s.finale.stepIndex > 0) add(Choice("exec:prev", "Previous term", kind = "nav"))
                 add(Choice("global_pause", "Pause everything", danger = true))
             },
@@ -685,7 +742,7 @@ object ViewBuilder {
         savedContracts: List<SavedContractSummary> = emptyList()
     ): ClientView {
         val base = baseView("tv", s, null, connections, nowMs, canGoBack = false)
-            .copy(join = join, savedContracts = savedContracts)
+            .copy(join = join, savedContracts = savedContracts, narrationNonce = s.narrationNonce)
         val n = s.negotiation
         val current = n.current
 

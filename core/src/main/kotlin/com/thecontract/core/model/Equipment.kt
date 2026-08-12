@@ -50,9 +50,18 @@ enum class Equipment(
         /** Items that count as "a toy" for the No-toys boundary and for generic toy resolution. */
         val toys: List<Equipment> = entries.filter { it.toyLike }
 
-        /** Preference order used when a term asks for a generic toy and several are available. */
+        /**
+         * Preference order used when a term asks for a generic toy and several are available.
+         *
+         * Only things that can be run over a body or put inside one, because every template that
+         * asks for a generic toy tells someone to use it that way — "runs #TOY# on him", "moves
+         * it to a different part of his body every thirty seconds". A cock ring goes on and stays
+         * on and a pair of clamps clamps, so neither belongs here: with an impact-and-clamps kit
+         * and nothing else, "runs the nipple clamps on him" is what came out. Leaving them off
+         * makes those terms simply unavailable to that kit, which is the right answer.
+         */
         val genericToyPreferenceOrder: List<Equipment> =
-            listOf(VIBRATOR, PROSTATE_TOY, ANAL_PLUG, DILDO, MASSAGE_WAND, SLEEVE, COCK_RING, NIPPLE_CLAMPS)
+            listOf(VIBRATOR, MASSAGE_WAND, PROSTATE_TOY, ANAL_PLUG, DILDO, SLEEVE)
     }
 }
 

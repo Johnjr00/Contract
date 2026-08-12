@@ -13,13 +13,17 @@ import android.os.IBinder
 import android.os.PowerManager
 import com.thecontract.core.engine.GameEngine
 import com.thecontract.core.server.ContractServer
+import com.thecontract.core.protocol.Narration
 import com.thecontract.core.server.SessionManager
 import com.thecontract.tv.ContractLog
 import com.thecontract.tv.R
 import com.thecontract.tv.ServerHolder
 import com.thecontract.tv.data.RoomStateStore
 import com.thecontract.tv.net.AndroidNetworkMonitor
+import com.thecontract.tv.ui.ChimePlayer
+import com.thecontract.tv.ui.NarrationPlayer
 import com.thecontract.tv.ui.MainActivity
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -28,6 +32,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /**
  * Hosts the embedded server for the whole life of a session (section 5).
@@ -40,8 +45,21 @@ import kotlinx.coroutines.launch
  */
 class ContractService : Service() {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    /**
+     * A supervisor stops one failed job cancelling its siblings; it does nothing about the
+     * failure itself, which goes to the thread's default handler and takes the process with it.
+     * These jobs watch the screen for the whole evening, so a single unforeseen exception in one
+     * of them would end the game. The handler makes that a logged fault instead.
+     */
+    private val scope = CoroutineScope(
+        SupervisorJob() + Dispatchers.Default +
+            CoroutineExceptionHandler { _, e -> ContractLog.w("Background job failed: $e") }
+    )
     private var tickJob: Job? = null
+    private var chimeJob: Job? = null
+    private var chime: ChimePlayer? = null
+    private var narrationJob: Job? = null
+    private var narrator: NarrationPlayer? = null
     private var server: ContractServer? = null
     private var monitor: AndroidNetworkMonitor? = null
     private var wakeLock: PowerManager.WakeLock? = null
@@ -55,6 +73,8 @@ class ContractService : Service() {
         private const val CHANNEL_ID = "session"
         private const val NOTIFICATION_ID = 1001
         private const val TICK_MS = 500L
+        private const val RUNNING_STATE = "RUNNING"
+        private const val COMPLETED_STATE = "COMPLETED"
 
         fun start(context: Context, resumeUnfinished: Boolean = false) {
             val intent = Intent(context, ContractService::class.java).apply {
@@ -80,16 +100,22 @@ class ContractService : Service() {
         createChannel()
         startForegroundCompat()
 
+        chime = ChimePlayer(applicationContext)
+        narrator = NarrationPlayer(applicationContext).also { it.warmUp() }
+
         val store = RoomStateStore(applicationContext)
         manager = SessionManager(store, GameEngine())
         manager.tvListener = SessionManager.TvListener { ServerHolder.publish(it) }
         ServerHolder.attach(manager)
 
-        monitor = AndroidNetworkMonitor(applicationContext) { interfaces ->
-            manager.refreshInterfaces(interfaces)
-        }.also { it.start() }
-
         scope.launch {
+            // AndroidNetworkMonitor.start() synchronously builds and broadcasts the first TV
+            // view, which reads saved session/contract state from Room — must not run on the
+            // main thread that onCreate() is executing on.
+            monitor = AndroidNetworkMonitor(applicationContext) { interfaces ->
+                manager.refreshInterfaces(interfaces)
+            }.also { it.start() }
+
             runCatching {
                 val started = ContractServer.startWithFallback(manager)
                 server = started
@@ -107,6 +133,49 @@ class ContractService : Service() {
             while (isActive) {
                 delay(TICK_MS)
                 runCatching { manager.tick() }
+            }
+        }
+
+        // Read the screen out loud, from the same published TV view the screen itself renders.
+        // The engine decides what may be spoken; this only has to notice when the answer
+        // changes, because the view republishes on every tick whether anything moved or not.
+        narrationJob = scope.launch {
+            var spokenKey: String? = null
+            ServerHolder.tvView.collect { view ->
+                val setup = manager.sessionRecord?.state?.setup
+                val enabled = setup?.narrationEnabled ?: true
+                // The voice is a one-time download. Start it the moment there is a session that
+                // wants narration — that is the pairing screen, minutes before the first term,
+                // rather than making the first term the thing that waits for it. Gated on the
+                // setting, so a table that has turned narration off never fetches 139 MB.
+                if (setup?.narrationEnabled == true) runCatching { narrator?.prepare() }
+                val line = Narration.script(view, enabled)
+                when {
+                    line == null -> {
+                        // Nothing to say on this screen: cut off whatever the last one was, so
+                        // a term is not still being read over the screen that replaced it.
+                        if (spokenKey != null) runCatching { narrator?.stop() }
+                        spokenKey = null
+                    }
+                    line.key != spokenKey -> {
+                        spokenKey = line.key
+                        runCatching { narrator?.speak(line.text) }
+                    }
+                }
+            }
+        }
+
+        // Sound the chime the moment a timer stops running, watching the same published view
+        // the screen renders so the two can never disagree about when a timer ended.
+        chimeJob = scope.launch {
+            var previous = emptyMap<String, String>()
+            ServerHolder.tvView.collect { view ->
+                val current = view.timers.associate { it.id to it.state }
+                val justFinished = current.any { (id, state) ->
+                    state == COMPLETED_STATE && previous[id] == RUNNING_STATE
+                }
+                if (justFinished) runCatching { chime?.play() }
+                previous = current
             }
         }
     }
@@ -132,8 +201,10 @@ class ContractService : Service() {
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
-        // The launcher swiped the task away. Persist before anything else happens.
-        runCatching { manager.persistNow() }
+        // The launcher swiped the task away. Persist before anything else happens. Blocks this
+        // (main) thread until done, but the actual Room write runs on Dispatchers.IO, since Room
+        // forbids running it on the main thread directly.
+        runBlocking(Dispatchers.IO) { runCatching { manager.persistNow() } }
         super.onTaskRemoved(rootIntent)
     }
 
@@ -143,9 +214,16 @@ class ContractService : Service() {
     }
 
     private fun shutDown() {
-        // Persist first, so a running timer is frozen at a safe value before we go away.
-        runCatching { manager.persistNow() }
+        // Persist first, so a running timer is frozen at a safe value before we go away. Same
+        // main-thread-blocking-but-IO-executing shape as onTaskRemoved, for the same reason.
+        runBlocking(Dispatchers.IO) { runCatching { manager.persistNow() } }
         tickJob?.cancel()
+        chimeJob?.cancel()
+        chime?.release()
+        chime = null
+        narrationJob?.cancel()
+        narrator?.release()
+        narrator = null
         monitor?.stop()
         runCatching { server?.stop() }
         server = null

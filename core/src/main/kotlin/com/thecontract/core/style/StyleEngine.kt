@@ -14,7 +14,12 @@ data class RenderContext(
     val setup: SharedSetup,
     val binding: PartyBinding,
     val explicitness: Explicitness,
-    val availableEquipment: Set<Equipment>
+    val availableEquipment: Set<Equipment>,
+    /**
+     * Picks between a lexicon key's alternative wordings. Derived from the id of the item being
+     * rendered, so one term always reads the same way while the library as a whole varies.
+     */
+    val variantSeed: Int = 0
 ) {
     val giverName: String get() = setup.name(binding.giver)
     val receiverName: String get() = setup.name(binding.receiver)
@@ -41,8 +46,12 @@ class UnresolvableTemplateException(message: String) : IllegalStateException(mes
  */
 object StyleEngine {
 
-    private val tokenRegex = Regex("""\{([A-Za-z0-9_]+\+?)}""")
-    private val lexiconRegex = Regex("""\[([a-z0-9_]+)]""")
+    // Android's ICU-backed regex engine rejects a bare, unescaped `}` or `]` outside a
+    // quantifier/character-class context with a PatternSyntaxException, even though the JVM's
+    // own regex engine (used by every unit test and the desktop dev server) accepts it — so
+    // both must be escaped explicitly to work on-device.
+    private val tokenRegex = Regex("""\{([A-Za-z0-9_]+\+?)\}""")
+    private val lexiconRegex = Regex("""\[([a-z0-9_]+)\]""")
     private val equipmentRegex = Regex("""#([A-Za-z0-9_]+)#""")
 
     /** Possessive form. Always `name's`, which is correct for names ending in s as well. */
@@ -56,7 +65,10 @@ object StyleEngine {
             if (!Lexicon.has(key)) {
                 throw UnresolvableTemplateException("Unknown lexicon key [$key] in: $template")
             }
-            Lexicon.resolve(key, ctx.explicitness)
+            // The key name is mixed into the seed so that two keys in the same sentence choose
+            // independently; without it every key in an item would land on the same index and
+            // the alternatives would move in lockstep across the library.
+            Lexicon.resolve(key, ctx.explicitness, ctx.variantSeed + key.hashCode())
         }
 
         text = equipmentRegex.replace(text) { m ->

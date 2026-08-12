@@ -12,15 +12,35 @@ import com.thecontract.core.model.PreferenceLibrary
 import com.thecontract.core.model.PrivateProfile
 import com.thecontract.core.model.SharedSetup
 import com.thecontract.core.model.Slot
+import com.thecontract.core.content.ContentLibrary
 import com.thecontract.core.model.Term
 
 /** Everything eligibility and rendering need about the current session. */
 data class GameContext(
     val setup: SharedSetup,
-    val profiles: Map<Slot, PrivateProfile>
+    val profiles: Map<Slot, PrivateProfile>,
+    /**
+     * How many times each player has already been the receptive party in anal content this game
+     * — counting what is signed, what has been performed as consideration, and what is on the
+     * table right now. A vers top gets one for the whole night, so the allowance has to be
+     * spent against history rather than judged one term at a time.
+     */
+    val analReceptionUsed: Map<Slot, Int> = emptyMap()
 ) {
     fun profile(slot: Slot): PrivateProfile = profiles[slot] ?: PrivateProfile(slot)
     fun answer(slot: Slot, prefId: String): Answer = profile(slot).answer(prefId)
+
+    /** True when this player has no allowance left to be worked on the hole again. */
+    fun analReceptionSpent(slot: Slot): Boolean =
+        (analReceptionUsed[slot] ?: 0) >= setup.player(slot).analRole.receptiveAnalLimit
+
+    companion object {
+        fun of(state: com.thecontract.core.model.GameState): GameContext = GameContext(
+            state.setup,
+            state.profiles,
+            EligibilityEngine.analReceptionCounts(state)
+        )
+    }
 }
 
 sealed interface Eligibility {
@@ -41,11 +61,11 @@ sealed interface Eligibility {
  */
 object EligibilityEngine {
 
-    private val ANAL_ACTIVITIES = setOf("anal_external", "fingering", "anal_toys", "topping", "bottoming", "massage_anus", "plug", "dildo")
-    private val PENETRATIVE_ACTIVITIES = setOf("fingering", "anal_toys", "topping", "bottoming", "plug", "dildo")
+    private val ANAL_ACTIVITIES = setOf("anal_external", "fingering", "anal_toys", "topping", "bottoming", "massage_anus", "plug", "dildo", "rough_anal", "fisting")
+    private val PENETRATIVE_ACTIVITIES = setOf("fingering", "anal_toys", "topping", "bottoming", "plug", "dildo", "rough_anal", "fisting")
     private val FOOT_ACTIVITIES = setOf("foot_kissing", "foot_stimulation", "massage_calves_feet")
     private val ORGASM_ACTIVITIES = setOf("edging", "denial", "climax_permission")
-    private val ROUGH_ACTIVITIES = setOf("pinning", "rough_handling", "harder_oral", "hard_sex", "rough_hair_pulling")
+    private val ROUGH_ACTIVITIES = setOf("pinning", "rough_handling", "harder_oral", "hard_sex", "rough_hair_pulling", "rough_anal")
     private val PAIN_ACTIVITIES = setOf("spanking", "impact_toys", "nipple_clamps", "scratching")
     private val RESTRAINT_ACTIVITIES = setOf("restraint", "collaring")
     private val SEXUAL_MASSAGE_ACTIVITIES = setOf("massage_groin", "massage_anus", "massage_to_sexual")
@@ -191,17 +211,80 @@ object EligibilityEngine {
         }
     }
 
+    /**
+     * Whether a piece of content goes anywhere near anybody's hole.
+     */
+    private fun touchesAnal(categories: Set<Category>, activities: Set<String>, analPenetration: Boolean): Boolean =
+        Category.ANAL in categories || Category.RIMMING in categories ||
+            activities.any { it in ANAL_ACTIVITIES } || analPenetration
+
+    /**
+     * The men whose hole this term involves — penetrated, rimmed, fingered, plugged, fisted or
+     * rubbed from the outside, it makes no difference which.
+     *
+     * Activity names are written from the giver's side, so "bottoming" means the *giver* is the
+     * one taking it and the receiver is the one doing the penetrating. Everything else in the
+     * library is done to the receiver. A mutual term is done to both.
+     */
+    fun receptiveParties(term: Term, binding: PartyBinding): Set<Slot> {
+        if (!touchesAnal(term.categories, term.activities, term.analPenetration)) return emptySet()
+        if (term.mutual) return setOf(binding.giver, binding.receiver)
+        return setOf(if ("bottoming" in term.activities) binding.giver else binding.receiver)
+    }
+
+    /** The same question for a consideration action, where the recipient is the one worked on. */
+    fun receptiveParties(action: ConsiderationAction, performer: Slot, recipient: Slot): Set<Slot> {
+        if (!touchesAnal(action.categories, action.activities, action.analPenetration)) return emptySet()
+        if (action.mutual) return setOf(performer, recipient)
+        return setOf(recipient)
+    }
+
+    /**
+     * How many times each player has already been on the receiving end of anal content: signed
+     * terms, consideration actions actually performed, and whatever is on the table right now,
+     * so a proposal in flight already counts against a vers top's single allowance.
+     */
+    fun analReceptionCounts(state: com.thecontract.core.model.GameState): Map<Slot, Int> {
+        val counts = mutableMapOf<Slot, Int>()
+        fun bump(slots: Set<Slot>) = slots.forEach { counts[it] = (counts[it] ?: 0) + 1 }
+
+        fun countTerm(termId: String, giver: Slot, receiver: Slot) {
+            ContentLibrary.termsById[termId]?.let { bump(receptiveParties(it, PartyBinding(giver, receiver))) }
+        }
+        state.negotiation.signed.forEach { signed ->
+            signed.allTerms.forEach { countTerm(it.termId, it.giver, it.receiver) }
+        }
+        state.negotiation.receipts.forEach { receipt ->
+            ContentLibrary.considerationsById[receipt.actionId]
+                ?.let { bump(receptiveParties(it, receipt.performer, receipt.recipient)) }
+        }
+        state.negotiation.current?.let { current ->
+            countTerm(current.term.termId, current.term.giver, current.term.receiver)
+            current.bundledTerm?.let { countTerm(it.termId, it.giver, it.receiver) }
+        }
+        return counts
+    }
+
     private fun analRolesOk(term: Term, binding: PartyBinding, ctx: GameContext): Boolean {
-        val touchesAnal = Category.ANAL in term.categories || Category.RIMMING in term.categories ||
-            term.activities.any { it in ANAL_ACTIVITIES } || term.analPenetration
+        val touchesAnal = touchesAnal(term.categories, term.activities, term.analPenetration)
         if (!touchesAnal) return true
         if (!ctx.setup.player(binding.giver).analRole.allowsAnyAnal) return false
         if (!ctx.setup.player(binding.receiver).analRole.allowsAnyAnal) return false
+        // Nothing goes near a top's hole, ever, and near a vers top's only once a night. This
+        // covers every kind of attention, not only penetration.
+        if (receptiveParties(term, binding).any { ctx.analReceptionSpent(it) }) return false
         if (term.analPenetration || term.activities.any { it in PENETRATIVE_ACTIVITIES }) {
-            // The party being penetrated must be able to bottom; the penetrating party must top.
-            if (!ctx.setup.player(binding.receiver).analRole.canBottom) return false
+            // Which party is penetrated depends on the term, and is not always the receiver.
+            // The activity names are written from the giver's side: "topping" means the giver
+            // penetrates the receiver, "bottoming" means the giver is the one taking it, so the
+            // receiver is the penetrating party. Assuming the receiver is always the penetrated
+            // one excluded a strict top from every "he finishes inside him" closing term — the
+            // player those terms exist for.
+            val receiverPenetrates = "bottoming" in term.activities
+            val penetrated = if (receiverPenetrates) binding.giver else binding.receiver
+            if (!ctx.setup.player(penetrated).analRole.canBottom) return false
             if (("topping" in term.activities) && !ctx.setup.player(binding.giver).analRole.canTop) return false
-            if (("bottoming" in term.activities) && !ctx.setup.player(binding.receiver).analRole.canTop) return false
+            if (receiverPenetrates && !ctx.setup.player(binding.receiver).analRole.canTop) return false
         }
         return true
     }
@@ -250,12 +333,20 @@ object EligibilityEngine {
         if (!equipmentOk(action.requiredEquipment, action.genericToy, ctx)) return Eligibility.Unavailable
         if (!satisfies(action.performerConstraint, performer, ctx)) return Eligibility.Unavailable
 
-        val touchesAnal = Category.ANAL in action.categories || Category.RIMMING in action.categories ||
-            action.activities.any { it in ANAL_ACTIVITIES } || action.analPenetration
+        val touchesAnal = touchesAnal(action.categories, action.activities, action.analPenetration)
         if (touchesAnal) {
             if (!ctx.setup.player(performer).analRole.allowsAnyAnal) return Eligibility.Unavailable
             if (!ctx.setup.player(recipient).analRole.allowsAnyAnal) return Eligibility.Unavailable
+            // Same rule as for terms: never for a top, once a night for a vers top.
+            if (receptiveParties(action, performer, recipient).any { ctx.analReceptionSpent(it) }) {
+                return Eligibility.Unavailable
+            }
             if (action.analPenetration && !ctx.setup.player(recipient).analRole.canBottom) {
+                return Eligibility.Unavailable
+            }
+            // Doing it with his own cock is the one case that asks the performer to top; a hand,
+            // a finger or a toy asks nothing of his role.
+            if (action.usesPerformersCock && !ctx.setup.player(performer).analRole.canTop) {
                 return Eligibility.Unavailable
             }
         }

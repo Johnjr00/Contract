@@ -45,6 +45,7 @@ import com.thecontract.core.protocol.SaveContract
 import com.thecontract.core.protocol.SaveProfile
 import com.thecontract.core.protocol.StartExecution
 import com.thecontract.core.protocol.StopAllTimers
+import com.thecontract.core.protocol.ReadAgain
 import com.thecontract.core.protocol.SubmitSetup
 import com.thecontract.core.protocol.TimerCommand
 import com.thecontract.core.protocol.UpdateSetup
@@ -99,7 +100,7 @@ class GameEngine {
         )
     )
 
-    fun context(state: GameState): GameContext = GameContext(state.setup, state.profiles)
+    fun context(state: GameState): GameContext = GameContext.of(state)
 
     /**
      * Called by the session manager when a phone claims or reclaims a slot. Keeps pairing
@@ -206,6 +207,14 @@ class GameEngine {
 
             is SubmitSetup -> requireP1(es, slot) { handleSubmitSetup(es, action, now) }
 
+            // Nothing about the game changes; the counter is what the television watches to
+            // know it has been asked to say the same thing over again.
+            is ReadAgain -> ok(
+                es,
+                es.state.copy(narrationNonce = es.state.narrationNonce + 1, updatedAtMs = now),
+                es.undoStack
+            )
+
             is SaveProfile -> handleSaveProfile(es, slot, action, now)
 
             is ProposalRespond -> handleProposalResponse(es, slot, action.response, now)
@@ -287,7 +296,7 @@ class GameEngine {
     /** Builds the next proposal, or moves to closing terms if the pool is exhausted. */
     private fun startProposal(s: GameState, now: Long): GameState {
         if (s.allRegularTermsSigned) return startClosing(s, now)
-        val ctx = GameContext(s.setup, s.profiles)
+        val ctx = GameContext.of(s)
         var selection = ProposalSelector.nextProposal(s, ctx)
         var working = s
         if (selection == null) {
@@ -438,7 +447,7 @@ class GameEngine {
     /** Re-renders the term with the amendment applied. Returns null if it cannot be applied. */
     private fun applyChosenAmendment(s: GameState, amendment: Amendment, now: Long): GameState? {
         val current = s.negotiation.current ?: return null
-        val ctx = GameContext(s.setup, s.profiles)
+        val ctx = GameContext.of(s)
         val term = ContentLibrary.termsById[current.term.termId] ?: return null
         val amendments = current.appliedAmendments + amendment
         val reversed = Amendment.ROLES_REVERSED in amendments
@@ -494,7 +503,7 @@ class GameEngine {
         val current = s.negotiation.current ?: return s
         val initiator = current.responses.entries.firstOrNull { it.value == ProposalResponse.BUNDLE }?.key
             ?: return s
-        val ctx = GameContext(s.setup, s.profiles)
+        val ctx = GameContext.of(s)
         val candidates = ProposalSelector.bundleCandidates(s, ctx, current.term.termId)
         if (candidates.isEmpty()) {
             // Nothing compatible to trade with: fall back to signing the single term.
@@ -521,9 +530,11 @@ class GameEngine {
         if (termId !in current.bundleCandidateIds) return reject(es, CODE_INVALID, "That term is not on offer.")
         if (s.regularTermsRemaining < 2) return reject(es, CODE_INVALID, "There is not enough room left for a trade.")
 
-        val ctx = GameContext(s.setup, s.profiles)
+        val ctx = GameContext.of(s)
         val term = ContentLibrary.termsById[termId] ?: return reject(es, CODE_INVALID, "Unknown term.")
-        val e = EligibilityEngine.evaluate(term, ctx)
+        // Same binding preference the candidate list was filtered on, or the trade could be
+        // signed the other way round from the one that kept the benefit alternating.
+        val e = EligibilityEngine.evaluate(term, ctx, ProposalSelector.preferredBinding(s, term))
         if (e !is Eligibility.Ok) return reject(es, CODE_INVALID, "That term is no longer compatible.")
 
         val undo = pushUndo(es)
@@ -564,7 +575,7 @@ class GameEngine {
 
     private fun beginConsideration(s: GameState, stronger: Boolean, now: Long): GameState {
         val current = s.negotiation.current ?: return s
-        val ctx = GameContext(s.setup, s.profiles)
+        val ctx = GameContext.of(s)
         val parts = buildList {
             ContentLibrary.termsById[current.term.termId]?.let {
                 add(it to PartyBinding(current.term.giver, current.term.receiver))
@@ -582,8 +593,12 @@ class GameEngine {
         val performer = beneficiary ?: current.term.giver
         val recipient = beneficiary?.other ?: current.term.receiver
 
+        // The closing step is the one players deliberate over most, so it offers a wider list.
         val options = ConsiderationSelector
-            .options(s, ctx, performer, recipient, mutualRequired = mutual, stronger = stronger)
+            .options(
+                s, ctx, performer, recipient, mutualRequired = mutual, stronger = stronger,
+                limit = if (current.term.climax) 12 else 10
+            )
             .map { Renderer.renderConsideration(it, performer, recipient, ctx) }
 
         val phase = if (current.term.climax) {
@@ -613,8 +628,10 @@ class GameEngine {
         }
         val current = s.negotiation.current ?: return reject(es, CODE_PHASE, "No proposal is open.")
         val mutual = current.beneficiary == null
-        if (!mutual && slot != null && slot != current.beneficiary) {
-            return reject(es, CODE_NOT_ALLOWED, "Only the player who owes consideration chooses it.")
+        // The one who is owed says what he is owed. The beneficiary performs it, but choosing it
+        // as well would let him pay himself.
+        if (!mutual && slot != null && slot != current.beneficiary?.other) {
+            return reject(es, CODE_NOT_ALLOWED, "Only the player who is owed consideration chooses it.")
         }
         val chosen = current.considerationOptions.firstOrNull { it.actionId == actionId }
             ?: return reject(es, CODE_INVALID, "That consideration is not on offer.")
@@ -778,7 +795,7 @@ class GameEngine {
         val done = s.negotiation.signedClosing.mapNotNull { it.closingFor }.toSet()
         val next = Slot.entries.firstOrNull { it !in done }
             ?: return s.copy(phase = GamePhase.FINAL_CONTRACT_REVIEW, negotiation = s.negotiation.copy(closingTurn = null))
-        val ctx = GameContext(s.setup, s.profiles)
+        val ctx = GameContext.of(s)
         val candidates = ProposalSelector.closingCandidates(s, ctx, next)
         return s.copy(
             phase = GamePhase.CLOSING_TERM_SELECTION,
@@ -801,7 +818,7 @@ class GameEngine {
         if (s.negotiation.current != null) return reject(es, CODE_PHASE, "The closing term is already chosen.")
         if (termId !in s.negotiation.closingOptionIds) return reject(es, CODE_INVALID, "That term is not on offer.")
 
-        val ctx = GameContext(s.setup, s.profiles)
+        val ctx = GameContext.of(s)
         val term = ContentLibrary.termsById[termId] ?: return reject(es, CODE_INVALID, "Unknown term.")
         val binding = PartyBinding(turn.other, turn)
         val e = EligibilityEngine.evaluate(term, ctx, preferredBinding = binding)
@@ -901,34 +918,17 @@ class GameEngine {
      * amendment move to the end of the regular block, and the two climax terms are always
      * last — ordinary reordering can never move them earlier.
      */
-    private fun startExecution(s: GameState, order: FinaleOrder): GameState {
-        val signed = s.negotiation.signed
-        val regularIdx = signed.indices.filter { signed[it].closingFor == null }
-        val closingIdx = signed.indices.filter { signed[it].closingFor != null }
-
-        val (deferred, normal) = regularIdx.partition { signed[it].term.deferToEnd }
-        val orderedNormal = when (order) {
-            FinaleOrder.SIGNED_ORDER -> normal
-            FinaleOrder.SMOOTH_ESCALATION -> normal.sortedBy { signed[it].term.level }
-            FinaleOrder.DOMINANTS_CUT -> normal.shuffled(Random(s.sessionId.hashCode().toLong() * 31 + 7))
-        }
-        val orderedDeferred = deferred.sortedBy { signed[it].term.level }
-
-        // Section 37: with anal penetration in the contract, the top's climax term comes first.
-        val orderedClosing = closingIdx.sortedByDescending { signed[it].term.analPenetration }
-
-        return s.copy(
-            phase = GamePhase.FINAL_EXECUTION,
-            timers = TimerEngine.empty,
-            finale = s.finale.copy(
-                chosenOrder = order,
-                executionOrder = orderedNormal + orderedDeferred + orderedClosing,
-                stepIndex = 0,
-                stepsCompleted = emptySet(),
-                stepStarted = false
-            )
+    private fun startExecution(s: GameState, order: FinaleOrder): GameState = s.copy(
+        phase = GamePhase.FINAL_EXECUTION,
+        timers = TimerEngine.empty,
+        finale = s.finale.copy(
+            chosenOrder = order,
+            executionSteps = FinaleOrdering.build(s, order),
+            stepIndex = 0,
+            stepsCompleted = emptySet(),
+            stepStarted = false
         )
-    }
+    )
 
     private fun handleStartExecution(es: EngineState, now: Long): ApplyResult {
         val s = es.state
@@ -936,22 +936,25 @@ class GameEngine {
         return handleExecutionCommand(es, null, "begin", now)
     }
 
-    private fun currentExecutionTerm(s: GameState): SignedTerm? {
-        val idx = s.finale.executionOrder.getOrNull(s.finale.stepIndex) ?: return null
-        return s.negotiation.signed.getOrNull(idx)
+    /** The term performed at the current step — one half of a trade, or a whole ordinary term. */
+    private fun currentExecutionTerm(s: GameState): RenderedTerm? {
+        val step = FinaleOrdering.resolve(s).getOrNull(s.finale.stepIndex) ?: return null
+        return s.negotiation.signed.getOrNull(step.signedIndex)?.half(step.bundled)
     }
 
     private fun handleExecutionCommand(es: EngineState, slot: Slot?, command: String, now: Long): ApplyResult {
         val s = es.state
         if (s.phase != GamePhase.FINAL_EXECUTION) return reject(es, CODE_PHASE, "Not in final execution.")
-        val signedTerm = currentExecutionTerm(s) ?: return reject(es, CODE_INVALID, "No term at this step.")
-        val term = signedTerm.term
+        val term = currentExecutionTerm(s) ?: return reject(es, CODE_INVALID, "No term at this step.")
 
         return when (command) {
             "begin" -> {
+                // This term's own clocks, controller and completer. A trade's second half is
+                // frequently the other man's to run and the other man's to sign off, so taking
+                // any of these from the first half put the wrong person in charge of it.
                 val board = TimerEngine.board(
                     context = term.instruction,
-                    timers = term.timers + (signedTerm.bundledTerm?.timers ?: emptyList()),
+                    timers = term.timers,
                     controller = if (term.mutual) null else term.giver,
                     bothMayControl = term.mutual,
                     completer = if (term.mutual) null else term.receiver
@@ -974,7 +977,7 @@ class GameEngine {
             }
 
             "next" -> {
-                val last = s.finale.stepIndex >= s.finale.executionOrder.lastIndex
+                val last = s.finale.stepIndex >= FinaleOrdering.resolve(s).lastIndex
                 if (last) {
                     ok(es, s.copy(phase = GamePhase.COMPLETED, completedAtMs = now, timers = TimerEngine.empty))
                 } else {

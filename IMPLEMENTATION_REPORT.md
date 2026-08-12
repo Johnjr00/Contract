@@ -10,15 +10,17 @@ Both APKs were built and verified.
 
 | | |
 | --- | --- |
-| Debug APK | `app/build/outputs/apk/debug/app-debug.apk` — 8,066,424 bytes |
+| Debug APK | `app/build/outputs/apk/debug/app-debug.apk` |
 | | application id `com.thecontract.tv.debug` |
-| | SHA-256 `def12ef108e1b1c486355787789f1c577f6b41b642993df47f51e7350162e9b0` |
-| Release APK | `app/build/outputs/apk/release/app-release.apk` — 1,265,143 bytes |
+| | SHA-256 `d1211a2b1085a17aeb369b8ed4e7329eb2249aa94071f7c3f1ef2d38566ec595` |
+| Release APK | `app/build/outputs/apk/release/app-release.apk` |
 | | application id `com.thecontract.tv`, minified and resource-shrunk by R8 |
-| | SHA-256 `3390eb18b53547ac16280626fe7b12cd91596f587d512f0be59e87157adebb87` |
+| | SHA-256 `07cc88aa6b8e30586076e5443065f378207d23cf9204ed6b1d0370eb958627b8` |
 | Release signature | APK Signature Scheme v2, verified with `apksigner verify` |
-| | signer `CN=The Contract, OU=Local, O=The Contract, L=Local, ST=Local, C=GB` |
-| | certificate SHA-256 `810b62c47c08223bb183e74ce4f390ee0d06da8ca5899ba63823b00bd60d6364` |
+| | signer `CN=The Contract, OU=TheContract, O=TheContract, L=Unknown, ST=Unknown, C=US` |
+| | certificate SHA-256 `d460e29876eda8d73e6b1af100f78942b26ac8ab28d33aaa7f42ca605bef25e0` |
+
+These are the hashes as of the vagueness sweep in section 4l below. The APK now carries a real versionCode (commit count), so successive builds differ. The signing cert is unchanged from the previous fix (same keystore).
 
 Toolchain actually used: AGP 8.7.3, Kotlin 2.2.21, KSP 2.2.21-2.0.4, Compose BOM 2024.10.01,
 Room 2.6.1, Android SDK Platform 35, Build-Tools 35.0.0, Gradle 8.14.3, JDK 21 emitting Java 17
@@ -38,7 +40,7 @@ Verified on the built artifacts rather than asserted from source:
   `FOREGROUND_SERVICE_SPECIAL_USE`, `RECEIVE_BOOT_COMPLETED`, `WAKE_LOCK`,
   `POST_NOTIFICATIONS` — with no analytics, advertising or tracking permission of any kind.
 * The phone controller survives R8 intact inside the release APK: `web/controller.html` (1,084 B),
-  `web/controller.css` (7,802 B) and `web/controller.js` (31,508 B) are present and byte-identical
+  `web/controller.css` (9,149 B) and `web/controller.js` (37,388 B) are present and byte-identical
   to source, and a grep across all three finds **zero** occurrences of `http://`, `https://`,
   `cdn` or `googleapis`. Nothing is fetched from outside the APK.
 * Release `classes.dex` carries 15,355 method references — no multidex needed.
@@ -70,6 +72,108 @@ Compiling `:app` for the first time surfaced problems that source review had not
 
 Items 2–4 were found and fixed by review before the SDK became available; item 1 could only be
 found by actually running the build.
+
+### Real-device crash found and fixed
+
+The APK described above actually built and ran `apksigner verify` clean, but crashed instantly
+on real Android TV hardware. That is a class of bug none of the earlier verification could catch
+— the JVM test suite runs against `JsonFileStateStore`, not `RoomStateStore`, and the live-browser
+verification in 3a drives the same `JsonFileStateStore`-backed dev server, so Room never entered
+the picture in either case.
+
+With the emulator back up, the crash reproduced identically there, giving a real stack trace:
+
+```
+FATAL EXCEPTION: main
+java.lang.RuntimeException: Unable to create service com.thecontract.tv.service.ContractService:
+java.lang.IllegalStateException: Cannot access database on the main thread since it may
+potentially lock the UI for a long period of time.
+	at com.thecontract.tv.service.ContractService.onCreate
+```
+
+Root cause: `ContractService.onCreate()` called `AndroidNetworkMonitor(...).start()` synchronously
+on the main thread (`Service.onCreate()` always runs there). `start()` immediately calls
+`SessionManager.refreshInterfaces()`, which broadcasts a TV view — and building that view reads
+saved session and contract state from Room. Room refuses to run a query on the main thread, so the
+service died on every single launch, unconditionally.
+
+Two more instances of the same mistake were reachable but hadn't yet been hit: `onTaskRemoved()`
+and `shutDown()` (called from `onDestroy()` and the `ACTION_STOP` path) both called
+`manager.persistNow()` — a Room write — directly, also on the main thread.
+
+Fixes, all in `ContractService.kt`:
+* The network monitor's construction and `start()` call moved inside the existing
+  `scope.launch { }` (`Dispatchers.Default`), alongside the server startup that was already
+  correctly off the main thread.
+* `onTaskRemoved()` and `shutDown()` now wrap `manager.persistNow()` in
+  `runBlocking(Dispatchers.IO) { }` — these two call sites need the write to have landed before
+  the function returns (the process may be killed right after), so they block the main thread
+  deliberately, but the query itself now executes on an IO-dispatcher thread rather than main,
+  which is what Room's check actually requires.
+
+Verified fixed the same way it was found: reinstalled the rebuilt release APK on the emulator,
+launched it, and confirmed via `logcat` that the service starts, the foreground notification
+posts, and the TV surface renders (screenshot on file) with no `FATAL EXCEPTION` over a sustained
+run.
+
+A second, different failure appeared intermittently during this same testing round — a foreground
+service start timeout (`Context.startForegroundService() did not then call
+Service.startForeground()`) — but `startForeground()` is literally the second statement in
+`onCreate()`, and `logcat` showed class verification running at 21–26,000 bytecodes/second on this
+sandbox's unaccelerated (no KVM) emulator, i.e. slow enough on its own to blow through the OS's
+short foreground-service-start window. This did not recur on the rebuilt release APK's
+verification run. It reads as an artifact of this specific software-only emulator rather than a
+code defect — real Android TV hardware has none of that verification overhead — but it hasn't been
+confirmed on real silicon, so if a foreground-service crash of that shape turns up on real
+hardware, treat this as unresolved rather than closed.
+
+Because the previous keystore (`the-contract-release.jks`, git-ignored by design) was lost earlier
+in this same work — deleted by an unrelated `git clean -fdx` run while resolving an unrelated
+GitHub PR problem — the release build above is signed with a newly generated keystore, and
+therefore a new signing certificate. Anyone who installed the earlier release build must
+`adb uninstall com.thecontract.tv` (it never got far enough to write any user data) before
+installing this one.
+
+### Regex crash after both private profiles save
+
+The previous fix let the app launch, but it crashed reliably as soon as both players finished
+their private profiles — the exact point where the game engine builds and renders the first
+proposed term. Reproducing it required actually playing through the app on the emulator: two
+headless-Chromium "phones" driven by Playwright against the real, installed APK's embedded
+server (via `adb forward`), joining with the real per-session token (read once via a temporary,
+never-committed `Log.e` line, since the token is deliberately never logged in shipped code and the
+QR/URL panel wasn't visible on this emulator's virtual network interface). `logcat` caught the
+real crash:
+
+```
+FATAL EXCEPTION: NanoHttpd Request Processor (#7)
+java.lang.ExceptionInInitializerError
+Caused by: java.util.regex.PatternSyntaxException: Syntax error in regexp pattern near index 21
+\{([A-Za-z0-9_]+\+?)}
+                     ^
+	at com.android.icu.util.regex.PatternNative.compileImpl(Native Method)
+	...
+	at g1.d.<clinit>
+```
+
+Root cause: `StyleEngine.kt` compiled its token-substitution regex as
+`Regex("""\{([A-Za-z0-9_]+\+?)}""")` — a trailing, unescaped `}`. The JVM's own regex engine
+(what every unit test and the desktop dev-server live-verification in 3a both run on) accepts a
+bare `}` outside a quantifier as a literal character. Android's ICU-backed regex engine does not,
+and throws `PatternSyntaxException` from the class's static initializer the first time
+`StyleEngine` is touched — which is precisely when a term is first rendered, i.e. the instant both
+profiles are saved and the game proposes its opening term. No test in this repository could have
+caught this: it is specifically a JVM-regex-engine-vs-Android-ICU-regex-engine divergence, invisible
+anywhere except a real Android runtime.
+
+Fixed by escaping the offending brace, and the same latent issue in the adjacent lexicon-token
+regex (`\[([a-z0-9_]+)]` → `\[([a-z0-9_]+)\]`) in both `StyleEngine.kt` and
+`ContentValidator.kt`, before it could cause an identical crash on the next lexicon-key term. The
+53-test JVM suite still passes unchanged (that engine never enforced the stricter rule either way).
+
+Verified fixed by rerunning the same real-app repro end to end: both simulated phones complete
+setup and their private profiles, and the TV successfully renders "Proposed term" with no crash
+anywhere in `logcat` — confirmed on both the debug and release builds.
 
 ## 2. Counts
 
@@ -257,6 +361,635 @@ assignments, valid closing-term beneficiaries with a written fallback, grammar c
 repeated words, malformed possessives, spacing before punctuation and mid-sentence capitals, and
 lexicon integrity. Plus: every register produces different text, the bundled web assets contain
 no external reference and no PWA machinery.
+
+### 4a. Full manual playtest: three complete games, real client and server
+
+Beyond the automated suite, three complete games were played start to finish against the real
+dev server through the real `controller.html/.css/.js`, using two headless-Chromium tabs driven
+by a purpose-built auto-player (not the JVM test harness) so every screen a real phone would
+render — every proposed term, consideration option, amendment, closing term and the full final
+draft — could be read and checked for sense, not just structurally validated. Setup, private
+profiles, negotiation (including a rejection, one- and two-sided counteroffers with amendment
+ballots, a bundle trade, and Back navigation), considerations, final execution and contract save
+were all driven through the actual wire protocol.
+
+- **Game 1** — broad profile (`Setups.broad`): all-Yes, all 28 equipment, Vers/Vers, Extremely
+  filthy, three-orders finale. Completed with the full 10-regular/2-closing contract.
+- **Game 2** — mixed profile: Yes/Maybe/No across preference sections, Vers Top/Vers Bottom, one
+  player with erection difficulty, three shared boundaries (no marks, no degradation, no foot
+  play), Filthy explicitness, Dominant-private finale. Confirmed the boundary system correctly
+  blocked and silently replaced 5 proposals that would have violated a boundary, and that only
+  the Dominant's phone saw the finale-order choice.
+- **Game 3** — restrictive profile: no anal for either player (role and boundary both set), no
+  toys, no pain, no rough sex, no degradation, no foot play, both players with erection
+  difficulty, Erotic (mildest) explicitness, uninterrupted finale. Confirmed 24 boundary-blocked
+  substitutions with zero violating content in the final contract, and that erection-difficulty
+  exclusion is scoped to content actually requiring an erection rather than all orgasm content.
+
+**Two real content bugs found and fixed** (neither could have been caught by the JVM test suite,
+which never renders through a real browser, or by the earlier live-verification in section 3a,
+which only ever drove the pure-JVM dev server's happy path — this was the first time the full
+negotiation, consideration and closing-term content was actually read end to end):
+
+1. **Grammatically broken sentences from seven `Lexicon` verb entries.** Several verb phrases
+   (`v_finger`, `v_finger_deep`, `v_rim`, `v_rim_hard`, `v_deep`, `v_fuck_hard`, `v_pin`) were
+   authored as complete prepositional phrases (e.g. `"works open with his fingers"`) or ended in
+   a bare adjective (e.g. `"fucks hard"`), but every calling template inserts the object
+   immediately after the token (`{G} [v_finger] {R}`) — the documented contract for the whole
+   lexicon. Live output was visibly broken: *"Dan fucks open with two fingers him with lube"*,
+   *"Marcus works open with his fingers him with lube"*. Fixed by rewriting each affected entry so
+   every register ends bare or in a preposition that can legitimately take the following object
+   (`"finger-fucks"`, `"works his tongue over"`, `"sinks slowly onto"`, `"fucks hard into"`,
+   `"clamps"`, etc.), verified by rereading the actual rendered text in all three games afterward.
+2. **A missing subject pronoun in four `base`-register templates** (`ClimaxTerms` ×2,
+   `ConsiderationsNonSexual` ×1, `TermsLevel5` ×1) — each read `"... while [v_x] him ..."` where
+   the sibling `explicit` line correctly had `"... while he [v_x] him ..."`. Only reachable at
+   Erotic/Direct explicitness (`base` is used below Filthy), which is why Game 3's transcript is
+   what caught it. Fixed by adding the missing `he`.
+
+All 53 automated tests, including content validation, still pass after both fixes. One further
+issue was found in the process but was in the manual test harness, not the app: the client's
+"Back" fallback button is not enclosed in `.choices .btn` like every other button (it renders
+directly under `#main`, see `controller.js` `render()`), so a `.choices`-scoped click helper
+cannot find it — confirmed working correctly (present within 200ms of signing, every time) once
+checked with an unscoped selector.
+
+### 4b. On-device quick round on the Android emulator
+
+Every earlier playthrough drove the pure-JVM dev server. This one ran against the **installed
+release APK** on an Android TV emulator (API 35, 1920×1080 leanback profile, software-rendered —
+the environment has no `/dev/kvm`), with the app's own foreground service hosting the embedded
+NanoHTTPD server on port 8765, reached over `adb forward`. Two headless-Chromium tabs acted as the
+two phones, loading the real `controller.html/.css/.js` served by the app itself. One complete
+**quick** session (10 regular + 2 closing terms) was played setup → private profiles → negotiation
+→ considerations → closing terms → finale execution → contract save, with `logcat` captured
+continuously and every WebSocket frame logged on both phones.
+
+Result: the round completed — 10/10 regular terms, 2/2 closing terms, 12 consideration receipts,
+both phones reaching `Done` and the TV reaching `Complete` — with **zero** `FATAL EXCEPTION` or
+`AndroidRuntime` entries in logcat across the whole run. Persistence was then verified from the
+other side: after abandoning the session (which clears the active session but keeps saved
+contracts), the TV's "Saved contracts on this TV" card listed **"Marcus and Dan — 12 terms"**,
+proving the contract had been written to the Keystore-encrypted Room database rather than merely
+displayed. That entry also survived a subsequent `adb install -r` upgrade of the APK.
+
+**One real reliability bug found and fixed.** An earlier run left the TV showing "Dan: in
+progress" indefinitely after Player 2's profile save appeared to succeed on the phone. WebSocket
+frame logging showed the cause: this emulator's `adb forward` link drops and re-establishes the
+socket every few seconds, and an action sent into that window was lost silently — `controller.js`
+showed a "trying again" toast but never actually retried, even though the protocol was explicitly
+designed for safe retries (`actionId` deduplication server-side, `expectedVersion` staleness
+rejection) that the client simply never used. Fixed in two commits:
+
+1. Actions whose `send()` fails because the socket is already closed are queued and replayed from
+   `ws.onopen` once reconnected.
+2. An action is then treated as pending from the moment it is *created* until a reply naming its
+   `actionId` arrives — not merely until `send()` returns true. A send can succeed locally and
+   still never reach the server if the connection dies before the reply comes back, so every
+   reconnect replays whatever is still unacknowledged. This is safe for the same reason a
+   duplicate tap always was: the server dedups by `actionId` and rejects a stale
+   `expectedVersion`, so a replay is either a no-op or applies exactly once.
+
+All 53 automated tests still pass, and the shipped `controller.js` inside the release APK remains
+byte-identical to source with zero external URL references.
+
+One further issue surfaced during this work and was **not** an app bug, recorded here so it is
+not re-investigated later: the auto-player harness had no case for the shared "Draft contract"
+overlay — `draftReviewOpen` is global state either phone can enter, and the harness had no way
+out of it, so a run could park there indefinitely. The harness now closes it.
+
+> **Correction.** This section originally also attributed the constant connect/disconnect churn
+> seen throughout this run to `adb forward` over the container's software-emulated network, and
+> asserted that phones would hold a stable socket on a real LAN. **That was wrong.** It was a
+> real server defect, reproduced later on plain localhost with no emulator involved, and it is
+> fixed in section 4d below. The churn was never an artifact of the test environment.
+
+### 4c. Wording revision: direct and specific throughout
+
+A review of the rendered content found three problems that ran through the whole library, all
+of which made instructions vaguer than they should be. All three are fixed.
+
+1. **"work" used as a catch-all verb** — "works him over", "works his ear", the term title
+   "Nipple work", the timer label "Working it in". It named no actual motion. All 351
+   occurrences in player-facing text are replaced with a verb that says what happens: sucks,
+   kneads, strokes, presses, pushes, rubs, grinds, jerks. This covered instruction text, term
+   titles and timer labels alike.
+
+2. **"filthy" everywhere** — it had leaked out of the lexicon into pacing, kissing, praise and
+   generic intensity, where it meant nothing: `adv_pace` at the top register was literally
+   `"hard and filthy"`, so terms rendered "at a hard and filthy pace". It now appears in no
+   generated text at all. The two explicitness *setting labels* ("Filthy", "Extremely filthy")
+   are unchanged, being the feature's own names rather than content.
+
+3. **Instructions that deferred to the players** — "at exactly the pace he calls", "does
+   whatever he likes to him", "wherever he decides", "as long as he comfortably can", "at his
+   own pace". Every one is now a stated, countable instruction anchored to the timers the term
+   already defines: named pace cycles with durations, a fixed order of body parts, a specific
+   number of positions, "slow to steady to hard to hardest" one minute each.
+
+Two lexicon bugs were found in the process. `v_edge` briefly embedded a count that collided
+with templates already stating one ("edges him three times over three separate times"), and
+`v_hold_back` was transitive ("makes him hold it") while both of its call sites use the
+submissive as the verb's *subject*, so it rendered "Chris makes him hold it" when Chris is the
+one holding back — a pre-existing defect of the same class as the section 4a lexicon fixes.
+Both are fixed.
+
+Constructions that are determinate rather than vague were deliberately left alone: those whose
+object is fixed by the action itself ("puts his mouth on whatever he uncovers") and emphatic
+prohibitions meaning "regardless" ("does not go in however much he pushes back").
+
+Verified by rendering every term, closing term and consideration — instruction text, titles and
+timer labels — in all four explicitness registers and grepping the rendered output rather than
+the source, then re-checking the same patterns against `classes.dex` inside the built release
+APK. All 53 tests pass.
+
+### 4d. Phones reconnecting every few seconds — root cause and fix
+
+Reported from real use: both phones disconnected and reconnected continuously, every few
+seconds, throughout a session. This had been visible during the emulator run in 4b and was
+wrongly written off there as an `adb forward` artifact. It was not. It reproduced on plain
+localhost with no emulator, no port forwarding and no Android involved at all.
+
+**Root cause.** `ContractServer.startWithFallback()` started the server with
+`start(SOCKET_READ_TIMEOUT, false)`. `SOCKET_READ_TIMEOUT` is NanoHTTPD's own constant and is
+**5000 ms**, and `NanoHTTPD.ServerRunnable` applies it as `SO_TIMEOUT` to *every* accepted
+socket. A WebSocket keeps using that same socket after the HTTP upgrade, and NanoWSD's read
+loop simply blocks on it — so five seconds of silence raised `SocketTimeoutException`, which
+NanoWSD treats as fatal (`onException` then `doClose`). The phone then reconnected, sat idle,
+and was killed again.
+
+The client's own heartbeat could never have prevented this: it pinged every 15 seconds, three
+times slower than the timeout that was killing it.
+
+**Fix**, in two parts:
+
+* `SOCKET_TIMEOUT_MS` (60 s) replaces the 5-second default. It is deliberately still finite —
+  a value of 0 blocks forever, so a half-open connection would pin its handler thread for the
+  life of the process.
+* The server now pings every open socket every 20 seconds (`WS_PING_INTERVAL_MS`) from a
+  daemon scheduler, shut down with the server. Driving the heartbeat from the server matters
+  because mobile browsers throttle and eventually suspend `setInterval` once a tab is
+  backgrounded or the screen locks — precisely when a phone sits idle mid-scene. A browser
+  answers a ping frame with a pong automatically, without waking page script, and that inbound
+  pong is what resets the socket's read timer. A `check()` in `startWithFallback` enforces that
+  the timeout always outlasts at least two missed pings, so the two constants cannot drift into
+  a broken relationship again.
+
+The client ping also moved from 15 s to 10 s as a second line of defence.
+
+**Measured, before and after**, against the real server:
+
+| | Before | After |
+| --- | --- | --- |
+| Silent raw WebSocket | closed after **5,319 ms** (code 1006) | still open at **95,082 ms** |
+| Real browser on the real controller page | — | **1 open, 0 closes in 95 s** |
+
+The "after" case survives well past the 60-second socket timeout, which is the specific
+evidence that the server-driven pings are resetting the read timer rather than merely delaying
+the failure.
+
+### 4e. Content revision: sense, specificity, position and intensity
+
+A full read of the rendered game surfaced problems that only show up in the
+finished sentences, plus several gaps in how closing options were chosen.
+
+**Sentences that did not make sense.** Some possessives attached to the wrong
+man: "{R} fucks his mouth hard and {G} keeps up with it" rendered as "Jimmy
+fucks his mouth hard and John keeps up with it", where {R} is the one being
+sucked and {G} owns the mouth, so the roles read backwards and "his" had no
+antecedent. Six of these came from the previous wording pass and two predated
+it. Separately, that pass had replaced oral actions with kneading in places
+where the instrument is a mouth ("kneads his chest with his mouth"), and had
+given `v_talk_dirty` and `v_edge` values that collided with the very clause
+their templates already carried ("spells out ... spelling out in detail",
+"edges him three times over three separate times"). All corrected.
+
+**Remaining vague directions** — "until he is told to stop", "until he says
+stop", "sets the depth", "exactly where he wants it", "for a few seconds" —
+are now stated counts, durations or body parts.
+
+**Position.** `analRolesOk()` required the *receiver* to be able to bottom
+whenever a term involved penetration. In a closing term the receiver is the
+finisher, and in the "he finishes inside him" terms the finisher is the one
+penetrating — so a strict top was offered none of them. Which party is
+penetrated now comes from the term's own activities.
+
+Closing options are then chosen from the finisher's anal role rather than
+from whether the contract happened to contain penetration, with an explicit
+quota for how many options have something going into him, and a slot reserved
+for finishing inside his partner whenever he can top. Measured per role with
+a vers partner, as come-inside / penetrated-himself out of 8: TOP 1/0,
+VERS_TOP 1/1, VERS 1/4, VERS_BOTTOM 1/6, BOTTOM 0/8.
+
+**New content.** Preferences `fisting` and `rough_anal`, both registered as
+anal and penetrative activities so the existing role, preference and boundary
+machinery covers them with no special cases; `rough_anal` also counts as
+rough play. Added 4 fisting considerations, 4 fisting terms and 2 fisting
+closing terms; 5 rough anal considerations, 6 rough anal terms and 2 rough
+anal closing terms; and 2 further ways to finish inside him. The rough
+material is confined to anal insertion. Verified by measurement that all of
+it disappears when either player answers No, under NO_ANAL_PENETRATION, under
+NO_ROUGH_SEX for the rough items, and when neither player can bottom.
+
+**Options offered** at the closing step: terms 5 to 8, consideration actions
+6 to 9.
+
+**Intensity curve**, measured as eligible terms per act for an all-yes pair:
+acts 1 and 2 contain no penetrative terms at all, penetration enters at act 3
+(25 of 40), act 4 is the authority and bondage band, and act 5 is the hardest
+(20 of 50 penetrative, including all the new material). Every act has 40 to 50
+eligible terms, so no act falls back to a gentler one for lack of content.
+
+Six further closing terms were then added that name the act plainly — his cock
+into his partner's ass, and him emptying himself inside it — because the
+existing "he finishes inside him" wording could be read as his mouth. They are
+closing terms only, and at least one is guaranteed to be offered in every one
+of the 36 anal-role pairings where the finisher can top and his partner can
+bottom.
+
+Library totals afterwards: 212 regular terms, 40 closing terms, 133
+consideration actions.
+
+Everything above was verified by rendering every term, closing term and
+consideration — instruction text, titles and timer labels — in all four
+explicitness registers and grepping the rendered output rather than the
+source. All 53 tests pass.
+
+---
+
+### 4f. The running timer on the television, and the end-of-timer chime
+
+The television now shows the running timer as the hero of the screen, and
+plays a soft tone the moment a timer finishes.
+
+**The panel.** `ActiveTimerPanel` sits directly under the header, above
+everything else, and is pinned outside the scrolling area so it can never be
+below the fold. It shows one timer only — the running one, or a paused one, so
+that a paused clock does not read as a crash — with its label, its name, the
+remaining time at 74sp, a progress bar, and `segment N of M` when a term
+carries several. Nothing at all is drawn while every timer is idle or
+finished, so negotiation screens are unchanged.
+
+**The chime.** `app/src/main/res/raw/timer_chime.wav` is a 1.6-second E5 bell
+generated offline: three partials at a 0.22 peak, a 30 ms attack rather than a
+click, and an exponential decay into a quadratic tail. `ChimePlayer` plays it
+through `SoundPool` at a further 0.45 gain. It is deliberately quiet and slow
+to start, because it sounds in a room where two people are mid-scene. It uses
+`USAGE_MEDIA` so it rides the volume the room already set for music, and it
+**does not request audio focus**: a one-second tone is not worth ducking a
+track for. `ContractService` watches the same published view the screen
+renders and plays the tone on a `RUNNING -> COMPLETED` transition, so the
+sound and the screen can never disagree about when a timer ended.
+
+**Verified on the emulator** against the packaged release APK: the timer
+panel renders correctly and fits the screen whole, and audio playback was
+observed from the app's own process (`AudioTrack: createTrack_l`, pid
+confirmed as `com.thecontract.tv`) at the instant the `Making out` timer went
+to completed, with no crashes and no `SoundPool` errors.
+
+Four television layout defects were found while testing this and fixed:
+
+* **The header spaced itself five times.** `Header` emitted five children
+  straight into a column arranged with `spacedBy(20.dp)`, so every one of them
+  collected another 40 px. The header occupied 429 px of screen for 277 px of
+  content and pushed the clock off the bottom. It is now a single column: 233
+  px, and the clock fits with room to spare.
+* **The join code never rendered.** The QR code was a fixed 320 dp and the
+  card interior in the left column is exactly 320 dp, so the details beside it
+  were measured at zero width, every word wrapped to one letter per line, the
+  row grew to thousands of pixels and the code itself was centred far below
+  the screen. The card looked simply empty — on the one screen whose entire
+  purpose is showing a code to scan. The panel is now sized from the space
+  actually available, and the join URL sits full width beneath the code rather
+  than in a side column. Confirmed by decoding the QR out of a screenshot of
+  the running app: it reads back the correct join URL.
+* **"Server offline" while the server was serving.** `ServerHolder.boundPort`
+  and `serverRunning` were plain fields read during composition. The port binds
+  a second or two after the screen first draws, and on the idle start screen
+  nothing else ever triggers a recomposition, so the header said offline
+  forever. They are now backed by a `StateFlow` the activity collects.
+* **Player pills wrapped one character per line.** The title and three pills
+  shared a single row, so the pills were squeezed to a few pixels wide. The
+  header is now two rows, and pill text does not wrap.
+
+Nothing in this column is focusable, so a remote cannot scroll it: anything
+below the fold there is invisible on a real television. That is why the timer
+is pinned, and why the join code is placed above the prose card while pairing
+and dropped once play starts, when the term on offer is what has to be up
+there instead.
+
+---
+
+### 4g. One layout on every television, whatever density it reports
+
+Every size in the television UI is written in `dp` against a 960 x 540 canvas,
+which is what a 1080p set at xhdpi reports. Televisions do not agree on that.
+A 4K set is usually xxxhdpi and lands on the same 960 x 540 dp, but plenty of
+sets, boxes and sticks report something else — tvdpi, 4K pixels at xhdpi,
+1080p at xxhdpi — and the same `48.dp` is then a different fraction of the
+screen on each of them. The fixed 460 dp remote column is the sharp edge: on a
+set reporting a 480 x 270 dp canvas it is wider than the whole screen, so the
+left column is squeezed to nothing and everything else runs off the edges.
+
+`TvCanvas` removes the variable. It ignores the reported density, measures the
+window in **pixels**, and derives a density that makes those pixels come out as
+960 x 540 design units, keeping whatever is left over on the long axis if the
+panel is not 16:9. The layout is therefore expressed purely in fractions of the
+screen it is actually on: 1080p and 2160p produce the same layout, the 4K one
+simply drawn with four times the pixels, and no set can be too small for the
+design because the design is measured against that set.
+
+The accessibility text scale is deliberately not carried through. On a canvas
+fitted this tightly a 1.3x text scale is the difference between a clock that
+fits and a clock cut off at the bezel, and the type here is already sized for
+a ten-foot viewing distance.
+
+**Measured.** The same build was rendered at four reported densities on a
+1920 x 1080 panel — 160, 213, 320 and 480 dpi, i.e. device canvases from
+1920 x 1080 dp down to 640 x 360 dp, a threefold range — and the rendered node
+bounds are identical to the pixel at every one of them:
+
+| Device density | Canvas the device reports | "The Contract" | "Remote" | "Start a new game" |
+| --- | --- | --- | --- | --- |
+| 160 dpi | 1920 x 1080 dp | x 96..442, y 96..167 | x 904..1015 | x 952..1330, y 355..412 |
+| 213 dpi | 1442 x 811 dp | x 96..442, y 96..167 | x 904..1015 | x 952..1330, y 355..412 |
+| 320 dpi | 960 x 540 dp | x 96..442, y 96..167 | x 904..1015 | x 952..1330, y 355..412 |
+| 480 dpi | 640 x 360 dp | x 96..442, y 96..167 | x 904..1015 | x 952..1330, y 355..412 |
+
+The 320 dpi row is also identical to the layout before this change, so the
+standard case is untouched.
+
+A before-and-after was captured at 640 dpi (a 480 x 270 dp canvas) on the same
+device: the previous build drew only its remote column, overflowing both edges
+with the left column squeezed off screen entirely, while this build is
+indistinguishable from its own 1080p render.
+
+**Not verified:** a literal 3840 x 2160 framebuffer. Rebuilding the virtual
+device with a 4K panel did not produce one — the Android TV system image pins
+the logical display to 1920 x 1080 regardless, which is what many real 4K
+television devices also do, rendering the UI at 1080p and upscaling in
+hardware — and a wiped 4K emulator was too slow to drive in this CPU-only
+sandbox. The scale is derived from the framebuffer, so 2160p is the same
+arithmetic with a factor of four, but it has not been rendered on one.
+
+---
+
+### 4h. The launcher icon and television banner
+
+The app shipped with placeholder artwork: four thin bars on a near-black
+field, no name. Android TV shows a leanback app's **banner**, not its icon, so
+that is what sat in the launcher's Apps row — and beside Play, Settings and
+YouTube it read as an empty tile.
+
+Both assets were redrawn around one mark: a sheet of printed terms with a
+copper signature across it, which is the game in a picture and is discreet
+enough for a television anyone can walk past.
+
+* **Banner** (`drawable/tv_banner.xml`, 320 x 180): the mark on the left, and
+  the wordmark — "THE" tracked out in copper above "CONTRACT" in the page
+  colour, over a copper rule — on the right, on a warm dark gradient a shade
+  above the launcher's own background so the tile has an edge.
+* **Launcher icon** (`drawable/ic_launcher_foreground.xml` over a new
+  `ic_launcher_background.xml` gradient): the mark alone. Adaptive icons only
+  guarantee the central 72dp of their 108dp square and a circular mask
+  inscribes that, so the mark is scaled to put its far corners at 35.2 of the
+  36 units available. It was rendered at 192, 96, 64 and 48 px under both the
+  rounded-square and circular masks and stays legible and uncropped at all of
+  them.
+
+Both are **vector** drawables, for the same reason section 4g gives: one asset
+that is crisp on a 1080p set and a 2160p one, with no density buckets to get
+wrong. The wordmark is real type — glyph outlines lifted from DejaVu Serif
+Bold with fontTools and written into the path data, so nothing depends on a
+font being present on the device. DejaVu's licence (Bitstream Vera derived)
+permits this. `tools/make_icons.py` regenerates all three assets.
+
+Verified in the actual Android TV launcher: `aapt2 dump badging` reports the
+banner on both the application and the leanback activity, and after clearing
+the launcher's cached artwork the Apps row draws the new tile correctly
+between Settings and YouTube. The icon was verified by rendering the shipped
+vector rather than on-device, since the launcher never shows it for a leanback
+app.
+
+---
+
+### 4i. Who picks the consideration, and how the game climbs
+
+Three rules about consideration were wrong, and they were wrong together.
+
+**The wrong player was choosing.** Consideration is a payment: the player who
+gained more from the term owes it. He also got to pick what it was, which let
+him pay himself in whatever he happened to fancy. The list now opens on the
+other phone — the player who gained less is the one being paid, so he is the
+one who names the payment. The beneficiary still performs it. `GameEngine`
+rejects a pick from the wrong phone, and the two screens now say plainly which
+side of the deal each player is on.
+
+**Some options paid the wrong player.** Every consideration is written
+performer-to-recipient, so nearly all of them were already service. The
+exception was the eight where the performer's own cock does the work — he is
+being stimulated himself, which is not a payment. `ConsiderationAction` now
+carries `usesPerformersCock`, and the selector never offers those. Penetration
+is still available as consideration through fingers, a dildo, a plug and
+fisting, so a bottom who is owed is not short-changed.
+
+That flag fixed a second, older defect on the way: eligibility checked that
+the *recipient* could bottom but never that the performer could top, so a
+strict bottom could be handed an option that required him to fuck someone.
+
+*A judgement call worth knowing about:* the game's own benefit model treats
+being penetrated as the benefit and the top as the one doing the work, so
+"he fucks him" could be read either way. It is excluded here on the ground
+that consideration should be one-sided service. It is one flag per action to
+put back.
+
+**Neither terms nor consideration climbed reliably.** A term was weighted
+towards its act but the level above was still reachable, so a first proposal
+could be something two people had not worked up to. The act is now a ceiling:
+act one draws on level one only, act two on levels one and two, and so on.
+Consideration got a moving window — the current band and the one below it —
+so the opening offers hands, mouths and ears with nothing below the waist,
+and the hardest actions exist only in the last act. Two further fixes came out
+of reading the offers: no more than two actions from one family (three ear-play
+variants side by side made every late offer read as the same thing reworded),
+and wider scoring jitter, because the same two options had been heading the
+list for several terms running.
+
+Measured over a full quick game, in order: ears, back and stomach; external
+anal and slow oral; the wand; permission and the crop; clamped and fucked;
+then the two closing terms. Consideration alongside it: praise, scalp and
+kissing; nipples and body trail; oral and thighs; groin and external anal;
+fingers and toys; dildo, crop and fisting.
+
+**Read end to end.** A harness printed every screen both phones and the
+television show, for a game that also rejects, counteroffers, trades a bundle,
+backs out and repeats a consideration. Reading it turned up nine more defects,
+all fixed: "sucks both his ear"; "{G} slicks him" in an instruction that never
+named him; "lets neither drop"; "until his legs are unreliable" and "until he
+actually says the word" on terms that already carry timers; a sentence opening
+"While he strokes him with his hands" before either man is named; and, in the
+final scene, the term card repeating the instruction that was already on the
+screen above it and still showing the negotiating note about who earns whose
+signature, after the contract was signed.
+
+Three of those are a class rather than one-offs, so `RenderSweepTest` now
+renders every term, closing term and consideration in all four registers and
+fails on a pronoun that arrives before any name, a doubled word, a double
+space or a missing full stop. It flags zero. `ConsiderationFairnessTest`
+holds the three rules above over a whole game. 57 tests pass.
+
+---
+
+### 4j. Help bubbles on the two answers nobody understands
+
+A proposal offers four answers: sign, counteroffer, trade, reject. Two of them
+explain themselves and two do not, and an answer a player does not understand
+is one he never uses — which is most of why the trade mechanic went unused.
+
+Each of those two now carries a round **?** beside it on the phone. Tapping it
+opens a bubble under the button, with a tail pointing back at the **?**:
+
+* **Counteroffer** — "Changes this term instead of killing it. You pick one
+  change to it — gentler, shorter, roles swapped, no toys — and then you both
+  vote on the new version. If you both say yes it goes in the contract. If
+  either of you says no, the term is gone for good."
+* **Trade** — "Puts a second term in alongside this one, and you pick that
+  second term yourself from a short list — everywhere else the game chooses
+  for you. Both go in together or neither does, it uses two of your term
+  slots, and a single consideration pays for the pair instead of two. The
+  other player has to agree to it."
+
+Tapping anywhere else puts the bubble away, as does tapping the same **?**
+again, or Escape. The **?** and the bubble stop the event before it reaches
+the document handler, so a tap on either does not dismiss it. A bubble left
+open does not survive a change of screen — the open state is keyed to the
+phase and the term on offer, so the next proposal starts clean — but it does
+survive the ordinary re-renders that a state update causes, which would
+otherwise have snatched it away mid-read.
+
+One wrinkle worth recording: the Pause bar is stuck over the bottom of the
+screen, and a bubble opened near it had its last line hidden underneath.
+`scrollIntoView` is no help, because as far as it is concerned the bubble is
+already on screen. The overlap is measured against the bar's own height and
+the page scrolled by exactly that.
+
+Exercised in a real mobile-sized browser against the dev server, tapping
+rather than clicking: both bubbles open with the right text, a tap away
+closes, a second tap on the same **?** closes, a tap inside the bubble does
+not, and the button underneath still does its job — tapping Counteroffer
+through the open bubble sent the answer.
+
+---
+
+### 4k. A whole game played on the device, read screen by screen
+
+The delivered APK was installed on a wiped emulator — every earlier build
+uninstalled first — and a complete quick game was played through two
+phone-sized browser tabs driving the real controller against the real server
+in the app. Ten regular terms, two closing terms, twelve consideration
+rounds and a twelve-step final scene. Every screen either phone showed was
+captured as text and as a screenshot and read: 205 screens.
+
+Eight defects came out of it.
+
+**Two vague terms.** "Playing it straight" said only that the two of them
+"run the term as an authority scene, staying in character" — circular, and it
+tells a player nothing to actually do. It now has him giving an order roughly
+every thirty seconds and the other carrying each one out without speaking.
+"Held by the jaw" ended "until he is done" on a term that carries its own
+timer; it ends at the timer now.
+
+**Four deferrals to an agreement the game never makes.** Two degradation
+terms told the players to use "the terms they have already agreed on". No
+such agreement exists anywhere in the game. Both now stand on their own.
+
+**Three grammar faults that only exist after substitution.** "one of Dan's
+ear"; "reaches round to strokes his cock", where the lexicon hands back a
+third-person verb that cannot follow "to"; and "takes deeper onto Dan's
+cock", a `v_deep` variant that does not parse in the one register that used
+it. All three are now caught by `RenderSweepTest`, which grew two rules: a
+singular body part after "one of"/"both of", and a conjugated verb after
+"to".
+
+**The term card was labelled "Proposed term" on every screen that carried
+one** — 167 of the 212 screens in the first full run, including the screen
+that had just announced the term *signed*, every consideration screen, and
+every screen of the final scene, where nothing is being proposed to anybody.
+It now reads "Signed term", "The term being earned" or "Term in the scene"
+as appropriate, on the phone and on the television.
+
+**"Mark it complete" gave no sign it had worked.** Pressing it left the same
+button sitting there unchanged; the only feedback was the clock stopping. It
+is replaced by the fact of it — a "Marked complete" tag — and moving on
+becomes the obvious next press.
+
+**The last term of the scene offered "Next term".** There is no next term at
+step 12 of 12; that button ends the session. It now says "Finish the
+contract".
+
+Two things found and deliberately not treated as product defects. A cold
+first launch after a fresh install still trips the `startForeground` window
+on this unaccelerated emulator, as already recorded in section 1; the second
+launch is fine. And the driver's own clicks were being lost until it stopped
+re-clicking timer controls and started pressing buttons inside a single page
+evaluation — the phone rebuilds its DOM on a state change, which is correct
+behaviour and not something a human thumb races.
+
+---
+
+### 4l. Every build shipped as versionCode 1, and a sweep for judgement calls
+
+**The launcher tile went blank again.** The artwork was not the problem: the
+vectors are byte-identical to the build where it was verified, the packaged
+`res/FL.xml` is a full 10 KB rather than a shrunk stub, and on the emulator
+the banner draws correctly in both the apps drawer and the home favourites
+row. The problem was `versionCode = 1`, hard-coded, on every build shipped so
+far. A launcher caches an app's banner, icon and label keyed by package and
+re-reads them when the version changes; half a dozen different APKs all
+claiming to be version 1 left the television showing whichever artwork it saw
+first, which was the original placeholder — dark bars on near-black, i.e. a
+blank tile. `versionCode` now derives from the commit count and `versionName`
+follows it, so no two builds can ever again claim to be the same version.
+
+**Vague completion conditions, swept rather than picked off.** Three more were
+reported by hand — "until he swears at him for it", "until he goes loose",
+"until the muscle stops fighting him" — so the whole library was catalogued by
+its `until` clauses instead. Twenty-seven were judgement calls about how the
+other man was feeling; all are now anchored to the timer, a count, or a spoken
+cue. `RenderSweepTest` now fails any instruction that ends on anything except
+a timer, a count, an orgasm, a spoken instruction or a plain physical fact.
+
+**Then every one of the 385 rendered instructions was read.** That turned up
+fifteen more defects, most of them invisible in the source:
+
+* `{G} and {R} [v_rim] each other` rendered as "Marcus and Dan **eats** each
+  other" — the lexicon only knows the third person singular, so four
+  reciprocal actions had a singular verb on two subjects.
+* "using it to set how deep he goes on every stroke, **all the wants him**" —
+  a garbled fragment.
+* `from [adv_thrust_slow] to [adv_thrust_hard]` gave "from **in** long, deep
+  strokes to **in** brutal, fast strokes", in three places.
+* "clips the leash onto **Dan's the collar**", from a possessive in front of an
+  equipment name that already carries its own article.
+* "has him **swallows** him", twice — a conjugated verb after "has him".
+* "kneads his shoulders and chest **over** with nails and teeth"; "Dan is
+  **blindfolded with the blindfold**"; "agrees to being his property for the
+  night **for the rest of the night**".
+* Vague: "until he is done with him", "until he is finished", "every spot that
+  makes him swear" (twice), "past the point where he starts pushing his chest
+  up", "however long it takes", "does not give him a second", and two
+  roleplay terms that asked the players to "run the capture scene properly"
+  without saying what that is.
+
+Three more rules went into the sweep for the classes that can recur: a plural
+subject with a singular verb, a possessive followed by "the", and a conjugated
+verb after "has him". The sweep flags zero across all four registers.
+
+**Consideration options now show their timing.** Choosing between actions
+without knowing whether one runs forty-five seconds or four minutes is
+choosing blind. Each option carries `Timed: Mouth 1:00 · Neck 1:00 · Chest
+1:00 · 3:00 in total`, on the phone and on the television, on the selection
+screen as well as during it.
 
 ---
 

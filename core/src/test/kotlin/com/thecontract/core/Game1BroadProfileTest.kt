@@ -86,14 +86,18 @@ class Game1BroadProfileTest {
         val closingFor = final.negotiation.signedClosing.mapNotNull { it.closingFor }.toSet()
         assertEquals(setOf(Slot.PLAYER_1, Slot.PLAYER_2), closingFor, "both players must climax")
 
-        // Beneficiaries are assigned, and a mutual term has none by design.
+        // A term both men perform has no beneficiary by design. A term only one man performs may
+        // still have none — an order obeyed or a rule kept is done by one of them and benefits
+        // neither, because being the one in charge of it is not a benefit.
         final.negotiation.signed.forEach { signed ->
-            if (!signed.term.mutual) {
-                assertNotNull(signed.term.beneficiary, "term ${signed.term.termId} has no beneficiary")
-            } else {
+            if (signed.term.mutual) {
                 assertNull(signed.term.beneficiary, "mutual term ${signed.term.termId} named a beneficiary")
             }
         }
+        assertTrue(
+            final.negotiation.signed.any { it.term.beneficiary != null },
+            "no signed term named a beneficiary at all"
+        )
 
         // The plan actually exercised what it claimed to.
         assertTrue(driver.backsTaken.isNotEmpty(), "Back navigation was never exercised")
@@ -114,9 +118,10 @@ class Game1BroadProfileTest {
         assertTrue(driver.timerStarts.size > 20, "timers were barely used: ${driver.timerStarts.size}")
 
         // The two climax terms always execute last.
-        val order = final.finale.executionOrder
-        assertEquals(final.negotiation.signed.size, order.size)
-        val lastTwo = order.takeLast(2).map { final.negotiation.signed[it] }
+        val order = final.finale.executionSteps
+        // One step per term performed, so a trade contributes two.
+        assertEquals(final.negotiation.signed.sumOf { it.allTerms.size }, order.size)
+        val lastTwo = order.takeLast(2).map { final.negotiation.signed[it.signedIndex] }
         assertTrue(lastTwo.all { it.closingFor != null }, "climax terms are not last in the running order")
 
         // TV and phones agree on the authoritative version.
@@ -144,7 +149,7 @@ class Game1BroadProfileTest {
             val final = driver.run()
             assertEquals(GamePhase.COMPLETED, final.phase, "order $order did not complete")
             assertEquals(order, final.finale.chosenOrder)
-            val lastTwo = final.finale.executionOrder.takeLast(2).map { final.negotiation.signed[it] }
+            val lastTwo = final.finale.executionSteps.takeLast(2).map { final.negotiation.signed[it.signedIndex] }
             assertTrue(lastTwo.all { it.closingFor != null }, "order $order moved a climax term earlier")
             assertEquals(final.version, h.tvView().version)
         }
@@ -173,8 +178,9 @@ class Game1BroadProfileTest {
         val (_, driver) = playBroadGame(finale = FinaleFormat.UNINTERRUPTED)
         val final = driver.run()
         assertEquals(FinaleOrder.SMOOTH_ESCALATION, final.finale.chosenOrder)
-        val regular = final.finale.executionOrder
-            .map { final.negotiation.signed[it] }
+        val regular = final.finale.executionSteps
+            .filterNot { it.bundled }
+            .map { final.negotiation.signed[it.signedIndex] }
             .filter { it.closingFor == null }
             .map { it.term.level }
         assertEquals(regular.sorted(), regular, "smooth escalation must run gentlest first")

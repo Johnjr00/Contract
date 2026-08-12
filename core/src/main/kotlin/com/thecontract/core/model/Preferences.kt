@@ -31,7 +31,16 @@ data class Preference(
     val section: PreferenceSection,
     val activity: String,
     val direction: Direction,
-    val label: String
+    val label: String,
+    /**
+     * False for a preference the game does not put to the players at all and takes as a Yes.
+     *
+     * It stays in the library rather than being deleted, because terms are written against
+     * activities and the eligibility engine looks up the giving and receiving side of every one of
+     * them by id. Removing the record would leave those terms referring to nothing; removing the
+     * *question* is what was actually wanted.
+     */
+    val asked: Boolean = true
 )
 
 /**
@@ -109,6 +118,8 @@ object PreferenceLibrary {
         pair(a, "anal_toys", "Using anal toys on him", "Having anal toys used on me")
         pair(a, "topping", "Fucking his ass", "Having my ass fucked by him")
         pair(a, "bottoming", "Bottoming for him", "Having him bottom for me")
+        pair(a, "rough_anal", "Fucking his hole hard and rough", "Having my hole fucked hard and rough")
+        pair(a, "fisting", "Pushing my hand into his hole", "Taking his hand inside me")
 
         // --- Toys -----------------------------------------------------------------------
         val y = PreferenceSection.TOYS
@@ -166,13 +177,93 @@ object PreferenceLibrary {
         neutral(f, "watching_porn", "Watching porn together")
     }
 
-    /** All preferences, in phone-display order. */
-    val all: List<Preference> = builder.toList()
+    /**
+     * Preferences the profile no longer asks about, and which every player is taken to have said
+     * Yes to.
+     *
+     * These are the parts of the game nobody was ever going to decline in a way that mattered —
+     * most of the massage vocabulary, the language and orgasm-control questions, the roleplay
+     * framings — and asking about each of them separately made the profile long enough that the
+     * answers stopped being considered. A shorter list of questions people actually read is worth
+     * more than a longer one they click through.
+     *
+     * Two whole sections are emptied by this and drop out of the form altogether.
+     */
+    private val ASSUMED_YES: Set<String> = setOf(
+        "body_worship_give",
+        "body_worship_receive",
+        "foot_stimulation_give",
+        "foot_stimulation_receive",
+        "massage_general_give",
+        "massage_general_receive",
+        "massage_light_give",
+        "massage_light_receive",
+        "massage_deep_give",
+        "massage_deep_receive",
+        "massage_scalp_give",
+        "massage_scalp_receive",
+        "massage_jaw_face_give",
+        "massage_jaw_face_receive",
+        "massage_neck_shoulders_give",
+        "massage_neck_shoulders_receive",
+        "massage_upper_back_give",
+        "massage_upper_back_receive",
+        "massage_lower_back_give",
+        "massage_lower_back_receive",
+        "massage_chest_give",
+        "massage_chest_receive",
+        "massage_arms_hands_give",
+        "massage_arms_hands_receive",
+        "massage_buttocks_hips_give",
+        "massage_buttocks_hips_receive",
+        "massage_inner_thighs_give",
+        "massage_inner_thighs_receive",
+        "massage_calves_feet_give",
+        "massage_calves_feet_receive",
+        "massage_groin_give",
+        "massage_groin_receive",
+        "massage_oil_give",
+        "massage_oil_receive",
+        "ownership_language_give",
+        "ownership_language_receive",
+        "permission_control_give",
+        "explicit_praise_give",
+        "explicit_praise_receive",
+        "degradation_give",
+        "degradation_receive",
+        "dirty_talk_give",
+        "dirty_talk_receive",
+        "edging_give",
+        "edging_receive",
+        "denial_give",
+        "denial_receive",
+        "climax_permission_give",
+        "climax_permission_receive",
+        "roleplay_lead_give",
+        "roleplay_lead_receive",
+        "strangers_fantasy",
+        "authority_roleplay",
+        "capture_roleplay",
+        "mirror_play",
+        "watching_porn",
+    )
+
+    /** Every preference, asked or assumed, in phone-display order. */
+    val all: List<Preference> = builder.map { it.copy(asked = it.id !in ASSUMED_YES) }
 
     val byId: Map<String, Preference> = all.associateBy { it.id }
 
+    /** The ones actually put to a player. */
+    val asked: List<Preference> = all.filter { it.asked }
+
+    /**
+     * The form, section by section. A section with nothing left to ask is not shown: an empty
+     * heading reads as a question that failed to load.
+     */
     val bySection: Map<PreferenceSection, List<Preference>> =
-        PreferenceSection.entries.associateWith { s -> all.filter { it.section == s } }
+        PreferenceSection.entries
+            .associateWith { s -> asked.filter { it.section == s } }
+            .filterValues { it.isNotEmpty() }
 
     fun require(id: String): Preference =
         byId[id] ?: error("Unknown preference id: $id")
@@ -183,8 +274,8 @@ object PreferenceLibrary {
     /** Convenience: the id of the receiving side of an activity. */
     fun receive(activity: String): String = "${activity}_receive"
 
-    /** A fresh profile: every preference at Maybe. */
-    fun blankAnswers(): Map<String, Answer> = all.associate { it.id to Answer.MAYBE }
+    /** A fresh profile: every preference that is asked about, at Maybe. */
+    fun blankAnswers(): Map<String, Answer> = asked.associate { it.id to Answer.MAYBE }
 }
 
 /**
@@ -194,7 +285,6 @@ object PreferenceLibrary {
  */
 @Serializable
 enum class MaybeCondition(val id: String, val label: String) {
-    ASK_AGAIN("ask_again", "Ask again immediately before starting"),
     GENTLER("gentler", "Gentler version"),
     UNDER_TWO_MINUTES("under_two_minutes", "Keep it under two minutes"),
     ROLES_REVERSED("roles_reversed", "Roles reversed"),
@@ -202,12 +292,11 @@ enum class MaybeCondition(val id: String, val label: String) {
     WITHOUT_TOY("without_toy", "Without a toy"),
     WITHOUT_RESTRAINT("without_restraint", "Without restraint"),
     SAVE_FOR_FINALE("save_for_finale", "Save it for the finale"),
-    PAUSE_MIDWAY("pause_midway", "Pause midway for a direct check-in"),
     STOP_BEFORE_ORGASM("stop_before_orgasm", "Stop before orgasm"),
     MASSAGE_FIRST("massage_first", "Begin with at least five minutes of massage");
 
     companion object {
-        /** Accepts either the wire id ("ask_again") or the enum name ("ASK_AGAIN"). */
+        /** Accepts either the wire id ("gentler") or the enum name ("GENTLER"). */
         fun byId(id: String): MaybeCondition? =
             entries.firstOrNull { it.id == id || it.name == id }
     }
@@ -223,8 +312,6 @@ enum class Amendment(val id: String, val label: String) {
     NO_TOYS("no_toys", "No toys"),
     NO_RESTRAINT("no_restraint", "No restraint"),
     STOP_BEFORE_ORGASM("stop_before_orgasm", "Stop before orgasm"),
-    MIDPOINT_CHECK("midpoint_check", "Midpoint check"),
-    ASK_AGAIN("ask_again", "Ask again immediately before execution"),
     SAVE_FOR_FINALE("save_for_finale", "Save for finale"),
     TRADE_ONLY("trade_only", "Trade only");
 

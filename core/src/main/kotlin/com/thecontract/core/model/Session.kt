@@ -20,9 +20,16 @@ data class SharedSetup(
     val explicitness: Explicitness = Explicitness.DIRECT,
     val finaleFormat: FinaleFormat = FinaleFormat.THREE_ORDERS,
     val stopWord: String = "red",
-    val defaultMaybeCondition: MaybeCondition = MaybeCondition.ASK_AGAIN,
+    val defaultMaybeCondition: MaybeCondition = MaybeCondition.GENTLER,
     val boundaries: Set<Boundary> = emptySet(),
-    val equipment: Set<Equipment> = emptySet()
+    val equipment: Set<Equipment> = emptySet(),
+    /**
+     * Whether the television reads instructions out loud.
+     *
+     * Speech is public by its nature, so this only ever applies to what is already on the TV —
+     * never to a private list open on one phone. See [com.thecontract.core.protocol.Narration].
+     */
+    val narrationEnabled: Boolean = true
 ) {
     fun player(slot: Slot): PlayerSetup = if (slot == Slot.PLAYER_1) player1 else player2
 
@@ -57,7 +64,18 @@ data class PrivateProfile(
     val maybeConditions: Map<String, MaybeCondition> = emptyMap(),
     val complete: Boolean = false
 ) {
-    fun answer(prefId: String): Answer = answers[prefId] ?: Answer.MAYBE
+    /**
+     * A preference the profile does not ask about is a Yes, whatever happens to be stored.
+     *
+     * Stored answers are ignored for those rather than merely defaulted, so a profile saved before
+     * a question was retired does not keep a stale No alive and quietly filter content the game no
+     * longer offers any way to decline. An unrecognised id is still a Maybe: that is a question
+     * this build does not know about, not one it has decided for the player.
+     */
+    fun answer(prefId: String): Answer = when {
+        PreferenceLibrary.byId[prefId]?.asked == false -> Answer.YES
+        else -> answers[prefId] ?: Answer.MAYBE
+    }
 }
 
 @Serializable
@@ -91,7 +109,30 @@ data class SignedTerm(
     val regularSlotsConsumed: Int get() = if (bundledTerm != null) 2 else 1
 
     val allTerms: List<RenderedTerm> get() = listOfNotNull(term, bundledTerm)
+
+    /** The half of this item a given execution step performs. */
+    fun half(bundled: Boolean): RenderedTerm? = if (bundled) bundledTerm else term
 }
+
+/**
+ * One thing performed in the final scene.
+ *
+ * A trade is signed as a single contract item holding two terms, and for everything up to the
+ * finale that is the right shape: it is approved once, paid for with one consideration and
+ * occupies two slots as a unit. Performing it is the one place where that shape is wrong. The two
+ * halves are separate acts with their own instructions and their own timers, and — because the
+ * binding that keeps the benefit alternating casts the owed man as giver in one and receiver in
+ * the other — frequently with the giver and receiver the other way round. Run as a single step
+ * they took the first term's instruction, the first term's controller and the first term's
+ * completer, so the second was performed silently, timed against the wrong clock and marked
+ * complete by the wrong man.
+ */
+@Serializable
+data class ExecutionStep(
+    val signedIndex: Int,
+    /** True for the second term of a trade. */
+    val bundled: Boolean = false
+)
 
 @Serializable
 data class CurrentProposal(
@@ -183,8 +224,16 @@ data class FinaleState(
     val orderVotes: Map<Slot, FinaleOrder> = emptyMap(),
     val revealedBallot: List<FinaleOrder> = emptyList(),
     val chosenOrder: FinaleOrder? = null,
-    /** Signed-term indices in the order they will be executed. Climax terms always last. */
-    val executionOrder: List<Int> = emptyList(),
+    /**
+     * What is performed, in order. Climax terms always last, and the two halves of a trade always
+     * next to each other, because they were agreed as one thing.
+     *
+     * Named apart from the `executionOrder` list of plain indices this replaced, so a session
+     * saved by an older build decodes rather than being thrown away: the old key is now unknown
+     * and skipped, this one falls back to its default, and [com.thecontract.core.engine.FinaleOrdering]
+     * rebuilds the list from the signed contract.
+     */
+    val executionSteps: List<ExecutionStep> = emptyList(),
     val stepIndex: Int = 0,
     val stepsCompleted: Set<Int> = emptySet(),
     val stepStarted: Boolean = false
@@ -210,6 +259,12 @@ data class GameState(
     val pause: PauseState = PauseState(),
     /** Set while the draft is open so it can be closed back into the exact prior state. */
     val draftReviewOpen: Boolean = false,
+    /**
+     * Bumped by the "Read it again" button. The television narrates whenever the text it would
+     * speak changes, so raising this counter is all a replay needs to be: the key changes, and
+     * the same words are spoken again.
+     */
+    val narrationNonce: Int = 0,
     /**
      * Bounded ring of client action ids already applied. Makes every mutation idempotent, so a
      * double tap, a retry after a dropped WebSocket or a replayed message cannot double-sign a

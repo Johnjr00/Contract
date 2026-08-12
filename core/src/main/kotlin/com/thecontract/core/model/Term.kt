@@ -28,6 +28,16 @@ data class TimerSpec(val label: String, val seconds: Int) {
  * (used for Filthy/Extremely filthy). Within each register the lexicon still differentiates
  * every level, and Extremely filthy additionally appends [extremeTail].
  */
+/**
+ * A labelled list of suggestions shown under an instruction.
+ *
+ * Some instructions tell a man to do something without telling him what — "talks filth", "names
+ * a position". The instruction stays as written and the suggestions sit under it with their own
+ * heading, so nobody mistakes an example for an order.
+ */
+@Serializable
+data class Suggestions(val heading: String, val items: List<String>)
+
 @Serializable
 data class Term(
     val id: String,
@@ -54,6 +64,20 @@ data class Term(
     val timers: List<TimerSpec> = emptyList(),
     val mutual: Boolean = false,
     val extremeTail: String? = null,
+    /**
+     * Lines a player could actually say, for an instruction that tells him to talk without
+     * telling him what to say — "talks filth", "spells out what he is going to do to him",
+     * "says out loud who he belongs to". Suggestions, not part of the instruction: he is free to
+     * say something else. Split by register on the same rule as [base] and [explicit].
+     */
+    val examples: List<String> = emptyList(),
+    val examplesExplicit: List<String> = emptyList(),
+    /**
+     * Positions a player could put the other in, for an instruction that tells him to name or
+     * choose one. Register-independent: a position is a physical arrangement of two bodies and
+     * reads the same however coarse the rest of the sentence is.
+     */
+    val positions: List<String> = emptyList(),
     /** Climax terms are negotiated separately at the end and always execute last. */
     val climax: Boolean = false
 ) {
@@ -88,7 +112,21 @@ data class ConsiderationAction(
     val timers: List<TimerSpec> = emptyList(),
     /** Reciprocal action: both players control timers and both confirm completion. */
     val mutual: Boolean = false,
-    val extremeTail: String? = null
+    /**
+     * The performer's own cock is what the act is done with.
+     *
+     * Two things follow. He has to be able to top, which a toy or a hand would not require of
+     * him. And he is being stimulated himself, so the act is not pure service — consideration is
+     * owed by the player who gained more from the term, and an option that gets him off as well
+     * is not a payment. The selector leaves these out of what it offers.
+     */
+    val usesPerformersCock: Boolean = false,
+    val extremeTail: String? = null,
+    /** Lines he could say, for an action that tells him to talk. See [Term.examples]. */
+    val examples: List<String> = emptyList(),
+    val examplesExplicit: List<String> = emptyList(),
+    /** Positions he could use, for an action that tells him to choose one. See [Term.positions]. */
+    val positions: List<String> = emptyList()
 )
 
 @Serializable
@@ -123,7 +161,9 @@ data class RenderedTerm(
     /** Set by the "Save for finale" amendment or Maybe condition. */
     val deferToEnd: Boolean = false,
     /** Set by the "Trade only" amendment or the "Only as part of a trade" Maybe condition. */
-    val requiresTrade: Boolean = false
+    val requiresTrade: Boolean = false,
+    /** Labelled suggestion lists shown under the instruction. Never mandatory. */
+    val suggestions: List<Suggestions> = emptyList()
 ) {
     val totalSeconds: Int get() = timers.sumOf { it.seconds }
 }
@@ -142,5 +182,7 @@ data class RenderedConsideration(
     val recipient: Slot,
     val mutual: Boolean,
     val intensity: Int,
-    val equipmentUsed: List<String>
+    val equipmentUsed: List<String>,
+    /** Labelled suggestion lists shown under the instruction. Never mandatory. */
+    val suggestions: List<Suggestions> = emptyList()
 )

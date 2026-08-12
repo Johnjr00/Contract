@@ -23,9 +23,7 @@ object BenefitAnalysis {
         val weight = when (term.benefitType) {
             BenefitType.PENETRATION_RECIPIENT,
             BenefitType.ORAL_RECIPIENT,
-            BenefitType.RIMMING_RECIPIENT,
-            BenefitType.ORGASM_CONTROL,
-            BenefitType.OWNERSHIP -> 2
+            BenefitType.RIMMING_RECIPIENT -> 2
             else -> 1
         }
         return when (term.benefitParty) {
@@ -69,32 +67,32 @@ object BenefitAnalysis {
                 "who has to earn $giver's signature for it."
         }
         val beneficiary = beneficiary(term, binding)
-        val who = beneficiary?.let { setup.name(it) }
-        val other = beneficiary?.let { setup.name(it.other) }
+        if (beneficiary == null) {
+            return "Benefit is balanced: nobody is on the receiving end of this one, so being the man " +
+                "in charge of it counts for nothing. Consideration is reciprocal — both of you perform, " +
+                "and both of you confirm."
+        }
+        val who = setup.name(beneficiary)
+        val other = setup.name(beneficiary.other)
+        // Written from the beneficiary's side rather than the receiver's, because the man who is
+        // worked on is not always the one the term calls its receiver — a term where the
+        // submissive serves with his mouth is received by the dominant.
         val reason = when (term.benefitType) {
-            BenefitType.MASSAGE_RECIPIENT -> "$receiver is the one being worked on here, and the player on the table gets more out of it than the player doing the work"
-            BenefitType.KISS_RECIPIENT -> "$receiver is on the receiving end of the kissing, which is where the pleasure sits in this one"
-            BenefitType.EAR_PLAY_RECIPIENT -> "$receiver is the one having his ears worked, and that is the whole point of the term"
-            BenefitType.ORAL_RECIPIENT -> "$receiver has someone else's mouth on him for the whole term, and $giver is doing the work"
-            BenefitType.RIMMING_RECIPIENT -> "$receiver is the one being eaten out, and $giver is the one putting in the effort"
-            BenefitType.HAND_STIMULATION_RECIPIENT -> "$receiver is the one being worked over, and $giver is doing all of it"
-            BenefitType.TOY_RECIPIENT -> "$receiver is the one the toy is being used on, and $giver is running it"
-            BenefitType.FINGERING_RECIPIENT -> "$receiver is the one being opened up and worked, and $giver is doing it to him"
-            BenefitType.PENETRATION_RECIPIENT -> "$receiver is the one physically taken here, which is the larger share of the term"
-            BenefitType.COMMAND_AUTHORITY -> "$giver walks away with the authority in this one, and authority is the thing being traded"
-            BenefitType.OWNERSHIP -> "$giver gains the ownership this term hands over, which is the whole substance of it"
-            BenefitType.PERMISSION_CONTROL -> "$giver ends up deciding what $receiver is allowed to do, which is a real gain for $giver"
-            BenefitType.RESTRAINT_CONTROL -> "$giver has control of the restraint and therefore of the whole term"
-            BenefitType.ORGASM_CONTROL -> "$giver takes control of when $receiver is allowed to finish, and that control is the benefit"
-            BenefitType.SERVICE_RECIPIENT -> "$receiver is served throughout, and $giver does the serving"
-            BenefitType.MUTUAL -> "this one runs both ways and neither of them is doing more of the work"
+            BenefitType.MASSAGE_RECIPIENT -> "$who is the one being worked on, and $other is doing the work"
+            BenefitType.KISS_RECIPIENT -> "$who is on the receiving end of the kissing"
+            BenefitType.EAR_PLAY_RECIPIENT -> "$who is the one having his ears worked, and that is the whole point of it"
+            BenefitType.ORAL_RECIPIENT -> "$who has $other's mouth on him for the whole term"
+            BenefitType.RIMMING_RECIPIENT -> "$who is the one being eaten out, and $other is putting in the effort"
+            BenefitType.HAND_STIMULATION_RECIPIENT -> "$who is the one being worked over, and $other is doing all of it"
+            BenefitType.TOY_RECIPIENT -> "$who is the one the toy is used on, and $other is running it"
+            BenefitType.FINGERING_RECIPIENT -> "$who is the one being opened up and worked"
+            BenefitType.PENETRATION_RECIPIENT -> "$who is the one physically taken here"
+            BenefitType.IMPACT_RECIPIENT -> "$who is the one taking every stroke, and $other is only landing them"
+            BenefitType.HANDLING_RECIPIENT -> "$who is the one being moved and held, and $other is doing it to him"
+            BenefitType.SERVICE_RECIPIENT -> "$who is served throughout, and $other does the serving"
+            BenefitType.MUTUAL -> "neither of them is doing more of the work"
         }
-        return if (beneficiary == null || who == null || other == null) {
-            "Benefit is balanced: $reason. Consideration for this term is reciprocal — both of you " +
-                "perform, and both of you confirm."
-        } else {
-            "$who benefits more from this term because $reason. $who therefore earns $other's signature."
-        }
+        return "$who benefits more from this term because $reason. $who therefore earns $other's signature."
     }
 
     fun bundleExplanation(parts: List<Pair<Term, PartyBinding>>, setup: SharedSetup): String {

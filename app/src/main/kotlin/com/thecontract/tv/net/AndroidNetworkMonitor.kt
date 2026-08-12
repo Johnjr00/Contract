@@ -9,6 +9,7 @@ import android.net.NetworkRequest
 import com.thecontract.core.net.InterfaceKind
 import com.thecontract.core.net.LocalInterface
 import com.thecontract.core.net.NetworkScanner
+import com.thecontract.tv.ContractLog
 import java.net.Inet4Address
 
 /**
@@ -95,7 +96,16 @@ class AndroidNetworkMonitor(
             .sortedWith(compareByDescending<LocalInterface> { it.priority }.thenBy { it.address })
     }
 
-    private fun publish() = onChange(current())
+    /**
+     * Runs on the system's connectivity callback thread, and rebuilds and broadcasts the whole
+     * television view. Guarded because a failure there would reach the top of a thread the app
+     * does not own, which on Android ends the process — a Wi-Fi blip is not grounds for losing
+     * the game in progress.
+     */
+    private fun publish() {
+        runCatching { onChange(current()) }
+            .onFailure { ContractLog.w("Network change not applied: ${it.message}") }
+    }
 
     fun start() {
         val request = NetworkRequest.Builder()

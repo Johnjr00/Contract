@@ -32,7 +32,8 @@
     timerAnchor: 0,
     profileDraft: null,
     setupDraft: null,
-    reclaim: null
+    reclaim: null,
+    pendingActions: []
   };
 
   // ------------------------------------------------------------------ helpers
@@ -99,6 +100,7 @@
       if (S.resume && S.resume.token) hello.resumeToken = S.resume.token;
       send(hello);
       startPing();
+      flushPending();
     };
 
     ws.onmessage = function (event) {
@@ -128,16 +130,45 @@
     return true;
   }
 
+  /**
+   * Resends every action still awaiting a reply. Safe to call on every reconnect: each envelope
+   * keeps its original actionId, and the server already deduplicates by actionId and rejects a
+   * stale expectedVersion, so a resend can only be a harmless no-op if the original somehow did
+   * get through, or applied exactly once if it did not. An envelope is removed from the queue
+   * only once its ACTION_ACCEPTED/ACTION_REJECTED reply arrives (see handle()), not merely
+   * because send() returned true -- a send can succeed locally and still never reach the server
+   * if the connection drops in the window before the reply comes back.
+   */
+  function flushPending() {
+    S.pendingActions.forEach(function (envelope) { send(envelope); });
+  }
+
+  function removePending(actionId) {
+    S.pendingActions = S.pendingActions.filter(function (envelope) { return envelope.actionId !== actionId; });
+  }
+
   function act(action) {
-    if (!send({ type: "PLAYER_ACTION", actionId: uuid(), expectedVersion: S.version, action: action })) {
-      toast("Not connected yet. Trying again.");
+    var envelope = { type: "PLAYER_ACTION", actionId: uuid(), expectedVersion: S.version, action: action };
+    S.pendingActions.push(envelope);
+    if (!send(envelope)) {
+      // A brief reconnect (a real one happens even on a healthy local network) must not silently
+      // drop the tap that triggered it -- it stays queued and flushPending() resends it once
+      // reconnected.
+      toast("Not connected. Will send again once reconnected.");
       connect();
     }
   }
 
+  /**
+   * Application-level heartbeat. The server also pings this socket on its own schedule, and the
+   * browser answers those automatically without waking any page script, so this is the second
+   * line of defence rather than the only one -- which matters because mobile browsers throttle
+   * setInterval hard once the tab is backgrounded or the screen locks. The interval must stay
+   * comfortably inside the server's socket read timeout (ContractServer.SOCKET_TIMEOUT_MS).
+   */
   function startPing() {
     stopPing();
-    S.pingTimer = setInterval(function () { send({ type: "PING", t: Date.now() }); }, 15000);
+    S.pingTimer = setInterval(function () { send({ type: "PING", t: Date.now() }); }, 10000);
   }
   function stopPing() { clearInterval(S.pingTimer); }
 
@@ -193,10 +224,12 @@
 
       case "ACTION_ACCEPTED":
         S.version = msg.version;
+        removePending(msg.actionId);
         return;
 
       case "ACTION_REJECTED":
         S.version = msg.version;
+        removePending(msg.actionId);
         if (msg.code === "STALE_VERSION") {
           toast("That screen had moved on. Showing the current one.");
         } else if (msg.code !== "DUPLICATE") {
@@ -228,9 +261,47 @@
     main.appendChild(card);
   }
 
+  // ------------------------------------------------------------------ choice help
+
+  /*
+   * Two of the four answers to a proposal are not self-explanatory, and a player who does not
+   * understand them simply never uses them. Each gets a "?" beside it that opens a bubble.
+   * Plain words only: this is read by someone mid-scene, not studying.
+   */
+  var HELP = {
+    counteroffer:
+      "Changes this term instead of killing it. You pick one change to it \u2014 gentler, " +
+      "shorter, roles swapped, no toys \u2014 and then you both vote on the new version. " +
+      "If you both say yes it goes in the contract. If either of you says no, the term is " +
+      "gone for good.",
+    bundle:
+      "Puts a second term in alongside this one, and you pick that second term yourself from " +
+      "a short list \u2014 everywhere else the game chooses for you. Both go in together or " +
+      "neither does, it uses two of your term slots, and a single consideration pays for the " +
+      "pair instead of two. The other player has to agree to it."
+  };
+
+  var openHelp = null;       // id of the choice whose bubble is showing
+  var openHelpKey = "";      // what was on screen when it was opened
+  var helpJustOpened = false; // scroll it clear of the Pause bar, but only on the opening tap
+
+  /* A new proposal, or any new screen, closes a bubble left open on the last one. */
+  function helpKey(v) {
+    return (v.phase || "") + "|" + ((v.term && v.term.termId) || "");
+  }
+
+  function closeHelp() {
+    if (openHelp === null) return false;
+    openHelp = null;
+    render();
+    return true;
+  }
+
   function render() {
     var v = S.view;
     if (!v) return;
+
+    if (helpKey(v) !== openHelpKey) { openHelp = null; openHelpKey = helpKey(v); }
 
     $("who").textContent = (v.names && v.names[v.slot] ? v.names[v.slot] : v.slot === "PLAYER_1" ? "Player 1" : "Player 2") +
       (v.roles && v.roles[v.slot] ? " · " + (v.roles[v.slot] === "DOMINANT" ? "Dominant" : "submissive") : "");
@@ -276,7 +347,7 @@
 
     if (v.setup) main.appendChild(renderSetup(v.setup));
     if (v.profile) main.appendChild(renderProfile(v.profile));
-    if (v.term) main.appendChild(renderTerm(v.term, "Proposed term"));
+    if (v.term) main.appendChild(renderTerm(v.term, termLabel(v)));
     if (v.bundledTerm) main.appendChild(renderTerm(v.bundledTerm, "Second term in the trade"));
     if (v.termOptions && v.termOptions.length) {
       v.termOptions.forEach(function (t) { main.appendChild(renderTerm(t, "Option")); });
@@ -299,7 +370,46 @@
         b.appendChild(document.createTextNode(c.label));
         if (c.detail) b.appendChild(el("small", null, c.detail));
         b.addEventListener("click", function () { dispatchChoice(c.id); });
-        list.appendChild(b);
+
+        if (!HELP[c.id]) { list.appendChild(b); return; }
+
+        var wrap = el("div", "choice-help");
+        var row = el("div", "choice-row");
+        row.appendChild(b);
+
+        var q = el("button", "help-btn", "?");
+        q.type = "button";
+        q.setAttribute("aria-label", "What does \u201c" + c.label + "\u201d do?");
+        q.setAttribute("aria-expanded", openHelp === c.id ? "true" : "false");
+        // Without this the document handler below would close the bubble in the same tap.
+        q.addEventListener("click", function (ev) {
+          ev.stopPropagation();
+          openHelp = openHelp === c.id ? null : c.id;
+          helpJustOpened = openHelp !== null;
+          render();
+        });
+        row.appendChild(q);
+        wrap.appendChild(row);
+
+        if (openHelp === c.id) {
+          var bubble = el("div", "bubble", HELP[c.id]);
+          bubble.setAttribute("role", "note");
+          bubble.addEventListener("click", function (ev) { ev.stopPropagation(); });
+          wrap.appendChild(bubble);
+          // The Pause bar is stuck over the bottom of the screen and can cover the last line of
+          // a bubble opened near it. scrollIntoView will not help — as far as it is concerned
+          // the bubble is already on screen — so measure the overlap and scroll by exactly that.
+          if (helpJustOpened) {
+            helpJustOpened = false;
+            setTimeout(function () {
+              var foot = document.getElementById("foot");
+              var covered = foot ? foot.getBoundingClientRect().height : 0;
+              var over = bubble.getBoundingClientRect().bottom - (window.innerHeight - covered - 8);
+              if (over > 0) window.scrollBy(0, over);
+            }, 0);
+          }
+        }
+        list.appendChild(wrap);
       });
       box.appendChild(list);
       main.appendChild(box);
@@ -324,31 +434,75 @@
     paintTimers();
   }
 
+  /*
+   * What the term card is called depends on where the game is. It said "Proposed term" on every
+   * screen that carried one, including the screen that had just announced it signed and every
+   * screen of the final scene, where nothing is being proposed to anybody.
+   */
+  function termLabel(v) {
+    if (v.execution) return "Term in the scene";
+    switch (v.phase) {
+      case "TERM_SIGNED":
+        return "Signed term";
+      case "CONSIDERATION_PRIVATE_SELECTION":
+      case "CLOSING_TERM_CONSIDERATION":
+      case "CONSIDERATION_PUBLIC_EXECUTION":
+      case "WAITING_FOR_SIGNATURE_CONFIRMATION":
+        return "The term being earned";
+      default:
+        return "Proposed term";
+    }
+  }
+
+  /**
+   * Labelled suggestion lists for an instruction that tells a man to do something without
+   * telling him what — things he could say, positions he could use. Suggestions, not orders;
+   * the heading says so, because a list under an instruction otherwise reads as part of it.
+   */
+  function appendSuggestions(card, lists) {
+    (lists || []).forEach(function (group) {
+      if (!group || !group.items || !group.items.length) return;
+      var box = el("div", "examples");
+      box.appendChild(el("div", "examples-head", group.heading));
+      var list = el("ul", "examples-list");
+      group.items.forEach(function (line) { list.appendChild(el("li", null, line)); });
+      box.appendChild(list);
+      card.appendChild(box);
+    });
+  }
+
   function renderTerm(t, label) {
     var card = el("section", "card");
     card.appendChild(el("h3", null, label + " · " + t.actTitle + (t.climax ? " · closing term" : "")));
     card.appendChild(el("h2", null, t.title));
-    card.appendChild(el("p", "instruction", t.instruction));
+    if (t.instruction) card.appendChild(el("p", "instruction", t.instruction));
 
     if (t.equipment && t.equipment.length) {
       var eq = el("div");
       t.equipment.forEach(function (e) { eq.appendChild(el("span", "tag", e)); });
       card.appendChild(eq);
     }
+    appendSuggestions(card, t.suggestions);
     (t.conditions || []).forEach(function (c) { card.appendChild(el("div", "notice", "Condition: " + c)); });
     (t.amendments || []).forEach(function (a) { card.appendChild(el("div", "notice", "Amendment: " + a)); });
 
     if (t.timers && t.timers.length) {
-      var tl = el("p", "meta", "Timed: " + t.timers.map(function (x) {
-        return x.label + " " + fmtClock(x.totalSeconds * 1000);
-      }).join(" · "));
-      card.appendChild(tl);
+      card.appendChild(el("p", "meta", timingLine(t.timers)));
     }
 
-    var m = el("p", "meta");
-    m.appendChild(document.createTextNode(t.benefitExplanation || ""));
-    card.appendChild(m);
+    if (t.benefitExplanation) {
+      card.appendChild(el("p", "meta", t.benefitExplanation));
+    }
     return card;
+  }
+
+  /** "Timed: Left ear 0:45 · Right ear 0:45 · 1:30 in total" */
+  function timingLine(timers) {
+    var parts = timers.map(function (t) { return t.label + " " + fmtClock(t.totalSeconds * 1000); });
+    var total = timers.reduce(function (a, t) { return a + t.totalSeconds; }, 0);
+    var line = "Timed: " + parts.join(" · ");
+    if (timers.length > 1) line += " · " + fmtClock(total * 1000) + " in total";
+    return line;
   }
 
   function renderConsideration(c, selectable) {
@@ -356,10 +510,17 @@
     card.appendChild(el("h3", null, selectable ? "Consideration option" : "Consideration"));
     card.appendChild(el("h2", null, c.title));
     card.appendChild(el("p", "instruction", c.instruction));
+    appendSuggestions(card, c.suggestions);
     if (c.equipment && c.equipment.length) {
       var eq = el("div");
       c.equipment.forEach(function (e) { eq.appendChild(el("span", "tag", e)); });
       card.appendChild(eq);
+    }
+    // How long it runs, on the selection screen as well as during it: choosing between
+    // consideration actions without knowing whether one is forty-five seconds or four minutes
+    // is choosing blind.
+    if (c.timers && c.timers.length) {
+      card.appendChild(el("p", "meta", timingLine(c.timers)));
     }
     var who = c.mutual
       ? "Both of you perform this and both of you confirm."
@@ -466,6 +627,7 @@
           box.appendChild(el("div", "num", "Traded with"));
           box.appendChild(el("p", "instruction", t.bundledInstruction));
         }
+        appendSuggestions(box, t.suggestions);
         (t.conditions || []).forEach(function (c) { box.appendChild(el("span", "tag", "Condition: " + c)); });
         (t.amendments || []).forEach(function (a) { box.appendChild(el("span", "tag", "Amendment: " + a)); });
         if (t.considerationTitle) {
@@ -636,6 +798,7 @@
         dominantSlot: form.dominantSlot,
         analRoles: Object.assign({}, form.analRoles),
         erectionDifficulty: Object.assign({}, form.erectionDifficulty),
+        narrationEnabled: form.narrationEnabled !== false,
         sessionLength: form.sessionLength,
         explicitness: form.explicitness,
         finaleFormat: form.finaleFormat,
@@ -732,6 +895,15 @@
     card.appendChild(field("Default condition for a Maybe", selectFor(form.options.maybeCondition,
       d.defaultMaybeCondition, function (v) { d.defaultMaybeCondition = v; })));
 
+    var narr = el("label", "check");
+    var ncb = document.createElement("input");
+    ncb.type = "checkbox";
+    ncb.checked = !!d.narrationEnabled;
+    ncb.addEventListener("change", function () { d.narrationEnabled = ncb.checked; });
+    narr.appendChild(ncb);
+    narr.appendChild(el("span", null, "TV reads instructions out loud"));
+    card.appendChild(narr);
+
     card.appendChild(el("h3", null, "Shared hard boundaries"));
     card.appendChild(checkList(form.options.boundaries, d.boundaries, function (id, on) {
       toggle(d.boundaries, id, on);
@@ -770,6 +942,7 @@
         analRole: d.analRoles.PLAYER_2,
         erectionDifficulty: !!d.erectionDifficulty.PLAYER_2
       },
+      narrationEnabled: !!d.narrationEnabled,
       sessionLength: d.sessionLength,
       explicitness: d.explicitness,
       finaleFormat: d.finaleFormat,
@@ -788,6 +961,7 @@
     var arg = i < 0 ? null : id.slice(i + 1);
 
     switch (head) {
+      case "read_again": return act({ type: "read_again" });
       case "sign": return act({ type: "proposal_response", response: "SIGN" });
       case "counteroffer": return act({ type: "proposal_response", response: "COUNTEROFFER" });
       case "bundle": return act({ type: "proposal_response", response: "BUNDLE" });
@@ -830,6 +1004,13 @@
     try { S.resume = JSON.parse(load(KEY_RESUME) || "null"); } catch (e) { S.resume = null; }
 
     $("pauseBtn").addEventListener("click", function () { act({ type: "global_pause" }); });
+
+    // Tapping the screen away from the bubble puts it away. The bubble and its "?" stop the
+    // event before it gets here, so only a tap somewhere else counts.
+    document.addEventListener("click", function () { closeHelp(); });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" || e.key === "Esc") closeHelp();
+    });
 
     // A phone that comes back from lock or from another app reconnects immediately.
     document.addEventListener("visibilitychange", function () {

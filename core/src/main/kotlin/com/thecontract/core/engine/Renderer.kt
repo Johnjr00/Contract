@@ -9,6 +9,7 @@ import com.thecontract.core.model.RenderedConsideration
 import com.thecontract.core.model.RenderedTerm
 import com.thecontract.core.model.RenderedTimer
 import com.thecontract.core.model.Slot
+import com.thecontract.core.model.Suggestions
 import com.thecontract.core.model.Term
 import com.thecontract.core.model.TimerSpec
 import com.thecontract.core.style.RenderContext
@@ -22,14 +23,19 @@ import com.thecontract.core.style.StyleEngine
  */
 object Renderer {
 
-    private const val CHECK_IN_SECONDS = 20
     private const val MASSAGE_FIRST_SECONDS = 300
 
-    fun context(ctx: GameContext, binding: PartyBinding): RenderContext = RenderContext(
+    private const val SPOKEN_HEADING = "Things he could say — suggestions only"
+    private const val POSITION_HEADING = "Positions he could use — suggestions only"
+
+    fun context(ctx: GameContext, binding: PartyBinding, itemId: String = ""): RenderContext = RenderContext(
         setup = ctx.setup,
         binding = binding,
         explicitness = ctx.setup.explicitness,
-        availableEquipment = ctx.setup.equipment
+        availableEquipment = ctx.setup.equipment,
+        // Stable per item, so a term reads the same every time it is shown, and different from
+        // the next term that happens to use the same lexicon keys.
+        variantSeed = itemId.hashCode()
     )
 
     private fun timerId(ownerId: String, index: Int) = "$ownerId#t$index"
@@ -54,6 +60,34 @@ object Renderer {
         }
     }
 
+    /**
+     * The labelled suggestion lists for one item, name tokens resolved.
+     *
+     * Empty for the overwhelming majority of the library: only an instruction that tells a man to
+     * do something without telling him what carries any. Spoken lines are split by register on
+     * the same rule as the templates; positions are not, because a position is a physical
+     * arrangement of two bodies and reads the same however coarse the sentence around it is.
+     */
+    private fun renderSuggestions(
+        says: List<String>,
+        saysExplicit: List<String>,
+        positions: List<String>,
+        rc: RenderContext
+    ): List<Suggestions> = buildList {
+        val spoken = when (rc.explicitness) {
+            com.thecontract.core.model.Explicitness.EROTIC,
+            com.thecontract.core.model.Explicitness.DIRECT -> says
+            com.thecontract.core.model.Explicitness.FILTHY,
+            com.thecontract.core.model.Explicitness.EXTREME -> saysExplicit.ifEmpty { says }
+        }
+        if (spoken.isNotEmpty()) {
+            add(Suggestions(SPOKEN_HEADING, spoken.map { StyleEngine.render(it, rc) }))
+        }
+        if (positions.isNotEmpty()) {
+            add(Suggestions(POSITION_HEADING, positions.map { StyleEngine.render(it, rc) }))
+        }
+    }
+
     fun renderTerm(
         term: Term,
         binding: PartyBinding,
@@ -62,7 +96,7 @@ object Renderer {
         amendments: List<Amendment> = emptyList(),
         extraAmendmentLabels: List<String> = emptyList()
     ): RenderedTerm {
-        val rc = context(ctx, binding)
+        val rc = context(ctx, binding, term.id)
         val instruction = StyleEngine.renderInstruction(term.base, term.explicit, term.extremeTail, rc)
         var rendered = RenderedTerm(
             termId = term.id,
@@ -76,6 +110,7 @@ object Renderer {
             benefitExplanation = BenefitAnalysis.explanation(term, binding, ctx.setup),
             equipmentUsed = equipmentUsed(term.requiredEquipment, term.genericToy, rc),
             categories = term.categories,
+            suggestions = renderSuggestions(term.examples, term.examplesExplicit, term.positions, rc),
             analPenetration = term.analPenetration,
             climax = term.climax,
             mutual = term.mutual,
@@ -93,7 +128,7 @@ object Renderer {
         ctx: GameContext
     ): RenderedConsideration {
         val binding = PartyBinding(performer, recipient)
-        val rc = context(ctx, binding)
+        val rc = context(ctx, binding, action.id)
         return RenderedConsideration(
             actionId = action.id,
             title = StyleEngine.render(action.title, rc).removeSuffix("."),
@@ -103,7 +138,8 @@ object Renderer {
             recipient = recipient,
             mutual = action.mutual,
             intensity = action.intensity,
-            equipmentUsed = equipmentUsed(action.requiredEquipment, action.genericToy, rc)
+            equipmentUsed = equipmentUsed(action.requiredEquipment, action.genericToy, rc),
+            suggestions = renderSuggestions(action.examples, action.examplesExplicit, action.positions, rc)
         )
     }
 
@@ -116,13 +152,6 @@ object Renderer {
         val total = timers.sumOf { it.seconds }
         if (total <= capSeconds || total == 0) return timers
         return scaleTimers(timers, capSeconds.toDouble() / total, 10)
-    }
-
-    private fun insertCheckIn(timers: List<RenderedTimer>, ownerId: String): List<RenderedTimer> {
-        if (timers.isEmpty()) return timers
-        val mid = timers.size / 2
-        val checkIn = RenderedTimer("$ownerId#check", "Check-in", CHECK_IN_SECONDS)
-        return timers.take(mid) + checkIn + timers.drop(mid)
     }
 
     private fun dropEquipment(
@@ -138,17 +167,13 @@ object Renderer {
         val g = rc.giverName
         val recv = rc.receiverName
         return when (condition) {
-            MaybeCondition.ASK_AGAIN -> r.copy(
-                instruction = StyleEngine.tidy(
-                    "Before this begins, $g asks $recv one more time and waits for a clear yes. " + r.instruction
-                ),
-                conditions = r.conditions + label
-            )
-
+            // Written as an override, because it lands on instructions that have already named a
+            // pressure: "with hard pressure … lighter pressure" reads as a contradiction unless
+            // the second sentence says plainly that it replaces the first.
             MaybeCondition.GENTLER -> r.copy(
                 instruction = StyleEngine.tidy(
-                    r.instruction + " All of it is taken at the gentler end: lighter pressure, a slower pace, " +
-                        "and nothing pushed further than it needs to go."
+                    r.instruction + " Everything above is done at the gentler end instead: lighter pressure " +
+                        "than written, a slower pace, and nothing taken as far as the term says."
                 ),
                 conditions = r.conditions + label
             )
@@ -183,8 +208,7 @@ object Renderer {
 
             MaybeCondition.WITHOUT_RESTRAINT -> r.copy(
                 instruction = StyleEngine.tidy(
-                    r.instruction + " Nothing is used to hold $recv down — he holds the position himself instead, " +
-                        "and $g checks he still is."
+                    r.instruction + " Nothing is used to hold $recv down — he holds the position himself instead."
                 ),
                 equipmentUsed = dropEquipment(r) {
                     it in setOf(Equipment.CUFFS, Equipment.ROPE, Equipment.SPREADER_BAR, Equipment.LEASH)
@@ -194,15 +218,6 @@ object Renderer {
 
             MaybeCondition.SAVE_FOR_FINALE -> r.copy(
                 deferToEnd = true,
-                conditions = r.conditions + label
-            )
-
-            MaybeCondition.PAUSE_MIDWAY -> r.copy(
-                instruction = StyleEngine.tidy(
-                    r.instruction + " Halfway through, $g stops and asks $recv directly whether to carry on, " +
-                        "and waits for the answer before he does."
-                ),
-                timers = insertCheckIn(r.timers, r.termId),
                 conditions = r.conditions + label
             )
 
@@ -230,8 +245,8 @@ object Renderer {
         return when (amendment) {
             Amendment.GENTLER -> r.copy(
                 instruction = StyleEngine.tidy(
-                    r.instruction + " Amended to the gentler version: lighter pressure, a slower pace, " +
-                        "and nothing taken as far as it could be."
+                    r.instruction + " Amended: everything above is done at lighter pressure and a slower " +
+                        "pace than written."
                 ),
                 amendments = r.amendments + label
             )
@@ -278,22 +293,6 @@ object Renderer {
                 amendments = r.amendments + label
             )
 
-            Amendment.MIDPOINT_CHECK -> r.copy(
-                instruction = StyleEngine.tidy(
-                    r.instruction + " Amended: halfway through, $g stops and checks with $recv before carrying on."
-                ),
-                timers = insertCheckIn(r.timers, r.termId),
-                amendments = r.amendments + label
-            )
-
-            Amendment.ASK_AGAIN -> r.copy(
-                instruction = StyleEngine.tidy(
-                    "Immediately before this term is carried out, $g asks $recv again and waits for a clear yes. " +
-                        r.instruction
-                ),
-                amendments = r.amendments + label
-            )
-
             Amendment.SAVE_FOR_FINALE -> r.copy(
                 instruction = StyleEngine.tidy(
                     r.instruction + " Amended: this term is held back to the end of the scene."
@@ -332,8 +331,6 @@ object Renderer {
             add(Amendment.NO_RESTRAINT)
         }
         if (!term.climax) add(Amendment.STOP_BEFORE_ORGASM)
-        if (rendered.timers.size > 1) add(Amendment.MIDPOINT_CHECK)
-        add(Amendment.ASK_AGAIN)
         if (!term.climax) {
             add(Amendment.SAVE_FOR_FINALE)
             add(Amendment.TRADE_ONLY)

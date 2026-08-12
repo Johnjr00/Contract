@@ -20,13 +20,29 @@ enum class Role { DOMINANT, SUBMISSIVE }
  * consideration actions, bundles, closing terms and final instructions.
  */
 @Serializable
-enum class AnalRole(val canTop: Boolean, val canBottom: Boolean, val topWeight: Double, val bottomWeight: Double) {
-    TOP(true, false, 1.0, 0.0),
-    VERS_TOP(true, true, 1.6, 0.6),
-    VERS(true, true, 1.0, 1.0),
-    VERS_BOTTOM(true, true, 0.6, 1.6),
-    BOTTOM(false, true, 0.0, 1.0),
-    NO_ANAL(false, false, 0.0, 0.0);
+enum class AnalRole(
+    val canTop: Boolean,
+    val canBottom: Boolean,
+    val topWeight: Double,
+    val bottomWeight: Double,
+    /**
+     * How many times across a whole game this player may be the receptive party in anal content
+     * — penetrated, rimmed, fingered, plugged, or worked on the hole in any other way.
+     *
+     * A top is not a man who merely prefers not to bottom: he never bottoms, and nothing goes
+     * near his hole all night, so his allowance is zero. A vers top will do it, but rarely, so
+     * his allowance is exactly one for the entire game. `canBottom` on its own was never enough
+     * to express either, because it only ever gated penetration and let rimming, fingering and
+     * fisting through.
+     */
+    val receptiveAnalLimit: Int
+) {
+    TOP(true, false, 1.0, 0.0, receptiveAnalLimit = 0),
+    VERS_TOP(true, true, 1.6, 0.6, receptiveAnalLimit = 1),
+    VERS(true, true, 1.0, 1.0, receptiveAnalLimit = Int.MAX_VALUE),
+    VERS_BOTTOM(true, true, 0.6, 1.6, receptiveAnalLimit = Int.MAX_VALUE),
+    BOTTOM(false, true, 0.0, 1.0, receptiveAnalLimit = Int.MAX_VALUE),
+    NO_ANAL(false, false, 0.0, 0.0, receptiveAnalLimit = 0);
 
     val allowsAnyAnal: Boolean get() = this != NO_ANAL
 }
@@ -115,6 +131,15 @@ enum class PartyConstraint { ANY, DOMINANT, SUBMISSIVE, TOP, BOTTOM }
  * Deliberately independent of how enthusiastically anyone answered their private profile.
  */
 @Serializable
+/**
+ * What a player gets out of a term, and therefore who owes consideration for it.
+ *
+ * Every value names something done to a man's body. Being in charge is deliberately not on this
+ * list: command, ownership, restraint, permission and orgasm control used to sit here and hand
+ * the benefit to whoever held the whip, which made the man being edged, spanked or tied the one
+ * owed nothing. The benefit belongs to whoever is on the receiving end of the physical act, and
+ * a term where nobody is — a rule, a protocol, a spoken declaration — is simply balanced.
+ */
 enum class BenefitType(val label: String) {
     MASSAGE_RECIPIENT("receives the massage"),
     KISS_RECIPIENT("receives the kissing"),
@@ -125,11 +150,8 @@ enum class BenefitType(val label: String) {
     TOY_RECIPIENT("receives the toy"),
     FINGERING_RECIPIENT("receives the fingering"),
     PENETRATION_RECIPIENT("receives penetration"),
-    COMMAND_AUTHORITY("gains command authority"),
-    OWNERSHIP("gains ownership"),
-    PERMISSION_CONTROL("gains permission control"),
-    RESTRAINT_CONTROL("gains restraint control"),
-    ORGASM_CONTROL("gains orgasm control"),
+    IMPACT_RECIPIENT("receives the impact"),
+    HANDLING_RECIPIENT("is the one handled"),
     SERVICE_RECIPIENT("receives service"),
     MUTUAL("benefits both equally")
 }
