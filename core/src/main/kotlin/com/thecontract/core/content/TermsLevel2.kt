@@ -25,7 +25,7 @@ import com.thecontract.core.model.Term
 
 /**
  * Act II — Access. Oral, rimming, hand stimulation, service and permission.
- * 48 terms (specification floor for level 2: 40).
+ * 64 terms (specification floor for level 2: 40).
  */
 internal object TermsLevel2 {
 
@@ -546,6 +546,167 @@ internal object TermsLevel2 {
             benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
             acts = setOf("commands", "sexual_service"),
             timers = listOf(tm("Holding still", 150))
+        ),
+
+        // ---------------------------------------------------------------- added (16)
+        t(
+            id = "l2_oral_twenty_and_off", level = 2, cats = setOf(ORAL),
+            title = "Twenty strokes, then off",
+            base = "{G} takes {R+} cock in his mouth for twenty strokes, comes off for a slow count of ten with his mouth clear of him, and runs that cycle four times over.",
+            explicit = "{G} gets his mouth on {R+} cock for twenty strokes, comes off for a slow count of ten and touches him with nothing in the gap, four rounds of it.",
+            benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
+            acts = setOf("oral"),
+            timers = listOf(tm("Round 1", 45), tm("Round 2", 45), tm("Round 3", 45), tm("Round 4", 45))
+        ),
+        t(
+            id = "l2_oral_balls_only", level = 2, cats = setOf(ORAL),
+            title = "Balls only",
+            base = "{G} works {R+} balls with his lips and tongue for the whole term, rolling each one in his mouth in turn, and puts his mouth on the shaft at no point.",
+            explicit = "{G} works {R+} balls with his lips and tongue for the whole term, rolling each one in his mouth in turn, and does not put his mouth on the shaft once.",
+            benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
+            acts = setOf("oral"),
+            timers = listOf(tm("Left side", 60), tm("Right side", 60), tm("Both", 60))
+        ),
+        t(
+            id = "l2_oral_standing_at_the_wall", level = 2, cats = setOf(ORAL, POWER),
+            title = "Hands on the wall",
+            base = "{R} stands with his back to the wall and both hands flat against it. {G} kneels in front of him and [v_suck] {R+} cock for the full timer, and {R} keeps his hands where they are throughout.",
+            explicit = "{R} stands with his back to the wall and both hands flat against it. {G} goes down on his knees in front of him and [v_suck] {R+} cock, and {R} does not lift a hand off the wall before the timer ends.",
+            benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
+            acts = setOf("oral", "kneeling"),
+            timers = listOf(tm("On his knees", 150))
+        ),
+        t(
+            id = "l2_oral_tongue_only", level = 2, cats = setOf(ORAL),
+            title = "Tongue only",
+            base = "{G} [v_tongue] {R+} cock from the base to the head and back down, keeping his lips off it the whole way, and {R} keeps both hands behind his own head.",
+            explicit = "{G} [v_tongue] {R+} cock base to head and back down, lips kept off it the whole way, and {R} keeps both hands behind his own head until the timer ends.",
+            benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
+            acts = setOf("oral"),
+            timers = listOf(tm("Up and down", 120))
+        ),
+        t(
+            id = "l2_oral_two_positions", level = 2, cats = setOf(ORAL),
+            title = "Two minutes standing, two on his back",
+            base = "{G} [v_suck] {R+} cock for two minutes with {R} standing and {G} on his knees, then for two more with {R} flat on his back and {G} between his legs.",
+            explicit = "{G} [v_suck] {R+} cock for two minutes with {R} standing and {G} on his knees, then two more with {R} flat on his back and {G} between his legs, and changes over exactly on the timer.",
+            benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
+            acts = setOf("oral", "kneeling"),
+            timers = listOf(tm("Standing", 120), tm("On his back", 120))
+        ),
+        t(
+            id = "l2_oral_after_the_massage", level = 2, cats = setOf(ORAL, MASSAGE),
+            title = "Five minutes of oil first",
+            base = "{G} works #massage_oil# into {R+} back and legs for the first two timers and goes nowhere near his cock, then turns him over and [v_suck] {R+} cock for the last one.",
+            explicit = "{G} works #massage_oil# into {R+} back and legs for the first two timers and stays away from his cock, then rolls him over and [v_suck] {R+} cock for the last one.",
+            benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
+            acts = setOf("massage_general", "massage_oil", "massage_to_sexual", "oral"),
+            equip = setOf(Equipment.MASSAGE_OIL),
+            blocks = setOf(Boundary.MASSAGE_NONSEXUAL),
+            timers = listOf(tm("Back", 150), tm("Legs", 150), tm("Mouth", 180))
+        ),
+        t(
+            id = "l2_rim_counted_rounds", level = 2, cats = setOf(RIMMING, ANAL),
+            title = "Sixty on, twenty off",
+            base = "{R} kneels with his chest down. {G} [v_rim] him for sixty seconds, comes away for twenty with both hands still holding him open, and does that three times over.",
+            explicit = "{R} kneels with his chest down and his ass up. {G} [v_rim] him for sixty seconds, comes away for twenty and keeps him held open the whole time, three rounds of it.",
+            benefit = RECEIVER, type = BenefitType.RIMMING_RECIPIENT,
+            acts = setOf("rimming"),
+            timers = listOf(
+                tm("Round 1 on", 60), tm("Round 1 off", 20),
+                tm("Round 2 on", 60), tm("Round 2 off", 20),
+                tm("Round 3 on", 60)
+            )
+        ),
+        t(
+            id = "l2_rim_and_inner_thighs", level = 2, cats = setOf(RIMMING, ANAL, KISSING),
+            title = "Thirty seconds a place",
+            base = "{G} [v_rim] {R} for thirty seconds, moves to the inside of one thigh for thirty, back to his hole for thirty, then the other thigh, and holds that order for the whole term.",
+            explicit = "{G} [v_rim] {R} for thirty seconds, drags his tongue to the inside of one thigh for thirty, back to his hole for thirty, then the other thigh, and holds that order for the whole term.",
+            benefit = RECEIVER, type = BenefitType.RIMMING_RECIPIENT,
+            acts = setOf("rimming", "inner_thigh_kissing"),
+            timers = listOf(tm("Hole", 30), tm("Left thigh", 30), tm("Hole again", 30), tm("Right thigh", 30))
+        ),
+        t(
+            id = "l2_rim_then_up_his_back", level = 2, cats = setOf(RIMMING, KISSING, ANAL),
+            title = "All the way back up",
+            base = "{G} [v_rim] {R} for two minutes, then works his way up {R+} back with [n_kiss_trail] and finishes by turning {R+} head and kissing him [adv_kiss_deep].",
+            explicit = "{G} [v_rim] {R} for two solid minutes, then kisses his way up {R+} back and finishes by turning {R+} head round and kissing him [adv_kiss_deep].",
+            benefit = RECEIVER, type = BenefitType.RIMMING_RECIPIENT,
+            acts = setOf("rimming", "tongue_kissing"),
+            timers = listOf(tm("Rimming", 120), tm("Up his back", 45), tm("Kissing", 60))
+        ),
+        t(
+            id = "l2_hand_one_stroke_a_count", level = 2, cats = setOf(HANDS),
+            title = "One stroke to a count of three",
+            base = "{G} slicks his hand with #lubricant# and [v_stroke] {R+} cock at one full stroke to a slow count of three, and never goes faster than that. {R} says nothing for the whole term.",
+            explicit = "{G} slicks his hand with #lubricant# and [v_stroke] {R+} cock, one full stroke to a slow count of three, and does not go quicker at any point. {R} stays silent from start to finish.",
+            benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
+            acts = setOf("massage_groin"),
+            equip = setOf(Equipment.LUBRICANT),
+            blocks = setOf(Boundary.MASSAGE_NONSEXUAL),
+            timers = listOf(tm("Slow strokes", 150))
+        ),
+        t(
+            id = "l2_hand_oiled_cock_and_balls", level = 2, cats = setOf(HANDS),
+            title = "One hand each",
+            base = "{G} warms #massage_oil# in his hands, takes {R+} cock in one and his balls in the other, and works both at the same slow pace for the full timer.",
+            explicit = "{G} warms #massage_oil# in his hands, takes {R+} cock in one and his balls in the other and works both at the same slow pace, and does not change speed once.",
+            benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
+            acts = setOf("massage_groin"),
+            equip = setOf(Equipment.MASSAGE_OIL),
+            blocks = setOf(Boundary.MASSAGE_NONSEXUAL),
+            timers = listOf(tm("Both at once", 150))
+        ),
+        t(
+            id = "l2_hand_behind_the_balls", level = 2, cats = setOf(HANDS, MASSAGE),
+            title = "The ground behind his balls",
+            base = "{R} lies on his back with his knees up. {G} slicks two fingers with #lubricant# and presses them into the ground behind {R+} balls with steady pressure, working small slow circles, and goes nowhere near his cock.",
+            explicit = "{R} lies on his back with his knees up. {G} slicks two fingers with #lubricant# and presses them into the ground behind {R+} balls with steady pressure, in small slow circles, and does not touch his cock once.",
+            benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
+            acts = setOf("massage_groin"),
+            equip = setOf(Equipment.LUBRICANT),
+            blocks = setOf(Boundary.MASSAGE_NONSEXUAL),
+            timers = listOf(tm("Behind the balls", 120))
+        ),
+        t(
+            id = "l2_service_hands_flat_and_still", level = 2, cats = setOf(POWER),
+            title = "Hands flat on the bed",
+            base = "{SUB} lies on his back with both hands flat on the bed. {DOM} works {SUB+} chest, stomach and thighs with both hands, and every time {SUB} lifts a hand the timer goes back to the start.",
+            explicit = "{SUB} lies on his back with both hands flat on the bed and leaves them there. {DOM} works {SUB+} chest, stomach and thighs with both hands, and the timer goes back to the start every time {SUB} lifts a hand off.",
+            benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
+            gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
+            acts = setOf("commands", "sexual_service"),
+            timers = listOf(tm("Hands flat", 150))
+        ),
+        t(
+            id = "l2_service_warm_towels", level = 2, cats = setOf(POWER, BODY_WORSHIP),
+            title = "Warm towel, then oil",
+            base = "{G} soaks #towels# in warm water, wrings it out and lays it over {R+} chest and stomach for a slow count of thirty. {G} then lifts it away and works #massage_oil# into the same ground with both palms.",
+            explicit = "{G} soaks #towels# in warm water, wrings it out and lays it over {R+} chest and stomach for a slow count of thirty, then lifts it off and works #massage_oil# into the same ground with both palms until the timer ends.",
+            benefit = RECEIVER, type = BenefitType.SERVICE_RECIPIENT,
+            acts = setOf("massage_oil", "massage_chest", "body_worship"),
+            equip = setOf(Equipment.TOWELS, Equipment.MASSAGE_OIL),
+            timers = listOf(tm("Warm towel", 45), tm("Oiled chest", 75), tm("Oiled stomach", 60))
+        ),
+        t(
+            id = "l2_power_hips_flat", level = 2, cats = setOf(POWER, HANDS),
+            title = "Hips down",
+            base = "{DOM} works {SUB+} cock with an oiled hand and {SUB} keeps his hips flat on the bed. Every time his hips come up, {DOM} takes his hand off for a slow count of ten before he starts again.",
+            explicit = "{DOM} [v_stroke] {SUB+} cock with an oiled hand and {SUB} keeps his hips flat on the bed. Every time they come up, {DOM} lifts his hand off for a slow count of ten before he starts again.",
+            benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
+            gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
+            acts = setOf("commands", "sexual_service"),
+            timers = listOf(tm("Hips down", 150))
+        ),
+        t(
+            id = "l2_power_eyes_open", level = 2, cats = setOf(POWER, HANDS),
+            title = "Eyes open",
+            base = "{G} [v_stroke] {R+} cock and both of them keep eye contact for the whole term. Every time {R} shuts his eyes or looks away, {G} stops for a slow count of ten before he starts again.",
+            explicit = "{G} [v_stroke] {R+} cock and the two of them hold eye contact the whole way through. Every time {R} shuts his eyes or turns his head, {G} stops dead for a slow count of ten before he starts again.",
+            benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
+            acts = setOf("sexual_service"),
+            timers = listOf(tm("Eyes open", 150))
         )
     )
 }

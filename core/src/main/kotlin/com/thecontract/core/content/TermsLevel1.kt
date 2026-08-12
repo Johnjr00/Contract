@@ -16,7 +16,7 @@ import com.thecontract.core.model.Term
 
 /**
  * Act I — Chemistry. Massage, kissing, ear play and body worship.
- * 50 terms (specification floor for level 1: 42).
+ * 66 terms (specification floor for level 1: 42).
  */
 internal object TermsLevel1 {
 
@@ -521,6 +521,158 @@ internal object TermsLevel1 {
             benefit = RECEIVER, type = BenefitType.SERVICE_RECIPIENT,
             acts = setOf("body_worship"),
             timers = listOf(tm("Left arm", 75), tm("Right arm", 75))
+        ),
+
+        // ---------------------------------------------------------------- added (16)
+        t(
+            id = "l1_massage_neck_face_up", level = 1, cats = setOf(MASSAGE),
+            title = "Neck, face up",
+            base = "{R} lies on his back with his head resting in {G+} hands. {G} [v_massage] the back of {R+} neck and the base of his skull [adv_pressure_light], fingertips either side of the spine and never on it, and holds the whole weight of {R+} head in his palms.",
+            explicit = "{R} lies on his back and puts his head in {G+} hands. {G} works the back of {R+} neck and the base of his skull with light, steady pressure, fingertips either side of the spine and never on it, and carries the whole weight of his head in his palms until the timer ends.",
+            benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
+            acts = setOf("massage_neck_shoulders"),
+            timers = listOf(tm("Base of the skull", 60), tm("Left side of the neck", 45), tm("Right side of the neck", 45))
+        ),
+        t(
+            id = "l1_massage_ribs_and_sides", level = 1, cats = setOf(MASSAGE),
+            title = "Ribs and sides",
+            base = "{R} lies on one side. {G} [v_massage] {R+} ribs and waist with firm, even pressure, following each rib out from the spine to the front, and when the first timer ends {R} rolls over and {G} does the other side the same way.",
+            explicit = "{R} lies on one side and {G} [v_knead] {R+} ribs and waist [adv_pressure_deep], following each rib out from the spine to the front. When the first timer ends {R} rolls over and {G} does the other side exactly the same way.",
+            benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
+            acts = setOf("massage_upper_back", "massage_lower_back"),
+            timers = listOf(tm("First side", 90), tm("Second side", 90))
+        ),
+        t(
+            id = "l1_massage_hamstrings", level = 1, cats = setOf(MASSAGE),
+            title = "Backs of his thighs",
+            base = "{R} lies face down. {G} [v_massage] the back of each of {R+} thighs [adv_pressure_deep], working from behind the knee up to the crease of the buttock and back down again.",
+            explicit = "{R} goes face down and stays there. {G} [v_knead] the back of each of {R+} thighs [adv_pressure_deep], behind the knee up to the crease of his ass and back down, and keeps the pressure on until the timer ends.",
+            benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
+            acts = setOf("massage_inner_thighs", "massage_deep"),
+            timers = listOf(tm("Left thigh", 75), tm("Right thigh", 75))
+        ),
+        t(
+            id = "l1_massage_counted_points", level = 1, cats = setOf(MASSAGE),
+            title = "Six points, twenty each",
+            base = "{R} lies face down. {G} presses both thumbs into six points on {R+} back in turn — the top of each shoulder, either side of the spine between the shoulder blades, and either side of the lower back — and holds each one for a slow count of twenty before he moves to the next.",
+            explicit = "{R} goes face down. {G} puts both thumbs into six points on {R+} back in turn — the top of each shoulder, either side of the spine between the shoulder blades, and either side of the lower back — leaning his weight into each one for a slow count of twenty before he moves on.",
+            benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
+            acts = setOf("massage_upper_back", "massage_lower_back", "massage_deep"),
+            timers = listOf(tm("Shoulders", 60), tm("Beside the spine", 60), tm("Lower back", 60))
+        ),
+        t(
+            id = "l1_massage_candle_chest", level = 1, cats = setOf(MASSAGE, SENSORY),
+            title = "Candle on his chest",
+            base = "{G} drips warm wax from #massage_candle# across {R+} chest and stomach, waits a slow count of five, then [v_massage] it into the skin with slow, even pressure.",
+            explicit = "{G} tips #massage_candle# and drips the warm wax across {R+} chest and stomach, waits a slow count of five, then rubs it into the skin with slow, hard pressure and does not stop before the timer does.",
+            benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
+            acts = setOf("warm_wax", "massage_candle", "massage_chest"),
+            equip = setOf(Equipment.MASSAGE_CANDLE),
+            timers = listOf(tm("Wax across the chest", 30), tm("Chest", 60), tm("Stomach", 60))
+        ),
+        t(
+            id = "l1_massage_wand_legs", level = 1, cats = setOf(MASSAGE),
+            title = "Wand down his legs",
+            base = "{G} runs #massage_wand# down the back of each of {R+} legs [adv_toy_pace] and holds it in place for a slow count of ten on each hamstring and again behind each knee.",
+            explicit = "{G} runs #massage_wand# down the back of each of {R+} legs [adv_toy_pace] and presses it in hard for a slow count of ten on each hamstring and again behind each knee.",
+            benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
+            acts = setOf("massage_wand", "massage_general"),
+            equip = setOf(Equipment.MASSAGE_WAND),
+            timers = listOf(tm("Left leg", 60), tm("Right leg", 60))
+        ),
+        t(
+            id = "l1_massage_oiled_arms_seated", level = 1, cats = setOf(MASSAGE),
+            title = "Oiled arms and shoulders",
+            base = "{R} sits upright. {G} warms #massage_oil# in his hands and [v_massage] {R+} shoulders and both arms, one arm at a time, shoulder down to the wrist and back up.",
+            explicit = "{R} sits upright and {G} warms #massage_oil# in his hands, then [v_knead] {R+} shoulders and both arms, one arm at a time, shoulder down to the wrist and back up, until the timer ends.",
+            benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
+            acts = setOf("massage_arms_hands", "massage_oil"),
+            equip = setOf(Equipment.MASSAGE_OIL),
+            timers = listOf(tm("Shoulders", 45), tm("Left arm", 60), tm("Right arm", 60))
+        ),
+        t(
+            id = "l1_kiss_down_the_spine", level = 1, cats = setOf(KISSING, BODY_WORSHIP),
+            title = "Down his spine",
+            base = "{R} lies face down. {G} lays [n_kiss_trail] from the back of {R+} neck all the way down his spine to the small of his back, then works back up the same line.",
+            explicit = "{R} goes face down and stays there. {G} lays [n_kiss_trail] from the back of {R+} neck down his spine to the small of his back, then works back up the same line and does not miss a single vertebra.",
+            benefit = RECEIVER, type = BenefitType.KISS_RECIPIENT,
+            acts = setOf("neck_kissing", "body_worship"),
+            timers = listOf(tm("Down", 75), tm("Back up", 75))
+        ),
+        t(
+            id = "l1_kiss_ten_places", level = 1, cats = setOf(KISSING, BODY_WORSHIP),
+            title = "Ten places, ten seconds each",
+            base = "{G} kisses {R} in ten places in this order — his mouth, his jaw, his throat, each collarbone, each nipple, his stomach, each hip bone — and holds each kiss for a slow count of ten.",
+            explicit = "{G} kisses {R} in ten places in this order — his mouth, his jaw, his throat, each collarbone, each nipple, his stomach, each hip bone — and keeps his mouth on each one for a slow count of ten.",
+            benefit = RECEIVER, type = BenefitType.KISS_RECIPIENT,
+            acts = setOf("neck_kissing", "chest_nipple_kissing", "stomach_hip_kissing"),
+            timers = listOf(tm("Mouth and jaw", 45), tm("Throat and collarbones", 45), tm("Nipples", 45), tm("Stomach and hips", 45))
+        ),
+        t(
+            id = "l1_kiss_against_the_wall", level = 1, cats = setOf(KISSING),
+            title = "Against the wall",
+            base = "{G} puts {R} back against the wall, plants a hand either side of his head and kisses him [adv_kiss_deep], and {R} keeps both hands flat on the wall behind him.",
+            explicit = "{G} pushes {R} back against the wall, plants a hand either side of his head and kisses him [adv_kiss_deep] for the whole timer, and {R} keeps both hands flat on the wall behind him.",
+            benefit = RECEIVER, type = BenefitType.KISS_RECIPIENT,
+            acts = setOf("hard_kissing", "tongue_kissing"),
+            timers = listOf(tm("Against the wall", 120))
+        ),
+        t(
+            id = "l1_kiss_slow_then_hard", level = 1, cats = setOf(KISSING),
+            title = "Slow first, hard second",
+            base = "{G} kisses {R} [adv_kiss] for the first two minutes and [adv_kiss_deep] for the second two, and changes over exactly when the first timer ends.",
+            explicit = "{G} kisses {R} [adv_kiss] for the first two minutes, then [adv_kiss_deep] for the second two, and changes over exactly when the first timer ends and not before.",
+            benefit = RECEIVER, type = BenefitType.KISS_RECIPIENT,
+            acts = setOf("long_making_out", "hard_kissing"),
+            timers = listOf(tm("Slow", 120), tm("Hard", 120))
+        ),
+        t(
+            id = "l1_ear_lobes_counted", level = 1, cats = setOf(EAR_PLAY),
+            title = "Twenty seconds an ear",
+            base = "{G} takes one of {R+} ears in his mouth for a slow count of twenty, then the other, and keeps swapping between them until the timer ends. {R} keeps his hands at his sides throughout.",
+            explicit = "{G} takes one of {R+} ears in his mouth for a slow count of twenty, then the other, and keeps swapping between them until the timer ends. {R} keeps his hands flat at his sides and does not touch {G} once.",
+            benefit = RECEIVER, type = BenefitType.EAR_PLAY_RECIPIENT,
+            acts = setOf("ear_play"),
+            timers = listOf(tm("Swapping ears", 150))
+        ),
+        t(
+            id = "l1_ear_behind_and_jaw", level = 1, cats = setOf(EAR_PLAY, KISSING),
+            title = "Behind the ear",
+            base = "{G} [v_tongue] the skin behind each of {R+} ears and along the hinge of his jaw, slowly and lightly, one side for the first timer and the other for the second.",
+            explicit = "{G} [v_tongue] the skin behind each of {R+} ears and down the hinge of his jaw, wet and slow, one side for the first timer and the other for the second, and puts his mouth nowhere else.",
+            benefit = RECEIVER, type = BenefitType.EAR_PLAY_RECIPIENT,
+            acts = setOf("ear_play", "neck_kissing"),
+            timers = listOf(tm("Left side", 60), tm("Right side", 60))
+        ),
+        t(
+            id = "l1_worship_stomach_and_ribs", level = 1, cats = setOf(BODY_WORSHIP),
+            title = "Stomach and ribs",
+            base = "{R} lies on his back with his arms above his head. {G} works his mouth and hands over {R+} stomach, ribs and the line of each hip, and puts his mouth nowhere below the waistband.",
+            explicit = "{R} lies on his back with his arms above his head and does not move them. {G} [v_worship] {R+} stomach, ribs and the line of each hip with mouth and hands, and does not go below the waistband once.",
+            benefit = RECEIVER, type = BenefitType.SERVICE_RECIPIENT,
+            acts = setOf("body_worship"),
+            timers = listOf(tm("Stomach", 60), tm("Ribs", 45), tm("Hips", 45))
+        ),
+        t(
+            id = "l1_sensory_feather_and_breath", level = 1, cats = setOf(SENSORY),
+            title = "Feather, then breath",
+            base = "{R} lies still with his eyes shut. {G} runs #feather# over {R+} chest, stomach and inner thighs [adv_slow], then covers the same ground again with nothing but his breath, his mouth an inch off the skin the whole way.",
+            explicit = "{R} lies still with his eyes shut and does not move. {G} runs #feather# over {R+} chest, stomach and inner thighs [adv_slow], then goes back over the same ground with nothing but his breath, his mouth an inch off the skin the whole way.",
+            benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
+            acts = setOf("body_worship"),
+            equip = setOf(Equipment.FEATHER),
+            timers = listOf(tm("Feather", 90), tm("Breath", 90))
+        ),
+        t(
+            id = "l1_visual_mirror_hands", level = 1, cats = setOf(VISUAL, BODY_WORSHIP),
+            title = "Watching his own chest",
+            base = "{G} stands behind {R} in front of #mirror# and runs both hands over {R+} chest, stomach and hips. Both of them watch the reflection and neither one looks away.",
+            explicit = "{G} stands behind {R} at #mirror# and runs both hands over {R+} chest, stomach and hips. Both of them keep their eyes on the reflection and neither one looks away before the timer ends.",
+            benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
+            acts = setOf("body_worship"),
+            gPrefs = setOf("mirror_play"), rPrefs = setOf("mirror_play"),
+            equip = setOf(Equipment.MIRROR),
+            timers = listOf(tm("Chest", 45), tm("Stomach", 45), tm("Hips", 45))
         )
     )
 }

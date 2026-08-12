@@ -8,6 +8,7 @@ import com.thecontract.core.model.Boundary
 import com.thecontract.core.model.Category.ANAL
 import com.thecontract.core.model.Category.HANDS
 import com.thecontract.core.model.Category.KISSING
+import com.thecontract.core.model.Category.MASSAGE
 import com.thecontract.core.model.Category.ORAL
 import com.thecontract.core.model.Category.ORGASM_CONTROL
 import com.thecontract.core.model.Category.POWER
@@ -22,7 +23,7 @@ import com.thecontract.core.model.Term
 
 /**
  * Act III — Privilege. Anal preparation, toys, penetration and orgasm terms.
- * 48 terms (specification floor for level 3: 40).
+ * 56 terms (specification floor for level 3: 40).
  */
 internal object TermsLevel3 {
 
@@ -483,6 +484,171 @@ internal object TermsLevel3 {
             acts = setOf("vibration"),
             equip = setOf(Equipment.VIBRATOR),
             timers = listOf(tm("Nipples", 30), tm("Thighs", 30), tm("Balls", 30), tm("Cock", 30))
+        ),
+
+        // ---------------------------------------------------------------- added (16)
+        t(
+            id = "l3_anal_two_fingers_counted", level = 3, cats = setOf(ANAL),
+            title = "Ten strokes, then held",
+            base = "{G} slicks two fingers with #lubricant#, gives {R} ten slow strokes with them, then holds them still and buried for a slow count of twenty, and does that three times over.",
+            explicit = "{G} slicks two fingers with #lubricant#, gives {R} ten slow strokes, then holds them buried and dead still for a slow count of twenty, three rounds of it.",
+            benefit = RECEIVER, type = BenefitType.FINGERING_RECIPIENT,
+            acts = setOf("fingering"), anal = true,
+            equip = setOf(Equipment.LUBRICANT), rCon = PartyConstraint.BOTTOM,
+            timers = listOf(tm("Round 1", 60), tm("Round 2", 60), tm("Round 3", 60))
+        ),
+        t(
+            id = "l3_anal_finger_knees_held", level = 3, cats = setOf(ANAL),
+            title = "Knees to his chest",
+            base = "{R} lies on his back and holds both knees against his own chest. {G} slicks up with #lubricant# and [v_finger] {R}, then adds a second finger when the second timer starts, and {R} holds his knees where they are throughout.",
+            explicit = "{R} lies on his back and pulls both knees to his own chest. {G} slicks up with #lubricant# and [v_finger] {R}, adds a second finger when the second timer starts, and {R} does not let his knees drop before the timer ends.",
+            benefit = RECEIVER, type = BenefitType.FINGERING_RECIPIENT,
+            acts = setOf("fingering"), anal = true,
+            equip = setOf(Equipment.LUBRICANT), rCon = PartyConstraint.BOTTOM,
+            timers = listOf(tm("One finger", 90), tm("Two fingers", 120))
+        ),
+        t(
+            id = "l3_anal_rim_and_two_fingers", level = 3, cats = setOf(ANAL, RIMMING),
+            title = "Tongue, then tongue and fingers",
+            base = "{G} [v_rim] {R} for the first timer, then keeps his tongue working on him and slides two slick fingers into him with #lubricant# for the second.",
+            explicit = "{G} [v_rim] {R} for the first timer, then keeps his tongue on him and pushes two slick fingers into him with #lubricant# for the second.",
+            benefit = RECEIVER, type = BenefitType.RIMMING_RECIPIENT,
+            acts = setOf("rimming", "fingering"), anal = true,
+            equip = setOf(Equipment.LUBRICANT), rCon = PartyConstraint.BOTTOM,
+            timers = listOf(tm("Tongue only", 120), tm("Tongue and fingers", 150))
+        ),
+        t(
+            id = "l3_anal_held_still_inside", level = 3, cats = setOf(ANAL),
+            title = "Still, for a count of thirty",
+            base = "{G} warms #lubricant# in his hands, works one finger into {R} and then holds it completely still, buried, for a slow count of thirty before he moves it at all. He does that three times over.",
+            explicit = "{G} warms #lubricant# in his hands, pushes one finger into {R} and holds it dead still for a slow count of thirty before he moves it, three times over.",
+            benefit = RECEIVER, type = BenefitType.FINGERING_RECIPIENT,
+            acts = setOf("fingering"), anal = true,
+            equip = setOf(Equipment.LUBRICANT), rCon = PartyConstraint.BOTTOM,
+            timers = listOf(tm("First", 60), tm("Second", 60), tm("Third", 60))
+        ),
+        t(
+            id = "l3_anal_fingers_and_kissing", level = 3, cats = setOf(ANAL, KISSING),
+            title = "Fingered and kissed",
+            base = "{G} lies face to face with {R}, works two slick fingers into him with #lubricant# and kisses him [adv_kiss_deep] the entire time, and does not break the kiss before the timer ends.",
+            explicit = "{G} lies face to face with {R}, pushes two slick fingers into him with #lubricant# and keeps kissing him [adv_kiss_deep] the whole way through, and does not break off before the timer ends.",
+            benefit = RECEIVER, type = BenefitType.FINGERING_RECIPIENT,
+            acts = setOf("fingering", "tongue_kissing"), anal = true,
+            equip = setOf(Equipment.LUBRICANT), rCon = PartyConstraint.BOTTOM,
+            timers = listOf(tm("Fingered and kissed", 180))
+        ),
+        t(
+            id = "l3_anal_three_positions", level = 3, cats = setOf(ANAL),
+            title = "Ninety seconds a position",
+            base = "{G} slicks two fingers with #lubricant#, works them into {R} and keeps them in him through three positions in this order: face down, then on his back with his knees up, then on his side. {G} moves him on only when a timer ends.",
+            explicit = "{G} works two slick fingers into {R} with #lubricant# and keeps them in him through three positions in this order: face down, on his back with his knees up, then on his side. {G} moves him on only when a timer ends.",
+            benefit = RECEIVER, type = BenefitType.FINGERING_RECIPIENT,
+            acts = setOf("fingering"), anal = true,
+            equip = setOf(Equipment.LUBRICANT), rCon = PartyConstraint.BOTTOM,
+            timers = listOf(tm("Face down", 90), tm("On his back", 90), tm("On his side", 90))
+        ),
+        t(
+            id = "l3_toy_plug_and_back_rub", level = 3, cats = setOf(TOYS, ANAL, MASSAGE),
+            title = "Plugged, then worked",
+            base = "{G} opens {R} up with #lubricant#, [v_insert] #anal_plug#, then puts him face down and, with the plug still in him, [v_massage] his back and shoulders [adv_pressure_firm].",
+            explicit = "{G} opens {R} up with #lubricant# and [v_insert] #anal_plug#, then puts him face down and [v_knead] his back and shoulders [adv_pressure_deep] while the plug stays in him.",
+            benefit = RECEIVER, type = BenefitType.TOY_RECIPIENT,
+            acts = setOf("plug", "anal_toys", "massage_upper_back"), anal = true,
+            equip = setOf(Equipment.ANAL_PLUG, Equipment.LUBRICANT), rCon = PartyConstraint.BOTTOM,
+            timers = listOf(tm("Opening him up", 60), tm("The plug in", 45), tm("Back and shoulders", 180))
+        ),
+        t(
+            id = "l3_toy_dildo_counted", level = 3, cats = setOf(TOYS, ANAL),
+            title = "Twenty, then held",
+            base = "{G} pushes #dildo# into {R} with #lubricant#, gives him twenty slow strokes with it, then holds it all the way in for a slow count of twenty, and repeats that three times.",
+            explicit = "{G} pushes #dildo# into {R} with #lubricant#, gives him twenty slow strokes, then holds it all the way in for a slow count of twenty, three rounds of it.",
+            benefit = RECEIVER, type = BenefitType.TOY_RECIPIENT,
+            acts = setOf("dildo", "anal_toys"), anal = true,
+            equip = setOf(Equipment.DILDO, Equipment.LUBRICANT), rCon = PartyConstraint.BOTTOM,
+            timers = listOf(tm("Round 1", 75), tm("Round 2", 75), tm("Round 3", 75))
+        ),
+        t(
+            id = "l3_toy_vibe_on_the_plug", level = 3, cats = setOf(TOYS, ANAL),
+            title = "Buzzing against the plug",
+            base = "{G} works #anal_plug# into {R} with #lubricant#, then holds #vibrator# against the base of it [adv_toy_pace] and keeps it there for the whole of the second timer.",
+            explicit = "{G} works #anal_plug# into {R} with #lubricant#, then presses #vibrator# hard against the base of it [adv_toy_pace] and does not lift it off before the timer ends.",
+            benefit = RECEIVER, type = BenefitType.TOY_RECIPIENT,
+            acts = setOf("plug", "anal_toys", "vibration"), anal = true,
+            equip = setOf(Equipment.ANAL_PLUG, Equipment.VIBRATOR, Equipment.LUBRICANT),
+            rCon = PartyConstraint.BOTTOM,
+            timers = listOf(tm("The plug in", 60), tm("Vibrator on the base", 150))
+        ),
+        t(
+            id = "l3_toy_two_in_turn", level = 3, cats = setOf(TOYS, ANAL),
+            title = "One toy, then the other",
+            base = "{G} uses #dildo# on {R} with #lubricant# for the first timer, draws it out, then [v_insert] #prostate_toy# and leaves it in him for the rest of the term.",
+            explicit = "{G} fucks {R} with #dildo# and plenty of #lubricant# for the first timer, pulls it out, then [v_insert] #prostate_toy# and leaves it in him for the rest of the term.",
+            benefit = RECEIVER, type = BenefitType.TOY_RECIPIENT,
+            acts = setOf("dildo", "anal_toys"), anal = true,
+            equip = setOf(Equipment.DILDO, Equipment.PROSTATE_TOY, Equipment.LUBRICANT),
+            rCon = PartyConstraint.BOTTOM,
+            timers = listOf(tm("The dildo", 150), tm("The prostate toy", 180))
+        ),
+        t(
+            id = "l3_toy_ring_and_vibrator", level = 3, cats = setOf(TOYS),
+            title = "Ring on, toy running",
+            base = "{G} puts #cock_ring# on {R}, then holds #vibrator# against the underside of his cock [adv_toy_pace] and moves it every thirty seconds between the head, the base and his balls.",
+            explicit = "{G} puts #cock_ring# on {R} and runs #vibrator# on the underside of his cock [adv_toy_pace], moving it every thirty seconds between the head, the base and his balls.",
+            benefit = RECEIVER, type = BenefitType.TOY_RECIPIENT,
+            acts = setOf("cock_ring", "vibration"),
+            equip = setOf(Equipment.COCK_RING, Equipment.VIBRATOR),
+            erection = PartyRef.RECEIVER,
+            timers = listOf(tm("Underside", 30), tm("Head", 30), tm("Base", 30), tm("Balls", 30))
+        ),
+        t(
+            id = "l3_toy_clamps_and_mouth", level = 3, cats = setOf(TOYS, ORAL),
+            title = "Clamped and sucked",
+            base = "{G} sucks {R+} nipples until they are hard, puts #nipple_clamps# on him, then [v_suck] {R+} cock with the clamps staying on for the rest of the term.",
+            explicit = "{G} sucks {R+} nipples hard, clips #nipple_clamps# onto them, then [v_suck] {R+} cock and leaves the clamps exactly where they are.",
+            benefit = RECEIVER, type = BenefitType.TOY_RECIPIENT,
+            acts = setOf("nipple_clamps", "nipple_stimulation", "oral"),
+            equip = setOf(Equipment.NIPPLE_CLAMPS),
+            blocks = setOf(Boundary.NO_PAIN, Boundary.NO_MARKS),
+            timers = listOf(tm("Mouth first", 60), tm("Clamps on", 45), tm("Sucked", 120))
+        ),
+        t(
+            id = "l3_toy_wand_on_his_hole", level = 3, cats = setOf(TOYS, ANAL),
+            title = "Wand against his hole",
+            base = "{R} kneels with his chest down. {G} slicks him with #lubricant#, holds #massage_wand# against {R+} [n_hole] [adv_toy_pace], and works one finger into him alongside it for the second timer.",
+            explicit = "{R} kneels with his chest down and his ass up. {G} slicks him with #lubricant#, presses #massage_wand# against his hole [adv_toy_pace] and pushes one finger into him alongside it for the second timer.",
+            benefit = RECEIVER, type = BenefitType.TOY_RECIPIENT,
+            acts = setOf("massage_wand", "vibration", "anal_external", "fingering"), anal = true,
+            equip = setOf(Equipment.MASSAGE_WAND, Equipment.LUBRICANT), rCon = PartyConstraint.BOTTOM,
+            timers = listOf(tm("Wand only", 90), tm("Wand and finger", 120))
+        ),
+        t(
+            id = "l3_orgasm_edge_by_mouth", level = 3, cats = setOf(ORGASM_CONTROL, ORAL),
+            title = "Three times with his mouth",
+            base = "{G} [v_suck] {R+} cock until {R} says out loud that he is close, then comes off him completely for a slow count of thirty. Three rounds of that, and {R} does not come during this term.",
+            explicit = "{G} [v_suck] {R+} cock until {R} says out loud that he is close, then pulls his mouth off him for a slow count of thirty. Three rounds of it, and {R} does not come during this term.",
+            benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
+            acts = setOf("oral", "edging", "denial"),
+            erection = PartyRef.RECEIVER,
+            timers = listOf(tm("Round 1", 90), tm("Round 2", 90), tm("Round 3", 90))
+        ),
+        t(
+            id = "l3_orgasm_five_minutes_no_finish", level = 3, cats = setOf(ORGASM_CONTROL, HANDS),
+            title = "Five minutes, and no finish",
+            base = "{G} keeps a slick hand on {R+} cock for five straight minutes, stops the moment {R} says he is close and starts again after a slow count of twenty. {R} does not come during this term.",
+            explicit = "{G} keeps a slick hand on {R+} cock for five straight minutes, stops dead every time {R} says he is close and starts again after a slow count of twenty. {R} does not come at any point in this term.",
+            benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
+            acts = setOf("edging", "denial"),
+            erection = PartyRef.RECEIVER,
+            timers = listOf(tm("First half", 150), tm("Second half", 150))
+        ),
+        t(
+            id = "l3_orgasm_ten_then_thirty", level = 3, cats = setOf(ORGASM_CONTROL),
+            title = "Ten strokes, thirty off",
+            base = "{G} gives {R} ten slow strokes with a slick hand, then lifts his hand right off for thirty seconds, and runs that cycle six times over. {R} keeps both hands behind his own head.",
+            explicit = "{G} gives {R} ten slow strokes with a slick hand, then takes his hand right off for thirty seconds, six cycles of it, and {R} keeps both hands behind his own head.",
+            benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
+            acts = setOf("edging", "denial"),
+            timers = listOf(tm("Cycles 1 and 2", 120), tm("Cycles 3 and 4", 120), tm("Cycles 5 and 6", 120))
         )
     )
 }

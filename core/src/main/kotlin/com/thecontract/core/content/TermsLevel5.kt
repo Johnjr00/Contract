@@ -10,6 +10,7 @@ import com.thecontract.core.model.Category.BONDAGE
 import com.thecontract.core.model.Category.IMPACT
 import com.thecontract.core.model.Category.KISSING
 import com.thecontract.core.model.Category.LANGUAGE
+import com.thecontract.core.model.Category.MASSAGE
 import com.thecontract.core.model.Category.ORAL
 import com.thecontract.core.model.Category.ORGASM_CONTROL
 import com.thecontract.core.model.Category.POWER
@@ -24,7 +25,7 @@ import com.thecontract.core.model.Term
 
 /**
  * Act V — Enforcement. Rough play, hard sex, intense BDSM and the rules that run to the end
- * of the night. 40 terms (specification floor for level 5: 40).
+ * of the night. 57 terms (specification floor for level 5: 40).
  */
 internal object TermsLevel5 {
 
@@ -531,6 +532,202 @@ internal object TermsLevel5 {
             benefit = RECEIVER, type = BenefitType.HANDLING_RECIPIENT,
             acts = setOf("rough_handling", "pinning"),
             timers = listOf(tm("First", 60), tm("Second", 60), tm("Third", 60))
+        ),
+
+        // ---------------------------------------------------------------- added (16)
+        t(
+            id = "l5_rough_pinned_and_bitten", level = 5, cats = setOf(ROUGH, SENSORY),
+            title = "Pinned and bitten",
+            base = "{G} [v_pin] {R} flat on his back by the wrists and closes his teeth on {R+} shoulders, the sides of his chest and each nipple in turn, holding every bite for a slow count of five.",
+            explicit = "{G} [v_pin] {R} flat on his back by the wrists and [v_bite] {R+} shoulders, the sides of his chest and each nipple in turn, holding every bite for a slow count of five.",
+            benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
+            acts = setOf("pinning", "scratching", "nipple_stimulation"),
+            blocks = setOf(Boundary.NO_ROUGH_SEX, Boundary.NO_PAIN, Boundary.NO_MARKS),
+            timers = listOf(tm("Shoulders", 45), tm("Chest", 45), tm("Nipples", 45))
+        ),
+        t(
+            id = "l5_rough_pulled_into_place", level = 5, cats = setOf(ROUGH, POWER),
+            title = "Pulled where he is wanted",
+            base = "{G} takes {R} by the ankles and pulls him flat down the bed into position, three times across the term, and {R} goes where he is pulled and does not help.",
+            explicit = "{G} grabs {R} by the ankles and drags him flat down the bed into position three times across the term, and {R} goes where he is pulled and does not help once.",
+            benefit = RECEIVER, type = BenefitType.HANDLING_RECIPIENT,
+            acts = setOf("rough_handling"),
+            blocks = setOf(Boundary.NO_ROUGH_SEX),
+            timers = listOf(tm("First", 60), tm("Second", 60), tm("Third", 60)),
+            positions = listOf(
+                "Flat on his back with his knees pushed up to his chest.",
+                "On his front with his hips pulled up and his chest down.",
+                "On his side with his top leg lifted and held there.",
+                "Pulled to the edge of the bed with his feet on the floor.",
+                "Face down with both arms stretched above his head."
+            )
+        ),
+        t(
+            id = "l5_rough_led_by_the_hair", level = 5, cats = setOf(ROUGH, ORAL),
+            title = "Led by the hair",
+            base = "{R} keeps a fist in {G+} hair and works {G+} mouth down onto his own cock with it, setting the depth and the pace himself, and {G} keeps both hands flat on his own thighs and comes off only to breathe.",
+            explicit = "{R} keeps a fist in {G+} hair and drags {G+} mouth down onto his own cock with it, setting the depth and the pace himself, and {G} keeps both hands flat on his own thighs and comes off him only to breathe.",
+            benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
+            acts = setOf("oral", "deep_oral", "harder_oral", "rough_hair_pulling"),
+            blocks = setOf(Boundary.NO_ROUGH_SEX),
+            timers = listOf(tm("Led by the hair", 150))
+        ),
+        t(
+            id = "l5_rough_held_by_the_hips", level = 5, cats = setOf(ROUGH, ANAL),
+            title = "Held by the hips",
+            base = "{G} slicks up with #lubricant#, [v_grip] {R+} hips and grinds himself against {R+} [n_hole] without pushing in at any point, and {R} holds still on his knees throughout.",
+            explicit = "{G} slicks up with #lubricant#, [v_grip] {R+} hips and grinds his cock against {R+} [n_hole] without once pushing in, and {R} holds still on his knees for the full timer.",
+            benefit = RECEIVER, type = BenefitType.HAND_STIMULATION_RECIPIENT,
+            acts = setOf("anal_external", "rough_handling"),
+            gCon = PartyConstraint.TOP, rCon = PartyConstraint.BOTTOM,
+            erection = PartyRef.GIVER,
+            equip = setOf(Equipment.LUBRICANT),
+            blocks = setOf(Boundary.NO_ROUGH_SEX),
+            timers = listOf(tm("Against him", 150))
+        ),
+        t(
+            id = "l5_oral_counted_deep", level = 5, cats = setOf(ORAL, ROUGH),
+            title = "Five deep, then breathe",
+            base = "{G} [v_deep] {R+} cock five times in a row, comes all the way off for a slow count of ten to breathe, then goes again, and runs that cycle for the whole timer.",
+            explicit = "{G} [v_deep] {R+} cock five times in a row, comes all the way off for a slow count of ten to breathe, then goes straight back down, for the whole timer.",
+            benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
+            acts = setOf("oral", "deep_oral", "harder_oral"),
+            blocks = setOf(Boundary.NO_ROUGH_SEX),
+            timers = listOf(tm("Cycles", 180))
+        ),
+        t(
+            id = "l5_oral_no_hands_hard", level = 5, cats = setOf(ORAL, ROUGH, POWER),
+            title = "No hands, hard pace",
+            base = "{G} kneels in front of {R} with both hands locked behind his own back and [v_suck] {R+} cock at a hard, steady pace, off him only to breathe.",
+            explicit = "{G} kneels in front of {R} with his hands locked behind his own back, [v_suck] {R+} cock as hard and as fast as he can manage, and comes off him only to breathe.",
+            benefit = RECEIVER, type = BenefitType.ORAL_RECIPIENT,
+            acts = setOf("oral", "kneeling", "harder_oral"),
+            blocks = setOf(Boundary.NO_ROUGH_SEX),
+            timers = listOf(tm("Mouth only", 150))
+        ),
+        t(
+            id = "l5_fist_slow_in_and_out", level = 5, cats = setOf(ANAL),
+            title = "Slowly back, slowly in",
+            base = "{G} works his slicked hand into {R} with plenty of #lubricant#, draws it back to the knuckles over a slow count of twenty, then pushes it in again over another twenty, and keeps that cycle for the full timer.",
+            explicit = "{G} works his slicked hand into {R} with plenty of #lubricant#, draws it back to the knuckles over a slow count of twenty and pushes it in again over another twenty, and holds that cycle for the full timer.",
+            benefit = RECEIVER, type = BenefitType.FINGERING_RECIPIENT,
+            acts = setOf("fisting"), anal = true,
+            rCon = PartyConstraint.BOTTOM,
+            equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Working in", 150), tm("Out and back", 180))
+        ),
+        t(
+            id = "l5_ranal_dildo_and_hand", level = 5, cats = setOf(ANAL, ROUGH, TOYS),
+            title = "The dildo and his fist",
+            base = "{G} drives #dildo# into {R} with #lubricant# [adv_thrust_hard] and works {R+} cock with his free hand at the same pace, and neither one stops before the timer does.",
+            explicit = "{G} drives #dildo# into {R} with #lubricant# [adv_thrust_hard] and [v_stroke] {R+} cock with his free hand at the same pace, and neither one stops before the timer does.",
+            benefit = RECEIVER, type = BenefitType.TOY_RECIPIENT,
+            acts = setOf("dildo", "anal_toys", "rough_anal"), anal = true,
+            rCon = PartyConstraint.BOTTOM,
+            equip = setOf(Equipment.DILDO, Equipment.LUBRICANT),
+            timers = listOf(tm("Pushing it in", 45), tm("Both at once", 180))
+        ),
+        t(
+            id = "l5_ranal_fingers_three_ways", level = 5, cats = setOf(ANAL, ROUGH),
+            title = "Three fingers, three positions",
+            base = "{G} builds to three fingers in {R} with #lubricant# and finger-fucks him hard through three positions in this order: face down, then on his back with his knees up, then on his side.",
+            explicit = "{G} builds to three fingers in {R} with plenty of #lubricant# and finger-fucks him hard through three positions in this order: face down, on his back with his knees up, then on his side.",
+            benefit = RECEIVER, type = BenefitType.FINGERING_RECIPIENT,
+            acts = setOf("fingering", "rough_anal"), anal = true,
+            rCon = PartyConstraint.BOTTOM,
+            equip = setOf(Equipment.LUBRICANT),
+            timers = listOf(tm("Building up", 60), tm("Face down", 90), tm("On his back", 90), tm("On his side", 90))
+        ),
+        t(
+            id = "l5_bdsm_flogger_counted", level = 5, cats = setOf(IMPACT),
+            title = "Forty with the flogger",
+            base = "{DOM} lands forty strokes of #flogger# across {SUB+} back, ass and thighs in four sets of ten, and {SUB} counts every stroke out loud and stays where he is between sets.",
+            explicit = "{DOM} lands forty strokes of #flogger# across {SUB+} back, ass and thighs in four sets of ten. {SUB} counts every stroke out loud, and any stroke he does not count is landed again.",
+            benefit = RECEIVER, type = BenefitType.IMPACT_RECIPIENT,
+            gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
+            acts = setOf("impact_toys", "commands"),
+            equip = setOf(Equipment.FLOGGER),
+            blocks = setOf(Boundary.NO_PAIN, Boundary.NO_MARKS),
+            timers = listOf(tm("Set 1", 45), tm("Set 2", 45), tm("Set 3", 45), tm("Set 4", 45))
+        ),
+        t(
+            id = "l5_bdsm_clamps_and_paddle", level = 5, cats = setOf(IMPACT, TOYS),
+            title = "Clamped and paddled",
+            base = "{DOM} puts #nipple_clamps# on {SUB}, leaves them on and lands three sets of ten with #paddle#, a slow count of twenty between sets.",
+            explicit = "{DOM} clips #nipple_clamps# onto {SUB}, leaves them exactly where they are and lands three sets of ten with #paddle#, a slow count of twenty between sets.",
+            benefit = RECEIVER, type = BenefitType.IMPACT_RECIPIENT,
+            gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
+            acts = setOf("nipple_clamps", "impact_toys"),
+            equip = setOf(Equipment.NIPPLE_CLAMPS, Equipment.PADDLE),
+            blocks = setOf(Boundary.NO_PAIN, Boundary.NO_MARKS),
+            timers = listOf(tm("Clamps on", 45), tm("Set 1", 45), tm("Set 2", 45), tm("Set 3", 45))
+        ),
+        t(
+            id = "l5_bdsm_cuffed_toy_rounds", level = 5, cats = setOf(BONDAGE, TOYS),
+            title = "Cuffed, three rounds",
+            base = "{SUB} is locked in #cuffs# and {DOM} runs #TOY# over his nipples for a minute, the inside of his thighs for a minute and his cock for a minute, in that order, and stays beside him the whole time.",
+            explicit = "{SUB} is locked in #cuffs# and {DOM} works #TOY# over his nipples for a minute, the inside of his thighs for a minute and his cock for a minute, in that order, and does not leave his side.",
+            benefit = RECEIVER, type = BenefitType.TOY_RECIPIENT,
+            gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
+            acts = setOf("restraint"), toy = true,
+            equip = setOf(Equipment.CUFFS),
+            blocks = setOf(Boundary.NO_RESTRAINTS),
+            timers = listOf(tm("Nipples", 60), tm("Thighs", 60), tm("Cock", 60))
+        ),
+        t(
+            id = "l5_bdsm_collar_and_silence", level = 5, cats = setOf(POWER, BONDAGE, MASSAGE),
+            title = "Collared and silent",
+            base = "{SUB} wears #collar# and kneels in front of {DOM} without speaking while {DOM} works {SUB+} shoulders, his hair and the back of his neck with both hands.",
+            explicit = "{SUB} wears #collar# and kneels in front of {DOM} in silence while {DOM} works {SUB+} shoulders, his hair and the back of his neck with both hands until the timer ends.",
+            benefit = RECEIVER, type = BenefitType.MASSAGE_RECIPIENT,
+            gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
+            acts = setOf("collaring", "massage_neck_shoulders", "hair_pulling"),
+            equip = setOf(Equipment.COLLAR),
+            timers = listOf(tm("Kneeling", 180))
+        ),
+        t(
+            id = "l5_rule_asks_before_touching", level = 5, cats = setOf(POWER),
+            title = "Asks before he touches him",
+            base = "For the rest of the night {SUB} asks {DOM} out loud before he puts a hand on him, every single time, and waits for an answer before he does.",
+            explicit = "For the rest of the night {SUB} asks {DOM} out loud before he puts a hand on him, every single time, and waits to be told yes before he does.",
+            benefit = MUTUAL, type = BenefitType.MUTUAL,
+            gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
+            acts = setOf("permission_control", "commands"),
+            timers = listOf(tm("Rule in force", 60))
+        ),
+        t(
+            id = "l5_rule_kneels_between_terms", level = 5, cats = setOf(POWER),
+            title = "Kneels between terms",
+            base = "For the rest of the night {SUB} goes down onto his knees in front of {DOM} at the end of every term and stays there, hands behind his back, for a slow count of thirty.",
+            explicit = "For the rest of the night {SUB} drops onto his knees in front of {DOM} at the end of every term and stays there, hands locked behind his back, for a slow count of thirty.",
+            benefit = MUTUAL, type = BenefitType.MUTUAL,
+            gCon = PartyConstraint.SUBMISSIVE, rCon = PartyConstraint.DOMINANT,
+            acts = setOf("kneeling", "commands"),
+            timers = listOf(tm("Rule in force", 60))
+        ),
+        t(
+            id = "l5_rule_thanks_him", level = 5, cats = setOf(POWER, LANGUAGE),
+            title = "Thanks him out loud",
+            base = "For the rest of the night {SUB} thanks {DOM} out loud at the end of every term, in a full sentence, before either of them moves on.",
+            explicit = "For the rest of the night {SUB} thanks {DOM} out loud at the end of every term, in a full sentence, before either of them moves on to the next.",
+            benefit = MUTUAL, type = BenefitType.MUTUAL,
+            gCon = PartyConstraint.DOMINANT, rCon = PartyConstraint.SUBMISSIVE,
+            acts = setOf("ownership_language", "commands"),
+            timers = listOf(tm("Rule in force", 60)),
+            says = listOf(
+                "Thank you.",
+                "Thank you for that.",
+                "Thank you, that was exactly what I wanted.",
+                "Thank you for putting me through that.",
+                "Thank you for the whole of that."
+            ),
+            saysExplicit = listOf(
+                "Thank you.",
+                "Thank you for that.",
+                "Thank you for using me like that.",
+                "Thank you for putting me through that.",
+                "Thank you for every bit of that."
+            )
         )
     )
 }

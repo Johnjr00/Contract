@@ -189,10 +189,10 @@ preposition, and the validator will not catch the result.
 `ContentValidator` requires at least 202 regular terms, 120 considerations, 132 preferences, and
 per level: **L1 42, L2-L5 40 each.**
 
-Current: **L1 50, L2 48, L3 40, L4 47, L5 41; 40 closing terms; 170 considerations.**
+Current: **L1 66, L2 64, L3 56, L4 63, L5 57; 40 closing terms; 170 considerations.**
 
-> **Level 3 sits exactly on its floor.** Removing any level-3 term requires adding a replacement
-> in the same commit.
+> Every level now sits clear of its floor, but the margin is the only thing standing between a
+> deletion and a failing build — check `ContentValidator.MIN_PER_LEVEL` before removing a term.
 
 ---
 
