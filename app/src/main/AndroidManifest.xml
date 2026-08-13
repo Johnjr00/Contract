@@ -4,13 +4,13 @@
 
     <!--
       Network use is a listening socket on the local network, plus address changes. There is no
-      analytics, no crash reporting and no telemetry, and nothing about a session — no term, no
-      profile, no spoken text — ever leaves the box.
+      analytics, no crash reporting and no telemetry.
 
-      There is exactly one outbound call, made once in the life of an install: fetching the voice
-      model, which is too large to ship inside the APK. It is a fixed list of files at a pinned
-      commit, verified by hash, and after it succeeds the app never reaches the network again.
-      See VoiceInstaller.
+      Narration is the one thing that may leave the box. The television speaks through the
+      platform speech engine and asks it for the best voice it has rather than restricting it to
+      on-device synthesis, so the text of a term can travel to whoever supplies that voice. That
+      is a deliberate choice: the local neural voice this replaced took as long to prepare a term
+      as to say it. Nothing else — no profile answer, no vote, no contract — is ever sent anywhere.
     -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />

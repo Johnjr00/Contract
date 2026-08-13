@@ -5,8 +5,9 @@ each man brings a phone, which is private. Over an evening the pair negotiate a 
 sexual terms, pay for each one with a "consideration", and then perform the whole contract in
 order as a final scene.
 
-Everything runs on the local network. The TV hosts an HTTP/WebSocket server, the phones connect
-to it in a browser, and nothing about a session ever leaves the box.
+The game runs on the local network. The TV hosts an HTTP/WebSocket server and the phones connect
+to it in a browser. Nothing about a session leaves the box except the words the television reads
+aloud, which go to the platform speech engine — see §5 and §8.
 
 ---
 
@@ -34,9 +35,11 @@ regular one.
 ```
 core/    Pure Kotlin. Game engine, content library, view builder, server, persistence.
          No Android dependencies — this is where almost all logic and all content lives.
-app/     Android TV app. Compose UI, foreground service, on-device narration (sherpa-onnx).
-model/   The TTS voice model (large binaries, fetched at first run if absent).
+app/     Android TV app. Compose UI, foreground service, narration via the platform engine.
 ```
+
+There is no native code and no bundled model, so one APK runs on every television and the whole
+build is a couple of megabytes.
 
 Files worth knowing:
 
@@ -53,7 +56,7 @@ Files worth knowing:
 | `core/.../engine/FinaleOrdering.kt` | The running order of the final scene. |
 | `core/.../validation/ContentValidator.kt` | Every content rule that can be automated. |
 | `app/.../ui/TvCanvas.kt` | The TV design canvas and the fit-to-height guard. |
-| `app/proguard-rules.pro` | R8 keep rules. See §8 — this file has broken the app twice. |
+| `app/.../ui/NarrationPlayer.kt` | Speech, via `android.speech.tts`. See §8. |
 
 ### Commands
 
@@ -61,8 +64,6 @@ Files worth knowing:
 ./gradlew :core:test                 # engine + content rules (fast, run this constantly)
 ./gradlew :app:testReleaseUnitTest   # app-side unit tests
 ./gradlew :app:assembleRelease       # APK -> app/build/outputs/apk/release/
-./gradlew :core:test --tests "*PlaythroughReadout*" --rerun-tasks
-                                     # writes core/build/playthrough-readout.txt
 ```
 
 Gradle works offline (`--offline`). Release builds are signed if `keystore.properties` exists.
@@ -217,6 +218,11 @@ Not a bolt-on — most of the architecture.
   version checks and pauses every timer. Resuming needs both phones.
 * **Privacy is structural.** The TV view never contains a profile answer or an unsubmitted
   selection — not hidden, simply absent from the object the TV is handed.
+* **One deliberate exception.** Narration goes through the platform speech engine, which is asked
+  for its best voice rather than being held to on-device synthesis, so the text of a *term* may
+  reach whoever supplies that voice. Nothing else leaves the box: no profile answer, no vote, no
+  consideration, no contract. The engine also never sees anything a player has not already been
+  shown on the shared screen, because `Narration` derives its script from the TV view alone.
 
 Known gaps, if asked: there is no aftercare stage and no periodic check-in; the stop word is
 displayed but not modelled in software (the pause button is the enforceable mechanism).
@@ -228,14 +234,14 @@ displayed but not modelled in software (the pause button is the enforceable mech
 * **Alternation.** The man who came out ahead on the last one-sided term is not the man the next
   is bound to favour. It moves on a **signature**, not a proposal — a rejected term leaves the
   debt where it was. Balanced terms name nobody and pass no turn. It is a *preference* the
-  selector drops if nothing eligible survives with it. `BenefitAlternationTest` plays real games.
+  selector drops if nothing eligible survives with it.
 * **A trade is one contract item and two execution steps.** The two halves routinely have giver
   and receiver reversed, so each step carries its own instruction, clocks, controller and
   completer. They stay adjacent in the running order. `BundledTermExecutionTest`.
 * **Assumed preferences.** 56 of the 151 preferences are no longer asked and answer `YES`
   regardless of what is stored — a stale `NO` from an older profile must not survive. The records
   stay in the library because terms reference those activities by id. Two sections (Language,
-  Orgasm control) are empty and are not shown. `AssumedPreferenceTest`.
+  Orgasm control) are empty and are not shown.
 * **Persistence tolerates old saves.** `StoreJson` uses `ignoreUnknownKeys`, and a failed decode
   drops the session silently. When changing a persisted field, **rename rather than retype** so the
   old key is skipped instead of failing to parse, and provide a rebuild path.
@@ -251,41 +257,57 @@ displayed but not modelled in software (the pause button is the enforceable mech
   figure for both.
 * **Nothing in the content column can take focus**, so a remote cannot scroll it. Anything that
   overflows is *gone*. `FitToHeight` shrinks the column by lowering the density rather than
-  clipping. `TvLayoutBudgetTest` guards the arithmetic.
+  clipping.
 * The accessibility text scale is deliberately not carried through.
 
 ---
 
-## 8. Traps that have already cost real debugging
+## 8. Narration
 
-**R8 strips what only native code uses.** Both of these were process aborts, not exceptions, so no
-`try/catch` anywhere could have caught them, and both only appeared in release builds:
+The television speaks through `android.speech.tts`. `NarrationPlayer` starts the engine, picks the
+best US English voice it offers — preferring a male one, since both players are men — and speaks
+with `QUEUE_FLUSH` so a new term cuts off the last.
 
-1. `sherpa-onnx` reads its config object's fields from C++ by name. R8 renamed them →
-   `JNI DETECTED ERROR: fid == null`. Fixed by keeping `com.k2fsa.sherpa.onnx.**`.
-2. The audio callback was a Kotlin lambda. Lambdas compile through `invokedynamic`, and the
-   desugared class carries only the erased `invoke(Object)Object` — the specialised
-   `invoke([F)Ljava/lang/Integer;` the native side looks up **was never in the APK at all**, so no
-   keep rule could preserve it. Fixed by declaring `ChunkSink` as a real class.
+This replaced an on-device neural voice (SupertonicTTS through sherpa-onnx). It sounded good and
+was genuinely local, but a Tegra X1 generated about a second of speech per second of compute, so a
+term took as long to prepare as to say. Buffering, thread counts and sampling steps were all tried;
+each fixed one symptom and produced another, because the arithmetic was the arithmetic.
 
-> When touching narration or ProGuard rules, verify against the **built APK's method table**, not
-> the rules file. A keep rule that looks right proves nothing.
+Two things went with it, and both are worth knowing if narration is ever revisited:
 
-**Narration performance.** Four threads, `SAMPLING_STEPS = 3`, and a short lead-in segment so
-speech starts before the whole passage is generated. `SAMPLING_STEPS` is the quality/speed dial.
-
----
+* **223 MB** of model and native library, and with it the per-architecture APK split, the
+  first-run download, and every R8 keep rule those needed. The APK went from 11 MB to 1.4 MB.
+* **A whole class of release-only crashes.** Native code reached into Kotlin by name, so R8 broke
+  it twice in ways no `try/catch` could catch — a renamed config field aborted the process with
+  `fid == null`, and a callback written as a lambda was never emitted in the specialised form the
+  native side looked up, so no keep rule could have preserved it. If anything like that comes
+  back, verify against the built APK's method table, not the rules file.
 
 ## 9. How to verify content changes
 
 1. `./gradlew :core:test` — the validator, the render sweep, the benefit rules, the playthroughs.
-2. Regenerate and **read** the readout:
-   `./gradlew :core:test --tests "*PlaythroughReadout*" --rerun-tasks`
-   → `core/build/playthrough-readout.txt`
+2. **Read the rendered output.** The suite catches everything expressible as a rule; it cannot
+   tell you whether an instruction can be carried out by two men in a room. Every issue marked
+   *(read)* above was found that way and would have shipped otherwise.
 
-The second step is not optional for content work. The suite catches everything expressible as a
-rule; it cannot tell you whether an instruction can be carried out by two men in a room. Every
-issue marked *(read)* above was found by reading rendered output and would have shipped otherwise.
+For step 2, play games through the test harness (`Harness`, `GameDriver`, `Setups` in
+`core/src/test/.../harness/`) and print each proposed term, each consideration option and the
+finale in order. Write that as a throwaway when you need it rather than leaving it in the suite —
+it always passes, so as a test it is noise.
 
 When adding terms, render them at the mildest and coarsest registers and read both — the coarse
 register substitutes different verbs and is where grammar breaks.
+
+---
+
+## 10. Tests
+
+Keep the suite small. A test earns its place by guarding a bug that actually happened, or a rule
+the game would silently break without it. Two exist for that reason:
+
+* `FinaleOnlyPenetrationTest` — intercourse and finishing stay in the closing terms (§4.2).
+* `BundledTermExecutionTest` — a trade performs as two steps, each with its own actors and clock.
+
+Do not add a test that restates a constant, re-checks something the validator already covers, or
+proves a value equals itself. If a check is worth having permanently, prefer adding it to
+`ContentValidator` — one place, one run, no new file.

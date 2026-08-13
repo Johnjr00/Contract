@@ -50,18 +50,15 @@ object ServerHolder {
      * network" is a different problem from "this device cannot run the voice", and the line on
      * screen is the only place either of them surfaces.
      */
+    /**
+     * What the narrator is doing. There is no download to report and no generation speed to
+     * measure since the platform engine took over; it either speaks or it says why it cannot.
+     */
     data class NarrationStatus(
         val speaking: Boolean = false,
-        val realTimeFactor: Double? = null,
         val failed: Boolean = false,
-        val failureNote: String? = null,
-        val download: Download? = null
-    ) {
-        data class Download(val bytesDone: Long, val bytesTotal: Long) {
-            val percent: Int
-                get() = if (bytesTotal <= 0) 0 else ((bytesDone * 100) / bytesTotal).toInt()
-        }
-    }
+        val failureNote: String? = null
+    )
 
     private val _narration = MutableStateFlow(NarrationStatus())
     val narration: StateFlow<NarrationStatus> = _narration.asStateFlow()
