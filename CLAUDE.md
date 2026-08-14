@@ -204,7 +204,7 @@ Not a bolt-on — most of the architecture.
 * **13 hard boundaries** (no anal, no pain, no marks, no restraints, no degradation, …). Which
   boundaries block a term is **derived** from its categories, activities and equipment rather than
   tagged per term, so a new term cannot accidentally slip past one.
-* **151 private preferences**, 95 of which are asked (§6). Directional: yes to giving is a
+* **151 private preferences**, 72 of which are asked (§6). Directional: yes to giving is a
   separate answer from yes to receiving. **A single No from either man removes the term.**
 * **Filtering is silent.** A No or missing equipment removes content without ever showing why —
   nobody learns what the other man declined. Boundary conflicts are the exception and may be
@@ -238,10 +238,10 @@ displayed but not modelled in software (the pause button is the enforceable mech
 * **A trade is one contract item and two execution steps.** The two halves routinely have giver
   and receiver reversed, so each step carries its own instruction, clocks, controller and
   completer. They stay adjacent in the running order. `BundledTermExecutionTest`.
-* **Assumed preferences.** 56 of the 151 preferences are no longer asked and answer `YES`
+* **Assumed preferences.** 79 of the 151 preferences are no longer asked and answer `YES`
   regardless of what is stored — a stale `NO` from an older profile must not survive. The records
-  stay in the library because terms reference those activities by id. Two sections (Language,
-  Orgasm control) are empty and are not shown.
+  stay in the library because terms reference those activities by id. Three sections (Power,
+  Language, Orgasm control) are empty and are not shown.
 * **Persistence tolerates old saves.** `StoreJson` uses `ignoreUnknownKeys`, and a failed decode
   drops the session silently. When changing a persisted field, **rename rather than retype** so the
   old key is skipped instead of failing to parse, and provide a rebuild path.

@@ -44,7 +44,7 @@ data class Preference(
 )
 
 /**
- * The private preference library (section 24). 147 preferences; the specification floor is 132.
+ * The private preference library (section 24). 151 preferences; the specification floor is 132.
  *
  * No answer in a player's profile is ever sent to the TV or to the other player's phone.
  */
@@ -182,16 +182,25 @@ object PreferenceLibrary {
      * Yes to.
      *
      * These are the parts of the game nobody was ever going to decline in a way that mattered —
-     * most of the massage vocabulary, the language and orgasm-control questions, the roleplay
-     * framings — and asking about each of them separately made the profile long enough that the
-     * answers stopped being considered. A shorter list of questions people actually read is worth
-     * more than a longer one they click through.
+     * most of the massage vocabulary, how the kissing goes rather than where it lands, the
+     * language and orgasm-control questions, the whole power dynamic, the roleplay framings — and
+     * asking about each of them separately made the profile long enough that the answers stopped
+     * being considered. A shorter list of questions people actually read is worth more than a
+     * longer one they click through.
      *
-     * Two whole sections are emptied by this and drop out of the form altogether.
+     * Three whole sections are emptied by this and drop out of the form altogether.
      */
     private val ASSUMED_YES: Set<String> = setOf(
+        "long_making_out_give",
+        "long_making_out_receive",
+        "tongue_kissing_give",
+        "tongue_kissing_receive",
+        "hard_kissing_give",
+        "hard_kissing_receive",
         "body_worship_give",
         "body_worship_receive",
+        "scratching_give",
+        "scratching_receive",
         "foot_stimulation_give",
         "foot_stimulation_receive",
         "massage_general_give",
@@ -224,9 +233,24 @@ object PreferenceLibrary {
         "massage_groin_receive",
         "massage_oil_give",
         "massage_oil_receive",
+        "massage_wand_give",
+        "massage_wand_receive",
+        "massage_to_sexual_give",
+        "massage_to_sexual_receive",
+        "spit_give",
+        "spit_receive",
+        "vibration_give",
+        "vibration_receive",
+        "commands_give",
+        "commands_receive",
+        "kneeling_give",
+        "kneeling_receive",
+        "sexual_service_give",
+        "sexual_service_receive",
         "ownership_language_give",
         "ownership_language_receive",
         "permission_control_give",
+        "permission_control_receive",
         "explicit_praise_give",
         "explicit_praise_receive",
         "degradation_give",
