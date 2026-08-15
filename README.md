@@ -37,6 +37,11 @@ Player 1's phone inputs the game settings:
 - **Hard boundaries** — thirteen checkboxes. Anything you check never appears in any form for that game.
 - Whether the **TV reads it aloud**. It will use Google Speech Synthesis or whatever TTS provider you have set up in your TV's accessibility settings.
 
+Two buttons at the top of that screen mean you only have to do all of it once. **Save these
+settings** puts the screen away under a name; **Saved settings** brings it back on a later night,
+every field, boundaries and equipment included. Read it through before you submit it anyway —
+what you were up for in March is not a standing agreement.
+
 ## Step 2 — Your private profile
 
 You each answer about seventy questions on your own phone: **Yes / Maybe / No**, and what you'll give is a separate question from what you'll take.
@@ -317,6 +322,16 @@ is unavailable.
 On launch, if an unfinished session exists the TV offers Resume or Start New. It is never
 silently destroyed; replacing it is an explicit choice. A corrupt session file is ignored rather
 than crashing the launch, which is covered by a test.
+
+**Saved settings** are the one thing kept deliberately between games. Player 1 names the setup
+screen as it stands and reloads it whole on a later night — everything, including both names, the
+anal roles, the stop word, the thirteen hard boundaries and the equipment list. They are stored
+encrypted like everything else, keyed to the television rather than to a session, so ending or
+abandoning a game leaves them alone; ten fit, saving under a name already in the list overwrites
+it after a confirmation, and deleting takes two taps. Loading one fills the form in and stops —
+Player 1 still reads it through and submits it himself, so the boundaries are re-confirmed every
+time rather than inherited quietly. Private profile answers are **never** part of this: they stay
+inside the session they were given in.
 
 ---
 

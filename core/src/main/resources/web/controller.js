@@ -32,6 +32,10 @@
     timerAnchor: 0,
     profileDraft: null,
     setupDraft: null,
+    setupRevision: null,   // the revision the draft was built from; see setupDraft()
+    setupPanel: null,      // null | "presets" | "save"
+    setupPresetName: "",
+    setupConfirm: null,    // { kind: "overwrite" | "delete", id: <preset id> }
     reclaim: null,
     pendingActions: []
   };
@@ -209,7 +213,12 @@
         S.version = msg.view.version;
         S.timerAnchor = Date.now();
         if (S.view.phase !== "PRIVATE_PROFILES" && S.view.phase !== "WAITING_FOR_PROFILES") S.profileDraft = null;
-        if (S.view.phase !== "PLAYER_1_SETUP") S.setupDraft = null;
+        if (S.view.phase !== "PLAYER_1_SETUP") {
+          S.setupDraft = null;
+          S.setupPanel = null;
+          S.setupConfirm = null;
+          S.setupPresetName = "";
+        }
         render();
         return;
 
@@ -790,7 +799,16 @@
 
   // ------------------------------------------------------------------ setup
 
+  /**
+   * The setup form is edited locally and only sent when it is saved or submitted, so the draft
+   * survives every re-render. It is rebuilt when the server says the setup underneath has been
+   * replaced -- which is what loading a saved setting does. Without that the fields would keep
+   * showing the old values and the load would look like it had done nothing.
+   */
   function setupDraft(form) {
+    var revision = form.revision || 0;
+    if (S.setupDraft && S.setupRevision !== revision) S.setupDraft = null;
+    S.setupRevision = revision;
     if (!S.setupDraft) {
       S.setupDraft = {
         player1Name: form.player1Name,
@@ -856,11 +874,152 @@
     return wrap;
   }
 
+  // Mirrors SetupPreset.idFor on the server, so the phone can tell a new name from one already
+  // in the list and ask before writing over it.
+  function presetId(name) {
+    var id = (name || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    return id || "preset";
+  }
+
+  function fmtDate(ms) {
+    try {
+      return new Date(ms).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function setupPanelButton(label, panel, count) {
+    var b = el("button", "btn" + (S.setupPanel === panel ? " btn-primary" : ""),
+      count === undefined ? label : label + " (" + count + ")");
+    b.type = "button";
+    b.setAttribute("aria-expanded", S.setupPanel === panel ? "true" : "false");
+    b.addEventListener("click", function () {
+      S.setupPanel = S.setupPanel === panel ? null : panel;
+      S.setupConfirm = null;
+      render();
+    });
+    return b;
+  }
+
+  /** The list of saved settings: use one, or delete one. Both need a second tap to take effect. */
+  function renderPresetList(form) {
+    var wrap = el("div", "presets");
+    if (!form.presets || !form.presets.length) {
+      wrap.appendChild(el("p", "meta",
+        "Nothing saved yet. Set the game up the way you want it, then use Save these settings."));
+      return wrap;
+    }
+    wrap.appendChild(el("p", "meta",
+      "Loading one replaces everything on this screen — names, roles, length, wording, stop word, " +
+      "boundaries and equipment. You still read it through and submit it yourself."));
+    form.presets.forEach(function (p) {
+      var row = el("div", "preset");
+      var head = el("div", "preset-head");
+      head.appendChild(el("span", "preset-name", p.name));
+      head.appendChild(el("span", "meta", "Saved " + fmtDate(p.savedAtMs)));
+      row.appendChild(head);
+
+      var buttons = el("div", "btn-row");
+      var use = el("button", "btn", "Use these settings");
+      use.type = "button";
+      use.addEventListener("click", function () {
+        S.setupPanel = null;
+        S.setupConfirm = null;
+        act({ type: "load_setup_preset", id: p.id });
+        toast("Loaded " + p.name + ".");
+      });
+      buttons.appendChild(use);
+
+      var confirming = S.setupConfirm && S.setupConfirm.kind === "delete" && S.setupConfirm.id === p.id;
+      var del = el("button", "btn btn-danger", confirming ? "Tap again to delete" : "Delete");
+      del.type = "button";
+      del.addEventListener("click", function () {
+        if (confirming) {
+          S.setupConfirm = null;
+          act({ type: "delete_setup_preset", id: p.id });
+          toast("Deleted " + p.name + ".");
+        } else {
+          S.setupConfirm = { kind: "delete", id: p.id };
+          render();
+        }
+      });
+      buttons.appendChild(del);
+      row.appendChild(buttons);
+      wrap.appendChild(row);
+    });
+    return wrap;
+  }
+
+  /** Naming and saving what is currently on the screen. */
+  function renderPresetSave(form, d) {
+    var wrap = el("div", "presets");
+    var existing = (form.presets || []).filter(function (p) {
+      return p.id === presetId(S.setupPresetName);
+    })[0];
+    var full = (form.presets || []).length >= (form.presetLimit || 0) && !existing;
+
+    wrap.appendChild(field("Name these settings", textFor(S.setupPresetName, function (v) {
+      var wasOverwrite = !!existing;
+      S.setupPresetName = v;
+      S.setupConfirm = null;
+      // Re-render only when the button's meaning changes, so the keyboard is not disturbed on
+      // every keystroke.
+      var isOverwrite = (form.presets || []).some(function (p) { return p.id === presetId(v); });
+      if (wasOverwrite !== isOverwrite) render();
+    })));
+
+    if (full) {
+      wrap.appendChild(el("p", "meta",
+        "There is room for " + form.presetLimit + " saved settings. Delete one before saving another."));
+      return wrap;
+    }
+
+    var confirming = !!(existing && S.setupConfirm && S.setupConfirm.kind === "overwrite" &&
+      S.setupConfirm.id === existing.id);
+    var label = confirming ? "Tap again to overwrite " + existing.name
+      : existing ? "Overwrite " + existing.name
+        : "Save these settings";
+    var save = el("button", "btn btn-primary", label);
+    save.type = "button";
+    // Read the name and the confirmation live rather than from the render that built this
+    // button: the field can have moved on since without the button needing to be redrawn.
+    save.addEventListener("click", function () {
+      var name = (S.setupPresetName || "").trim();
+      if (!name) { toast("Give these settings a name first."); return; }
+      var match = (form.presets || []).filter(function (p) { return p.id === presetId(name); })[0];
+      var confirmed = !!(match && S.setupConfirm && S.setupConfirm.kind === "overwrite" &&
+        S.setupConfirm.id === match.id);
+      if (match && !confirmed) {
+        S.setupConfirm = { kind: "overwrite", id: match.id };
+        render();
+        return;
+      }
+      S.setupConfirm = null;
+      S.setupPanel = null;
+      S.setupPresetName = "";
+      act({ type: "save_setup_preset", name: name, setup: buildSetup(d) });
+      toast("Saved as " + name + ".");
+    });
+    wrap.appendChild(save);
+    wrap.appendChild(el("p", "meta",
+      "Everything on this screen is saved, including the hard boundaries and the equipment list."));
+    return wrap;
+  }
+
   function renderSetup(form) {
     var d = setupDraft(form);
     var card = el("section", "card");
     card.appendChild(el("h2", null, "Shared setup"));
     card.appendChild(el("p", "meta", "Only you can change these. The other phone waits until you finish."));
+
+    var tools = el("div", "btn-row");
+    tools.style.marginTop = "12px";
+    tools.appendChild(setupPanelButton("Saved settings", "presets", (form.presets || []).length));
+    tools.appendChild(setupPanelButton("Save these settings", "save"));
+    card.appendChild(tools);
+    if (S.setupPanel === "presets") card.appendChild(renderPresetList(form));
+    if (S.setupPanel === "save") card.appendChild(renderPresetSave(form, d));
 
     card.appendChild(field("Player 1 name (you)", textFor(d.player1Name, function (v) { d.player1Name = v; })));
     card.appendChild(field("Player 2 name", textFor(d.player2Name, function (v) { d.player2Name = v; })));

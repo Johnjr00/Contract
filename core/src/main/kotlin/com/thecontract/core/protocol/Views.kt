@@ -101,6 +101,10 @@ data class ProfileForm(
 @Serializable
 data class SetupOption(val id: String, val label: String, val detail: String? = null)
 
+/** One row of the "Saved settings" list. The setup itself stays on the television. */
+@Serializable
+data class SetupPresetSummary(val id: String, val name: String, val savedAtMs: Long)
+
 @Serializable
 data class SetupForm(
     val player1Name: String,
@@ -117,7 +121,16 @@ data class SetupForm(
     val boundaries: List<String>,
     val equipment: List<String>,
     val options: Map<String, List<SetupOption>>,
-    val errors: List<String> = emptyList()
+    val errors: List<String> = emptyList(),
+    val presets: List<SetupPresetSummary> = emptyList(),
+    val presetLimit: Int = 0,
+    /**
+     * Rises whenever the server replaces the setup wholesale — which today means a preset was
+     * loaded. Player 1's phone edits a local draft and ignores the incoming form while it has one,
+     * so without a signal that the setup underneath has changed, loading a preset would leave the
+     * old values on screen and look like nothing happened.
+     */
+    val revision: Int = 0
 )
 
 @Serializable

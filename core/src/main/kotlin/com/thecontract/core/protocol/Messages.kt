@@ -27,6 +27,23 @@ data object ReadAgain : GameAction
 @Serializable @SerialName("update_setup")
 data class UpdateSetup(val setup: SharedSetup) : GameAction
 
+/**
+ * Saves the setup screen as it currently stands under a name, for a later game.
+ *
+ * The setup travels with the action because the in-progress form lives on Player 1's phone and
+ * does not reach the server until he submits it. Saving under a name already in the list
+ * overwrites it; the phone asks him to confirm first.
+ */
+@Serializable @SerialName("save_setup_preset")
+data class SaveSetupPreset(val name: String, val setup: SharedSetup) : GameAction
+
+/** Replaces the whole setup with a saved one. Resolved against the store by the session manager. */
+@Serializable @SerialName("load_setup_preset")
+data class LoadSetupPreset(val id: String) : GameAction
+
+@Serializable @SerialName("delete_setup_preset")
+data class DeleteSetupPreset(val id: String) : GameAction
+
 @Serializable @SerialName("save_profile")
 data class SaveProfile(
     val answers: Map<String, Answer>,

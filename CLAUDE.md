@@ -218,6 +218,11 @@ Not a bolt-on — most of the architecture.
   version checks and pauses every timer. Resuming needs both phones.
 * **Privacy is structural.** The TV view never contains a profile answer or an unsubmitted
   selection — not hidden, simply absent from the object the TV is handed.
+* **A saved setup is reloaded, never inherited.** Player 1 can keep the setup screen under a name
+  and bring it back on a later night, boundaries and equipment included, but loading only fills the
+  form in — he still reads it and submits it himself, so the thirteen boundaries are re-confirmed
+  every game. Nothing from a private profile is ever saved this way; the answers stay inside the
+  session they were given in.
 * **One deliberate exception.** Narration goes through the platform speech engine, which is asked
   for its best voice rather than being held to on-device synthesis, so the text of a *term* may
   reach whoever supplies that voice. Nothing else leaves the box: no profile answer, no vote, no
@@ -245,6 +250,15 @@ displayed but not modelled in software (the pause button is the enforceable mech
 * **Persistence tolerates old saves.** `StoreJson` uses `ignoreUnknownKeys`, and a failed decode
   drops the session silently. When changing a persisted field, **rename rather than retype** so the
   old key is skipped instead of failing to parse, and provide a rebuild path.
+* **Saved settings are not game state.** A `SetupPreset` is a named `SharedSetup` held by
+  `StateStore` beside the saved contracts, so it outlives every session. `ViewBuilder` is a pure
+  function of `GameState` and cannot reach the store: the list is passed into `phoneView` the way
+  `savedContracts` is passed into `tvView`, and `SessionManager` is what resolves a save, a load or
+  a delete. A load reaches the engine as an ordinary `UpdateSetup`.
+* **`setupRevision` is a contract with the phone.** Player 1's browser edits the setup form as a
+  local draft and ignores the incoming one while it holds one, so a whole-setup replacement must
+  bump `setupRevision` or the load silently does nothing on screen. The session version cannot
+  serve: it also moves when the second phone joins mid-setup, which would wipe a half-typed form.
 
 ---
 
