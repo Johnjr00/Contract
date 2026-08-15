@@ -1,12 +1,103 @@
 # The Contract
 
-An Android TV app for two consenting adult men. The television is the shared display and hosts a
+A sexual Android TV app/game for two consenting adult gay men. The television is the shared display and hosts a
 small server on the local network; each player scans one QR code and plays from the browser on
 his own phone. Everything runs offline — there is no cloud backend, no analytics, no external
 API, no CDN and no runtime download of any kind.
 
 > Adults only. Both players are assumed to be consenting adults who have discussed what they
 > are doing before starting.
+
+---
+
+## How the game works
+
+You start on Player 1's phone, setting up together: names, roles, anal roles, length, filth level of wording, hard limits, stop word. Then you separate and each answer your private profile questions — these are your own preferences — yes, maybe or no, giving and taking asked separately. Neither man ever sees the other's answers; anything either of you declines just quietly stops appearing in the game.
+
+Then the TV proposes terms — specific sexual acts, written out in full with timers attached. You each answer privately: sign, amend, trade or reject it. When a term is agreed upon, it gets added to the final "contract" sceen to be performed at the end. Whoever gains more from a term has to buy the other man's signature first, performing a consideration action on the spot before the term is officially signed — a smaller act, picked for him from a private list by the man who gains less from the term. Finish adding terms to fill the contract, then add two closing terms (a guaranteed climax for each player), and the final contract scene runs the terms you agreed on in order, closing terms last.
+
+Why "consideration"? In real contract law a promise alone isn't binding — each side has to give something of value in exchange. That's consideration, and it's the difference between a contract and a wish. Same here: no signature comes free, and the man with the most to gain buys it with his mouth or his hands first. Pay now, fuck later.
+
+## What you need
+
+- A TV running Android TV or Google TV with the app open, and **a phone each** (iPhone or Android, doesn't matter), on the same Wi-Fi.
+- Lube, towels, water, and whatever kit you actually own. Tick the equipment list honestly — the game silently never mentions anything you haven't got, so you won't be handed an instruction involving a spreader bar that exists only in your browser history.
+
+Scan the QR code on the TV. First phone in is Player 1, second is Player 2. That's the whole pairing ritual.
+
+## Step 1 — Setup
+
+Player 1's phone inputs the game settings:
+
+- **Names**, and who's **Dominant** and who's **submissive**.
+- **Anal role** each — top, vers-top, vers, vers-bottom, bottom, or none. Be truthful. "Top" means nothing goes near his ass all night; "vers-top" means exactly one thing does, once, in the entire game.
+- **How filthy the writing is** — four registers, from politely erotic up to the sort of language you'd normally only use with a hand already down someone's shorts. This changes the wording, not the acts.
+- **How long** — 10, 15, 20 or 25 terms, plus two closing ones. Ten is an evening. Twenty-five is a hostage situation you've consented to.
+- **A stop word.** Something you'd never shout by accident. "Red" is the default. 
+- **Hard boundaries** — thirteen checkboxes. Anything you check never appears in any form for that game.
+- Whether the **TV reads it aloud**. It will use Google Speech Synthesis or whatever TTS provider you have set up in your TV's accessibility settings.
+
+## Step 2 — Your private profile
+
+You each answer about seventy questions on your own phone: **Yes / Maybe / No**, and what you'll give is a separate question from what you'll take.
+
+1. **Nobody ever sees your answers.** Not the TV, not his phone, not at the end. They're never sent anywhere.
+2. **One No kills it.** Either man's No removes that thing from the whole game, and the other man is never told why it didn't come up. No conversation, no negotiation, no face.
+3. **Maybe isn't a shrug** — it's "yes, but." The game takes your condition (gentler, under two minutes, roles reversed) and rewrites the instruction to honour it.
+
+## Step 3 — Negotiation (the long bit)
+
+The TV proposes a term. You each answer privately. **Neither answer shows until both are in**.
+
+| Button | What it does |
+|---|---|
+| **Sign it** | Yes. Goes to consideration, then into the contract. |
+| **Counteroffer** | Yes, but amended — gentler, shorter, roles reversed, no toys, no restraint, massage first, save it for the finale. |
+| **Trade** | Bundle it with a second term as one package. Two slots, and it costs you more. |
+| **Reject** | Gone. Instantly, unilaterally, no reason, no cost. |
+
+**Reject is free.** One man alone kills a term, it leaves the pool for the game, and it doesn't cost you a slot or an inch of progress. 
+
+If you both counteroffer and want different changes, you vote between the two. Fail to agree and the term dies where it stands.
+
+**A signed term is not performed now.** It goes onto the contract, and the contract is performed in full at the end. You are negotiating in explicit detail for a sexual scene you've both agreed to have later.
+
+## Step 4 — Consideration: happening right now, before he signs
+
+This is the one part of negotiation that is not a promise. It's live.
+
+- The game names the man who gains more from the term.
+- The man who gains **less** picks the payment from a private list. The TV shows nothing while he chooses.
+- The man who gains **more** performs it **immediately**.
+- Then the man who's owed presses **"Signature earned"** — or **"again."**
+
+Only once the consideration action is finished does the term get signed onto the contract. 
+
+The game also keeps score. Sign something that favors one of you and the next proposal leans the other way. Rejecting doesn't move that needle — only signing does.
+
+## Step 5 — Closing terms
+
+Once all terms are signed, you each pick **how you finish** from a private list, and the other man votes it in. And yes, you pay a consideration for that too, on the spot.
+
+## Step 6 — The final scene
+
+Now the contract is performed. Everything you signed, in order, one step at a time, with the TV running the clock and reading your contract back to you.
+
+You'll pick a running order first: as signed, gentlest-to-hardest, or shuffled. Disagree and the Dominant decides — perks of management.
+
+The two closing terms are **always last**, and nothing can move them earlier. That's the whole design: your first signed term was probably a shoulder rub, and by the end you'll have talked yourself, in writing, into something you'd have been too shy to ask for out loud two hours and one hard-on ago.
+
+## Five things people get wrong
+
+1. **Rushing the profile.** See above. Do it properly.
+2. **Overstating the anal role.** "Vers" written in optimism is a rough way to discover you meant "vers-bottom."
+3. **Treating Maybe as No.** 
+4. **Forgetting it's cumulative.** By term fifteen you've signed a contract, not floated an idea.
+5. **Lube out of reach.** The app thought of everything except your bedside table.
+
+The negotiation is the game. The final scene is just the contract being honored — and it's the only one either of you will sign where reading the small print carefully makes the ending better and considerably wetter.
+
+
 
 ---
 
