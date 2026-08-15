@@ -335,15 +335,25 @@ data class SessionRecord(
 }
 
 /**
+ * Rules shared by both kinds of saved, named thing.
+ *
+ * The id is derived from the trimmed, case-folded name, which is what makes saving under a name
+ * already in the list an overwrite rather than a second entry.
+ */
+object PresetNaming {
+    const val MAX_PRESETS = 10
+    const val MAX_NAME_LENGTH = 40
+
+    fun idFor(name: String): String =
+        name.trim().lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-').ifBlank { "preset" }
+}
+
+/**
  * A named shared setup kept on the television between games.
  *
  * Saved deliberately by Player 1 from the setup screen and reloaded the same way, so a pair who
  * play the same way every time configure it once. It holds the whole of [SharedSetup] — names,
- * roles, length, register, stop word, boundaries, equipment — and nothing else: a preset is the
- * shared configuration both men agreed on out loud, never a private profile answer.
- *
- * [id] is derived from the trimmed, case-folded [name], which is what makes saving under a name
- * already in the list an overwrite rather than a second entry.
+ * roles, length, register, stop word, boundaries, equipment.
  */
 @Serializable
 data class SetupPreset(
@@ -353,11 +363,39 @@ data class SetupPreset(
     val setup: SharedSetup
 ) {
     companion object {
-        const val MAX_PRESETS = 10
-        const val MAX_NAME_LENGTH = 40
+        const val MAX_PRESETS = PresetNaming.MAX_PRESETS
+        const val MAX_NAME_LENGTH = PresetNaming.MAX_NAME_LENGTH
 
-        fun idFor(name: String): String =
-            name.trim().lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-').ifBlank { "preset" }
+        fun idFor(name: String): String = PresetNaming.idFor(name)
+    }
+}
+
+/**
+ * A named set of private-profile answers, kept on the television between games.
+ *
+ * Saved and reloaded deliberately from the profile screen so a man who answers the same way every
+ * time does not work through seventy-odd questions again. Loading one fills his form in and stops
+ * there — he still submits it himself.
+ *
+ * **These are not private between the two players.** The list is shown to both phones and either
+ * may load any entry, which means either man can read the other's saved answers by loading them.
+ * That is a deliberate choice and the one place the game's usual rule — that a profile answer
+ * never leaves the phone it was given on — does not hold. Answers given during a session are
+ * still private; only what is deliberately saved under a name is shared.
+ */
+@Serializable
+data class ProfilePreset(
+    val id: String,
+    val name: String,
+    val savedAtMs: Long,
+    val answers: Map<String, Answer> = emptyMap(),
+    val maybeConditions: Map<String, MaybeCondition> = emptyMap()
+) {
+    companion object {
+        const val MAX_PRESETS = PresetNaming.MAX_PRESETS
+        const val MAX_NAME_LENGTH = PresetNaming.MAX_NAME_LENGTH
+
+        fun idFor(name: String): String = PresetNaming.idFor(name)
     }
 }
 

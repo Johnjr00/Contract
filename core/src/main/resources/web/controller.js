@@ -36,6 +36,9 @@
     setupPanel: null,      // null | "presets" | "save"
     setupPresetName: "",
     setupConfirm: null,    // { kind: "overwrite" | "delete", id: <preset id> }
+    profilePanel: null,    // null | "presets" | "save"
+    profilePresetName: "",
+    profileConfirm: null,
     reclaim: null,
     pendingActions: []
   };
@@ -212,7 +215,12 @@
         S.view = msg.view;
         S.version = msg.view.version;
         S.timerAnchor = Date.now();
-        if (S.view.phase !== "PRIVATE_PROFILES" && S.view.phase !== "WAITING_FOR_PROFILES") S.profileDraft = null;
+        if (S.view.phase !== "PRIVATE_PROFILES" && S.view.phase !== "WAITING_FOR_PROFILES") {
+          S.profileDraft = null;
+          S.profilePanel = null;
+          S.profileConfirm = null;
+          S.profilePresetName = "";
+        }
         if (S.view.phase !== "PLAYER_1_SETUP") {
           S.setupDraft = null;
           S.setupPanel = null;
@@ -671,6 +679,8 @@
     card.appendChild(el("p", "meta",
       "Everything starts at Maybe. A Maybe is not a no — it is a yes with the condition you pick."));
 
+    card.appendChild(renderPresetTools(PROFILE_PRESETS, form));
+
     var global = el("div", "btn-row");
     [["YES", "Everything Yes"], ["MAYBE", "Everything Maybe"], ["NO", "Everything No"]].forEach(function (p) {
       var b = el("button", "btn", p[1]);
@@ -889,30 +899,84 @@
     }
   }
 
-  function setupPanelButton(label, panel, count) {
-    var b = el("button", "btn" + (S.setupPanel === panel ? " btn-primary" : ""),
+  // The setup screen and the profile screen both save and reload named copies of themselves.
+  // It is one panel; only the state it hangs on, the actions it sends and the wording differ.
+  var SETUP_PRESETS = {
+    key: "setup",
+    listLabel: "Saved settings",
+    saveLabel: "Save these settings",
+    nameLabel: "Name these settings",
+    useLabel: "Use these settings",
+    empty: "Nothing saved yet. Set the game up the way you want it, then use Save these settings.",
+    listHelp: "Loading one replaces everything on this screen \u2014 names, roles, length, wording, " +
+      "stop word, boundaries and equipment. You still read it through and submit it yourself.",
+    saveHelp: "Everything on this screen is saved, including the hard boundaries and the equipment list.",
+    fullHelp: function (n) {
+      return "There is room for " + n + " saved settings. Delete one before saving another.";
+    },
+    unnamed: "Give these settings a name first.",
+    loadType: "load_setup_preset",
+    saveType: "save_setup_preset",
+    deleteType: "delete_setup_preset",
+    payload: function () { return { setup: buildSetup(S.setupDraft) }; },
+    // The server bumps setupRevision and setupDraft() rebuilds from it.
+    onLoad: function () {}
+  };
+
+  var PROFILE_PRESETS = {
+    key: "profile",
+    listLabel: "Saved profiles",
+    saveLabel: "Save these answers",
+    nameLabel: "Name these answers",
+    useLabel: "Use these answers",
+    empty: "Nothing saved yet. Answer the questions the way you want them, then use Save these answers.",
+    listHelp: "Loading one replaces every answer on this screen with the ones that were saved. " +
+      "Read them through before you finish \u2014 they are exactly as they were saved, however long ago.",
+    saveHelp: "Saved profiles are shared: either phone can see this list and load anything on it.",
+    fullHelp: function (n) {
+      return "There is room for " + n + " saved profiles. Delete one before saving another.";
+    },
+    unnamed: "Give these answers a name first.",
+    loadType: "load_profile_preset",
+    saveType: "save_profile_preset",
+    deleteType: "delete_profile_preset",
+    payload: function () {
+      return { answers: S.profileDraft.answers, conditions: S.profileDraft.conditions };
+    },
+    // No revision here: the draft is dropped on the way out, so the answers the server sends back
+    // are what rebuilds the form.
+    onLoad: function () { S.profileDraft = null; }
+  };
+
+  function panelState(cfg) { return S[cfg.key + "Panel"]; }
+  function presetNameOf(cfg) { return S[cfg.key + "PresetName"] || ""; }
+  function confirmOf(cfg) { return S[cfg.key + "Confirm"]; }
+  function setPanel(cfg, v) { S[cfg.key + "Panel"] = v; }
+  function setPresetName(cfg, v) { S[cfg.key + "PresetName"] = v; }
+  function setConfirm(cfg, v) { S[cfg.key + "Confirm"] = v; }
+
+  function presetPanelButton(cfg, label, panel, count) {
+    var open = panelState(cfg) === panel;
+    var b = el("button", "btn" + (open ? " btn-primary" : ""),
       count === undefined ? label : label + " (" + count + ")");
     b.type = "button";
-    b.setAttribute("aria-expanded", S.setupPanel === panel ? "true" : "false");
+    b.setAttribute("aria-expanded", open ? "true" : "false");
     b.addEventListener("click", function () {
-      S.setupPanel = S.setupPanel === panel ? null : panel;
-      S.setupConfirm = null;
+      setPanel(cfg, open ? null : panel);
+      setConfirm(cfg, null);
       render();
     });
     return b;
   }
 
-  /** The list of saved settings: use one, or delete one. Both need a second tap to take effect. */
-  function renderPresetList(form) {
+  /** The saved list: use one, or delete one. Both need a second tap to take effect. */
+  function renderPresetList(cfg, form) {
     var wrap = el("div", "presets");
     if (!form.presets || !form.presets.length) {
-      wrap.appendChild(el("p", "meta",
-        "Nothing saved yet. Set the game up the way you want it, then use Save these settings."));
+      wrap.appendChild(el("p", "meta", cfg.empty));
       return wrap;
     }
-    wrap.appendChild(el("p", "meta",
-      "Loading one replaces everything on this screen — names, roles, length, wording, stop word, " +
-      "boundaries and equipment. You still read it through and submit it yourself."));
+    wrap.appendChild(el("p", "meta", cfg.listHelp));
     form.presets.forEach(function (p) {
       var row = el("div", "preset");
       var head = el("div", "preset-head");
@@ -921,26 +985,27 @@
       row.appendChild(head);
 
       var buttons = el("div", "btn-row");
-      var use = el("button", "btn", "Use these settings");
+      var use = el("button", "btn", cfg.useLabel);
       use.type = "button";
       use.addEventListener("click", function () {
-        S.setupPanel = null;
-        S.setupConfirm = null;
-        act({ type: "load_setup_preset", id: p.id });
+        setPanel(cfg, null);
+        setConfirm(cfg, null);
+        cfg.onLoad();
+        act({ type: cfg.loadType, id: p.id });
         toast("Loaded " + p.name + ".");
       });
       buttons.appendChild(use);
 
-      var confirming = S.setupConfirm && S.setupConfirm.kind === "delete" && S.setupConfirm.id === p.id;
+      var confirming = confirmOf(cfg) && confirmOf(cfg).kind === "delete" && confirmOf(cfg).id === p.id;
       var del = el("button", "btn btn-danger", confirming ? "Tap again to delete" : "Delete");
       del.type = "button";
       del.addEventListener("click", function () {
         if (confirming) {
-          S.setupConfirm = null;
-          act({ type: "delete_setup_preset", id: p.id });
+          setConfirm(cfg, null);
+          act({ type: cfg.deleteType, id: p.id });
           toast("Deleted " + p.name + ".");
         } else {
-          S.setupConfirm = { kind: "delete", id: p.id };
+          setConfirm(cfg, { kind: "delete", id: p.id });
           render();
         }
       });
@@ -952,17 +1017,17 @@
   }
 
   /** Naming and saving what is currently on the screen. */
-  function renderPresetSave(form, d) {
+  function renderPresetSave(cfg, form) {
     var wrap = el("div", "presets");
     var existing = (form.presets || []).filter(function (p) {
-      return p.id === presetId(S.setupPresetName);
+      return p.id === presetId(presetNameOf(cfg));
     })[0];
     var full = (form.presets || []).length >= (form.presetLimit || 0) && !existing;
 
-    wrap.appendChild(field("Name these settings", textFor(S.setupPresetName, function (v) {
+    wrap.appendChild(field(cfg.nameLabel, textFor(presetNameOf(cfg), function (v) {
       var wasOverwrite = !!existing;
-      S.setupPresetName = v;
-      S.setupConfirm = null;
+      setPresetName(cfg, v);
+      setConfirm(cfg, null);
       // Re-render only when the button's meaning changes, so the keyboard is not disturbed on
       // every keystroke.
       var isOverwrite = (form.presets || []).some(function (p) { return p.id === presetId(v); });
@@ -970,41 +1035,55 @@
     })));
 
     if (full) {
-      wrap.appendChild(el("p", "meta",
-        "There is room for " + form.presetLimit + " saved settings. Delete one before saving another."));
+      wrap.appendChild(el("p", "meta", cfg.fullHelp(form.presetLimit)));
       return wrap;
     }
 
-    var confirming = !!(existing && S.setupConfirm && S.setupConfirm.kind === "overwrite" &&
-      S.setupConfirm.id === existing.id);
+    var confirming = !!(existing && confirmOf(cfg) && confirmOf(cfg).kind === "overwrite" &&
+      confirmOf(cfg).id === existing.id);
     var label = confirming ? "Tap again to overwrite " + existing.name
       : existing ? "Overwrite " + existing.name
-        : "Save these settings";
+        : cfg.saveLabel;
     var save = el("button", "btn btn-primary", label);
     save.type = "button";
     // Read the name and the confirmation live rather than from the render that built this
     // button: the field can have moved on since without the button needing to be redrawn.
     save.addEventListener("click", function () {
-      var name = (S.setupPresetName || "").trim();
-      if (!name) { toast("Give these settings a name first."); return; }
+      var name = presetNameOf(cfg).trim();
+      if (!name) { toast(cfg.unnamed); return; }
       var match = (form.presets || []).filter(function (p) { return p.id === presetId(name); })[0];
-      var confirmed = !!(match && S.setupConfirm && S.setupConfirm.kind === "overwrite" &&
-        S.setupConfirm.id === match.id);
+      var confirmed = !!(match && confirmOf(cfg) && confirmOf(cfg).kind === "overwrite" &&
+        confirmOf(cfg).id === match.id);
       if (match && !confirmed) {
-        S.setupConfirm = { kind: "overwrite", id: match.id };
+        setConfirm(cfg, { kind: "overwrite", id: match.id });
         render();
         return;
       }
-      S.setupConfirm = null;
-      S.setupPanel = null;
-      S.setupPresetName = "";
-      act({ type: "save_setup_preset", name: name, setup: buildSetup(d) });
+      var action = { type: cfg.saveType, name: name };
+      var extra = cfg.payload();
+      Object.keys(extra).forEach(function (k) { action[k] = extra[k]; });
+      setConfirm(cfg, null);
+      setPanel(cfg, null);
+      setPresetName(cfg, "");
+      act(action);
       toast("Saved as " + name + ".");
     });
     wrap.appendChild(save);
-    wrap.appendChild(el("p", "meta",
-      "Everything on this screen is saved, including the hard boundaries and the equipment list."));
+    wrap.appendChild(el("p", "meta", cfg.saveHelp));
     return wrap;
+  }
+
+  /** The two buttons plus whichever panel is open, for either screen. */
+  function renderPresetTools(cfg, form) {
+    var frag = document.createDocumentFragment();
+    var tools = el("div", "btn-row");
+    tools.style.marginTop = "12px";
+    tools.appendChild(presetPanelButton(cfg, cfg.listLabel, "presets", (form.presets || []).length));
+    tools.appendChild(presetPanelButton(cfg, cfg.saveLabel, "save"));
+    frag.appendChild(tools);
+    if (panelState(cfg) === "presets") frag.appendChild(renderPresetList(cfg, form));
+    if (panelState(cfg) === "save") frag.appendChild(renderPresetSave(cfg, form));
+    return frag;
   }
 
   function renderSetup(form) {
@@ -1013,13 +1092,7 @@
     card.appendChild(el("h2", null, "Shared setup"));
     card.appendChild(el("p", "meta", "Only you can change these. The other phone waits until you finish."));
 
-    var tools = el("div", "btn-row");
-    tools.style.marginTop = "12px";
-    tools.appendChild(setupPanelButton("Saved settings", "presets", (form.presets || []).length));
-    tools.appendChild(setupPanelButton("Save these settings", "save"));
-    card.appendChild(tools);
-    if (S.setupPanel === "presets") card.appendChild(renderPresetList(form));
-    if (S.setupPanel === "save") card.appendChild(renderPresetSave(form, d));
+    card.appendChild(renderPresetTools(SETUP_PRESETS, form));
 
     card.appendChild(field("Player 1 name (you)", textFor(d.player1Name, function (v) { d.player1Name = v; })));
     card.appendChild(field("Player 2 name", textFor(d.player2Name, function (v) { d.player2Name = v; })));

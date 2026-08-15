@@ -46,9 +46,19 @@ what you were up for in March is not a standing agreement.
 
 You each answer about seventy questions on your own phone: **Yes / Maybe / No**, and what you'll give is a separate question from what you'll take.
 
-1. **Nobody ever sees your answers.** Not the TV, not his phone, not at the end. They're never sent anywhere.
+1. **Nobody ever sees the answers you give here.** Not the TV, not his phone, not at the end. They're never sent anywhere. The one exception is a profile you deliberately save under a name — see below.
 2. **One No kills it.** Either man's No removes that thing from the whole game, and the other man is never told why it didn't come up. No conversation, no negotiation, no face.
 3. **Maybe isn't a shrug** — it's "yes, but." The game takes your condition (gentler, under two minutes, roles reversed) and rewrites the instruction to honour it.
+
+**Saved profiles.** The same two buttons sit on this screen. Name a set of answers, and either of
+you can load it back on a later night instead of working through seventy questions again — it
+comes back exactly as it was saved, and you still press Save and finish yourself.
+
+Read that word *either* carefully, because it is the one place this game does not keep you two
+apart: the list is shown on both phones and either man can load anything on it, which means
+loading it shows him those answers. The answers you give inside a session are still yours alone.
+Only what you deliberately save under a name is shared. If you want a set of answers nobody else
+can read, don't save it — just answer the questions.
 
 ## Step 3 — Negotiation (the long bit)
 
@@ -330,8 +340,13 @@ encrypted like everything else, keyed to the television rather than to a session
 abandoning a game leaves them alone; ten fit, saving under a name already in the list overwrites
 it after a confirmation, and deleting takes two taps. Loading one fills the form in and stops —
 Player 1 still reads it through and submits it himself, so the boundaries are re-confirmed every
-time rather than inherited quietly. Private profile answers are **never** part of this: they stay
-inside the session they were given in.
+time rather than inherited quietly.
+
+**Saved profiles** work the same way on the profile screen, with one deliberate difference: they
+are shared. The list is offered to both phones and either man may load any entry, so either can
+read the other's saved answers by loading them. Answers given inside a session remain private and
+are still never persisted beyond it — only a profile explicitly saved under a name leaves the
+session, and loading one fills the form in without marking it finished.
 
 ---
 

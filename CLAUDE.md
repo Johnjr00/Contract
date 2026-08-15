@@ -17,7 +17,7 @@ aloud, which go to the platform speech engine — see §5 and §8.
 |---|---|
 | Pairing | TV shows a QR code and a join URL. Two phones join and take PLAYER_1 / PLAYER_2. |
 | Shared setup | Player 1 configures names, roles, anal roles, session length, explicitness register, finale format, stop word, boundaries, equipment. |
-| Private profiles | Each man answers the preference questions on his own phone. Nobody else ever sees the answers. |
+| Private profiles | Each man answers the preference questions on his own phone. Nobody else ever sees the answers he gives — only a profile he deliberately saves under a name is shared (§5). |
 | Negotiation | The engine proposes a term. Both men answer independently: sign, reject, counteroffer, or bundle. |
 | Consideration | Before a term is signed, the man who gains less picks a consideration from a list; it is performed and receipted. |
 | Closing terms | Two mandatory climax terms, one guaranteed to each man. |
@@ -221,8 +221,18 @@ Not a bolt-on — most of the architecture.
 * **A saved setup is reloaded, never inherited.** Player 1 can keep the setup screen under a name
   and bring it back on a later night, boundaries and equipment included, but loading only fills the
   form in — he still reads it and submits it himself, so the thirteen boundaries are re-confirmed
-  every game. Nothing from a private profile is ever saved this way; the answers stay inside the
-  session they were given in.
+  every game.
+* **Saved profiles are the one shared private thing, deliberately.** A man can keep his profile
+  answers under a name and reload them, and **either phone is shown the list and may load any entry
+  on it** — which means either man can read the other's saved answers. That was chosen knowingly;
+  do not "fix" it by gating the list. What did not change: answers given inside a session are still
+  never persisted beyond it, a load never marks the profile complete, and nothing reaches the TV —
+  `tvView` is never handed a `ProfileForm` at all. The UI says so at the point of saving and on the
+  profile screen itself; if that wording moves, keep the disclosure with it.
+* **Stale saved answers are caught downstream, not upstream.** A saved profile has no expiry and is
+  loaded verbatim, so a Yes from months ago can come back. That is survivable only because the
+  unilateral veto still stands: every term is proposed before it is performed and either man kills
+  it instantly, for free. Do not weaken that veto on the assumption profiles are current.
 * **One deliberate exception.** Narration goes through the platform speech engine, which is asked
   for its best voice rather than being held to on-device synthesis, so the text of a *term* may
   reach whoever supplies that voice. Nothing else leaves the box: no profile answer, no vote, no
@@ -250,11 +260,13 @@ displayed but not modelled in software (the pause button is the enforceable mech
 * **Persistence tolerates old saves.** `StoreJson` uses `ignoreUnknownKeys`, and a failed decode
   drops the session silently. When changing a persisted field, **rename rather than retype** so the
   old key is skipped instead of failing to parse, and provide a rebuild path.
-* **Saved settings are not game state.** A `SetupPreset` is a named `SharedSetup` held by
-  `StateStore` beside the saved contracts, so it outlives every session. `ViewBuilder` is a pure
-  function of `GameState` and cannot reach the store: the list is passed into `phoneView` the way
+* **Saved settings and saved profiles are not game state.** A `SetupPreset` is a named
+  `SharedSetup` and a `ProfilePreset` a named set of answers, both held by `StateStore` beside the
+  saved contracts, so they outlive every session. `ViewBuilder` is a pure function of `GameState`
+  and cannot reach the store: the lists arrive as `ViewBuilder.SavedLists`, the way
   `savedContracts` is passed into `tvView`, and `SessionManager` is what resolves a save, a load or
-  a delete. A load reaches the engine as an ordinary `UpdateSetup`.
+  a delete. A setup load reaches the engine as an ordinary `UpdateSetup`; a profile load as a
+  `SaveProfile` with `complete = false`, which is what keeps a load from finishing the profile.
 * **`setupRevision` is a contract with the phone.** Player 1's browser edits the setup form as a
   local draft and ignores the incoming one while it holds one, so a whole-setup replacement must
   bump `setupRevision` or the load silently does nothing on screen. The session version cannot

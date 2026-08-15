@@ -15,6 +15,7 @@ import com.thecontract.core.model.GameState
 import com.thecontract.core.model.MaybeCondition
 import com.thecontract.core.model.PartyBinding
 import com.thecontract.core.model.PreferenceLibrary
+import com.thecontract.core.model.ProfilePreset
 import com.thecontract.core.model.RenderedConsideration
 import com.thecontract.core.model.RenderedTerm
 import com.thecontract.core.model.RenderedTimer
@@ -31,6 +32,7 @@ import com.thecontract.core.protocol.JoinInfo
 import com.thecontract.core.protocol.Narration
 import com.thecontract.core.protocol.ProfileForm
 import com.thecontract.core.protocol.ProfileItem
+import com.thecontract.core.protocol.ProfilePresetSummary
 import com.thecontract.core.protocol.ProfileSection
 import com.thecontract.core.protocol.ProgressView
 import com.thecontract.core.protocol.SavedContractSummary
@@ -210,7 +212,11 @@ object ViewBuilder {
         FinaleOrder.DOMINANTS_CUT -> "Dominant's Cut"
     }
 
-    private fun profileForm(s: GameState, slot: Slot): ProfileForm {
+    private fun profileForm(
+        s: GameState,
+        slot: Slot,
+        presets: List<ProfilePresetSummary> = emptyList()
+    ): ProfileForm {
         val profile = s.profile(slot)
         return ProfileForm(
             sections = PreferenceLibrary.bySection.map { (section, prefs) ->
@@ -229,26 +235,35 @@ object ViewBuilder {
             },
             complete = profile.complete,
             defaultConditionId = s.setup.defaultMaybeCondition.name,
-            conditionOptions = MaybeCondition.entries.map { Choice(it.name, it.label, kind = "option") }
+            conditionOptions = MaybeCondition.entries.map { Choice(it.name, it.label, kind = "option") },
+            presets = presets,
+            presetLimit = ProfilePreset.MAX_PRESETS
         )
     }
 
     // ------------------------------------------------------------------ phone view
 
     @Suppress("CyclomaticComplexMethod", "LongMethod")
+    /**
+     * What the television has saved from earlier games.
+     *
+     * Supplied by the session manager because a view is built from [GameState] alone, and these
+     * live in the store rather than in any session. Each list reaches only the screen that can
+     * act on it.
+     */
+    data class SavedLists(
+        val setupPresets: List<SetupPresetSummary> = emptyList(),
+        val profilePresets: List<ProfilePresetSummary> = emptyList()
+    )
+
     fun phoneView(
         s: GameState,
         slot: Slot,
         connections: Map<Slot, ConnectionState>,
         nowMs: Long,
         canGoBack: Boolean,
-        /**
-         * Saved shared setups, supplied by the session manager: they are kept on the television
-         * rather than in the game state, and a view is built from the state alone. Reaches Player
-         * 1's setup screen and nothing else.
-         */
-        setupPresets: List<SetupPresetSummary> = emptyList()
-    ): ClientView = withReadAgain(s, phoneViewBody(s, slot, connections, nowMs, canGoBack, setupPresets))
+        saved: SavedLists = SavedLists()
+    ): ClientView = withReadAgain(s, phoneViewBody(s, slot, connections, nowMs, canGoBack, saved))
 
     /**
      * "Read it again" sits on both phones, because the television is the shared screen and
@@ -268,7 +283,7 @@ object ViewBuilder {
         connections: Map<Slot, ConnectionState>,
         nowMs: Long,
         canGoBack: Boolean,
-        setupPresets: List<SetupPresetSummary>
+        saved: SavedLists
     ): ClientView {
         val base = baseView("phone", s, slot, connections, nowMs, canGoBack)
         val n = s.negotiation
@@ -305,7 +320,7 @@ object ViewBuilder {
                     base.copy(
                         heading = "Set the game up",
                         body = "You are Player 1, so you configure the shared setup. The other phone waits.",
-                        setup = setupForm(s, setupPresets)
+                        setup = setupForm(s, saved.setupPresets)
                     )
                 } else {
                     base.copy(
@@ -326,17 +341,18 @@ object ViewBuilder {
                 if (mine.complete) {
                     base.copy(
                         heading = "Profile saved",
-                        body = "Only you have seen your answers. Waiting for the other profile.",
+                        body = "Only you have seen the answers you gave. Waiting for the other profile.",
                         waiting = true,
-                        profile = profileForm(s, slot),
+                        profile = profileForm(s, slot, saved.profilePresets),
                         choices = listOf(Choice("reopen_profile", "Change my answers", kind = "nav"))
                     )
                 } else {
                     base.copy(
                         heading = "Your private profile",
                         body = "Everything starts at Maybe. Nobody else — not the TV, not the other phone — " +
-                            "ever sees these answers.",
-                        profile = profileForm(s, slot)
+                            "ever sees the answers you give here. Saved profiles are the one exception: " +
+                            "anything you save under a name, the other phone can load.",
+                        profile = profileForm(s, slot, saved.profilePresets)
                     )
                 }
             }

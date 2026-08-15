@@ -140,6 +140,38 @@ interface ContractDao {
     fun delete(id: String)
 }
 
+/**
+ * A named set of private-profile answers, kept between games.
+ *
+ * The name and date are in the clear so the list can be built without decrypting anything; the
+ * answers are in the encrypted [payload]. Unlike the answers given during a session, these are
+ * shared between the two players — see `ProfilePreset`.
+ */
+@Entity(tableName = "profile_presets")
+data class ProfilePresetEntity(
+    @PrimaryKey val id: String,
+    val name: String,
+    val savedAtMs: Long,
+    val payload: ByteArray
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is ProfilePresetEntity) return false
+        return id == other.id &&
+            name == other.name &&
+            savedAtMs == other.savedAtMs &&
+            payload.contentEquals(other.payload)
+    }
+
+    override fun hashCode(): Int {
+        var result = id.hashCode()
+        result = 31 * result + name.hashCode()
+        result = 31 * result + savedAtMs.hashCode()
+        result = 31 * result + payload.contentHashCode()
+        return result
+    }
+}
+
 @Dao
 interface SetupPresetDao {
     @Query("SELECT * FROM setup_presets ORDER BY savedAtMs DESC")
@@ -156,15 +188,37 @@ interface SetupPresetDao {
     fun delete(id: String)
 }
 
+@Dao
+interface ProfilePresetDao {
+    @Query("SELECT * FROM profile_presets ORDER BY savedAtMs DESC")
+    fun all(): List<ProfilePresetEntity>
+
+    @Query("SELECT * FROM profile_presets WHERE id = :id LIMIT 1")
+    fun byId(id: String): ProfilePresetEntity?
+
+    /** Replace-on-conflict is what makes saving under an existing name an overwrite. */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun save(preset: ProfilePresetEntity)
+
+    @Query("DELETE FROM profile_presets WHERE id = :id")
+    fun delete(id: String)
+}
+
 @Database(
-    entities = [SessionEntity::class, ContractEntity::class, SetupPresetEntity::class],
-    version = 2,
+    entities = [
+        SessionEntity::class,
+        ContractEntity::class,
+        SetupPresetEntity::class,
+        ProfilePresetEntity::class
+    ],
+    version = 3,
     exportSchema = true
 )
 abstract class ContractDatabase : RoomDatabase() {
     abstract fun sessions(): SessionDao
     abstract fun contracts(): ContractDao
     abstract fun setupPresets(): SetupPresetDao
+    abstract fun profilePresets(): ProfilePresetDao
 
     companion object {
         @Volatile
@@ -188,13 +242,24 @@ abstract class ContractDatabase : RoomDatabase() {
             }
         }
 
+        /** Adds the saved-profiles table, for the same reason [MIGRATION_1_2] is written out. */
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `profile_presets` (" +
+                        "`id` TEXT NOT NULL, `name` TEXT NOT NULL, `savedAtMs` INTEGER NOT NULL, " +
+                        "`payload` BLOB NOT NULL, PRIMARY KEY(`id`))"
+                )
+            }
+        }
+
         fun get(context: Context): ContractDatabase = instance ?: synchronized(this) {
             instance ?: Room.databaseBuilder(
                 context.applicationContext,
                 ContractDatabase::class.java,
                 "the-contract.db"
             )
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 // Still the safety net for any version pair with no migration written: the
                 // database is a local cache of one in-flight game plus saved material, and a
                 // corrupt restore is worse than a rebuild.
