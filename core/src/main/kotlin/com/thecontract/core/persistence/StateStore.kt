@@ -1,5 +1,6 @@
 package com.thecontract.core.persistence
 
+import com.thecontract.core.model.ProfilePreset
 import com.thecontract.core.model.SavedContract
 import com.thecontract.core.model.SessionRecord
 import com.thecontract.core.model.SetupPreset
@@ -47,6 +48,20 @@ interface StateStore {
     fun saveSetupPreset(preset: SetupPreset)
 
     fun deleteSetupPreset(id: String)
+
+    /**
+     * Named sets of profile answers, newest first. Like the setups, these outlive every session.
+     *
+     * Unlike the answers given inside a session, they are shared: both phones are shown the list
+     * and either may load any of them. See [ProfilePreset].
+     */
+    fun listProfilePresets(): List<ProfilePreset>
+
+    fun loadProfilePreset(id: String): ProfilePreset?
+
+    fun saveProfilePreset(preset: ProfilePreset)
+
+    fun deleteProfilePreset(id: String)
 }
 
 internal val StoreJson: Json = Json {
@@ -66,6 +81,7 @@ class InMemoryStateStore : StateStore {
     private var session: SessionRecord? = null
     private val contracts = LinkedHashMap<String, SavedContract>()
     private val presets = LinkedHashMap<String, SetupPreset>()
+    private val profilePresets = LinkedHashMap<String, ProfilePreset>()
 
     override fun loadActiveSession(): SessionRecord? = lock.withLock { session }
 
@@ -89,6 +105,16 @@ class InMemoryStateStore : StateStore {
     override fun saveSetupPreset(preset: SetupPreset) = lock.withLock { presets[preset.id] = preset; Unit }
 
     override fun deleteSetupPreset(id: String) = lock.withLock { presets.remove(id); Unit }
+
+    override fun listProfilePresets(): List<ProfilePreset> =
+        lock.withLock { profilePresets.values.sortedByDescending { it.savedAtMs } }
+
+    override fun loadProfilePreset(id: String): ProfilePreset? = lock.withLock { profilePresets[id] }
+
+    override fun saveProfilePreset(preset: ProfilePreset) =
+        lock.withLock { profilePresets[preset.id] = preset; Unit }
+
+    override fun deleteProfilePreset(id: String) = lock.withLock { profilePresets.remove(id); Unit }
 }
 
 /**
@@ -101,6 +127,7 @@ class JsonFileStateStore(private val directory: File) : StateStore {
     private val sessionFile = File(directory, "active-session.json")
     private val contractsDir = File(directory, "contracts")
     private val presetsFile = File(directory, "setup-presets.json")
+    private val profilePresetsFile = File(directory, "profile-presets.json")
 
     init {
         directory.mkdirs()
@@ -174,5 +201,27 @@ class JsonFileStateStore(private val directory: File) : StateStore {
     override fun deleteSetupPreset(id: String) = lock.withLock {
         val next = readPresetsLocked().filterNot { it.id == id }
         writeAtomically(presetsFile, StoreJson.encodeToString(next))
+    }
+
+    private fun readProfilePresetsLocked(): List<ProfilePreset> {
+        if (!profilePresetsFile.exists()) return emptyList()
+        return runCatching { StoreJson.decodeFromString<List<ProfilePreset>>(profilePresetsFile.readText()) }
+            .getOrDefault(emptyList())
+    }
+
+    override fun listProfilePresets(): List<ProfilePreset> =
+        lock.withLock { readProfilePresetsLocked().sortedByDescending { it.savedAtMs } }
+
+    override fun loadProfilePreset(id: String): ProfilePreset? =
+        lock.withLock { readProfilePresetsLocked().firstOrNull { it.id == id } }
+
+    override fun saveProfilePreset(preset: ProfilePreset) = lock.withLock {
+        val next = readProfilePresetsLocked().filterNot { it.id == preset.id } + preset
+        writeAtomically(profilePresetsFile, StoreJson.encodeToString(next))
+    }
+
+    override fun deleteProfilePreset(id: String) = lock.withLock {
+        val next = readProfilePresetsLocked().filterNot { it.id == id }
+        writeAtomically(profilePresetsFile, StoreJson.encodeToString(next))
     }
 }

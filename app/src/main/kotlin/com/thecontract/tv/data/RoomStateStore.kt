@@ -2,6 +2,7 @@ package com.thecontract.tv.data
 
 import android.content.Context
 import com.thecontract.core.model.SavedContract
+import com.thecontract.core.model.ProfilePreset
 import com.thecontract.core.model.SessionRecord
 import com.thecontract.core.model.SetupPreset
 import com.thecontract.core.persistence.StateStore
@@ -100,5 +101,33 @@ class RoomStateStore(context: Context) : StateStore {
 
     override fun deleteSetupPreset(id: String) {
         db.setupPresets().delete(id)
+    }
+
+    override fun listProfilePresets(): List<ProfilePreset> =
+        db.profilePresets().all().mapNotNull { row ->
+            Crypto.decrypt(row.payload)?.let {
+                runCatching { json.decodeFromString<ProfilePreset>(it) }.getOrNull()
+            }
+        }
+
+    override fun loadProfilePreset(id: String): ProfilePreset? {
+        val row = db.profilePresets().byId(id) ?: return null
+        val plaintext = Crypto.decrypt(row.payload) ?: return null
+        return runCatching { json.decodeFromString<ProfilePreset>(plaintext) }.getOrNull()
+    }
+
+    override fun saveProfilePreset(preset: ProfilePreset) {
+        db.profilePresets().save(
+            ProfilePresetEntity(
+                id = preset.id,
+                name = preset.name,
+                savedAtMs = preset.savedAtMs,
+                payload = Crypto.encrypt(json.encodeToString(preset))
+            )
+        )
+    }
+
+    override fun deleteProfilePreset(id: String) {
+        db.profilePresets().delete(id)
     }
 }

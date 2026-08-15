@@ -44,6 +44,31 @@ data class LoadSetupPreset(val id: String) : GameAction
 @Serializable @SerialName("delete_setup_preset")
 data class DeleteSetupPreset(val id: String) : GameAction
 
+/**
+ * Saves the profile form as it currently stands under a name, for a later game.
+ *
+ * Carries the answers for the same reason [SaveSetupPreset] carries the setup: the form is a
+ * draft on the phone until it is saved or submitted. Either player may save one, and either may
+ * load it again — saved profiles are shared between the two men by design.
+ */
+@Serializable @SerialName("save_profile_preset")
+data class SaveProfilePreset(
+    val name: String,
+    val answers: Map<String, Answer>,
+    val conditions: Map<String, String> = emptyMap()
+) : GameAction
+
+/**
+ * Fills the profile form in from a saved one. Resolved against the store by the session manager
+ * and applied as an ordinary [SaveProfile] that does not mark the profile finished, so the player
+ * still submits it himself.
+ */
+@Serializable @SerialName("load_profile_preset")
+data class LoadProfilePreset(val id: String) : GameAction
+
+@Serializable @SerialName("delete_profile_preset")
+data class DeleteProfilePreset(val id: String) : GameAction
+
 @Serializable @SerialName("save_profile")
 data class SaveProfile(
     val answers: Map<String, Answer>,

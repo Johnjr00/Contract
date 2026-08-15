@@ -7,8 +7,11 @@ import com.thecontract.core.engine.ViewBuilder
 import com.thecontract.core.model.ConnectionState
 import com.thecontract.core.model.GamePhase
 import com.thecontract.core.model.GameState
+import com.thecontract.core.model.MaybeCondition
 import com.thecontract.core.model.PendingReclaim
 import com.thecontract.core.model.PlayerSlotState
+import com.thecontract.core.model.PreferenceLibrary
+import com.thecontract.core.model.ProfilePreset
 import com.thecontract.core.model.SavedContract
 import com.thecontract.core.model.SessionRecord
 import com.thecontract.core.model.SetupPreset
@@ -21,19 +24,24 @@ import com.thecontract.core.protocol.Choice
 import com.thecontract.core.protocol.ClaimSlot
 import com.thecontract.core.protocol.ClientMessage
 import com.thecontract.core.protocol.ClientView
+import com.thecontract.core.protocol.DeleteProfilePreset
 import com.thecontract.core.protocol.DeleteSetupPreset
 import com.thecontract.core.protocol.ErrorMessage
 import com.thecontract.core.protocol.GameAction
 import com.thecontract.core.protocol.Hello
 import com.thecontract.core.protocol.HelloOk
 import com.thecontract.core.protocol.JoinInfo
+import com.thecontract.core.protocol.LoadProfilePreset
 import com.thecontract.core.protocol.LoadSetupPreset
 import com.thecontract.core.protocol.Ping
 import com.thecontract.core.protocol.PlayerActionMessage
 import com.thecontract.core.protocol.Pong
+import com.thecontract.core.protocol.ProfilePresetSummary
 import com.thecontract.core.protocol.ProtocolJson
 import com.thecontract.core.protocol.Reconnect
 import com.thecontract.core.protocol.ReclaimPending
+import com.thecontract.core.protocol.SaveProfile
+import com.thecontract.core.protocol.SaveProfilePreset
 import com.thecontract.core.protocol.SaveSetupPreset
 import com.thecontract.core.protocol.SavedContractSummary
 import com.thecontract.core.protocol.ServerMessage
@@ -458,7 +466,7 @@ class SessionManager(
             val es = engineState ?: return
             slot to ViewBuilder.phoneView(
                 es.state, slot, connectionsLocked(), clock(), es.undoStack.isNotEmpty(),
-                setupPresetsLocked(slot, es.state)
+                savedListsLocked(slot, es.state)
             )
         }
         if (slot != null) transport?.send(clientId, StateSnapshot(view))
@@ -493,7 +501,8 @@ class SessionManager(
             // resolved here rather than in the engine, which only ever sees game state. Loading
             // one reaches the engine as the ordinary whole-setup replacement it is.
             val loaded = (action as? LoadSetupPreset)?.let { store.loadSetupPreset(it.id) }
-            val problem = presetProblemLocked(action, loaded)
+            val loadedProfile = (action as? LoadProfilePreset)?.let { store.loadProfilePreset(it.id) }
+            val problem = presetProblemLocked(action, loaded, loadedProfile)
             if (problem != null) {
                 replyTo?.let { id ->
                     transport?.send(
@@ -505,7 +514,17 @@ class SessionManager(
                 }
                 return false
             }
-            val engineAction = if (loaded != null) UpdateSetup(loaded.setup) else action
+            // Loading a saved profile is an ordinary save of those answers that stops short of
+            // marking the profile finished, so the man still submits it himself.
+            val engineAction = when {
+                loaded != null -> UpdateSetup(loaded.setup)
+                loadedProfile != null -> SaveProfile(
+                    answers = loadedProfile.answers,
+                    conditions = loadedProfile.maybeConditions.mapValues { (_, c) -> c.name },
+                    complete = false
+                )
+                else -> action
+            }
             val result = engine.apply(es, slot, actionId, expectedVersion, engineAction, clock())
             accepted = result.accepted
             if (result.accepted) {
@@ -624,7 +643,11 @@ class SessionManager(
      * problem: the list ends up as he asked, and a double tap on a slow socket must not raise an
      * error. A full list is refused rather than quietly dropping his oldest saved setup.
      */
-    private fun presetProblemLocked(action: GameAction, loaded: SetupPreset?): String? = when (action) {
+    private fun presetProblemLocked(
+        action: GameAction,
+        loaded: SetupPreset?,
+        loadedProfile: ProfilePreset?
+    ): String? = when (action) {
         is SaveSetupPreset -> {
             val name = action.name.trim()
             val existing = store.listSetupPresets()
@@ -637,6 +660,18 @@ class SessionManager(
             }
         }
         is LoadSetupPreset -> if (loaded == null) "Those saved settings are no longer on the TV." else null
+        is SaveProfilePreset -> {
+            val name = action.name.trim()
+            val existing = store.listProfilePresets()
+            when {
+                name.isEmpty() -> "Give these answers a name before saving them."
+                existing.size >= ProfilePreset.MAX_PRESETS &&
+                    existing.none { it.id == ProfilePreset.idFor(name) } ->
+                    "There is room for ${ProfilePreset.MAX_PRESETS} saved profiles. Delete one first."
+                else -> null
+            }
+        }
+        is LoadProfilePreset -> if (loadedProfile == null) "That saved profile is no longer on the TV." else null
         else -> null
     }
 
@@ -654,22 +689,52 @@ class SessionManager(
                 )
             }
             is DeleteSetupPreset -> store.deleteSetupPreset(action.id)
+            is SaveProfilePreset -> {
+                val name = action.name.trim().take(ProfilePreset.MAX_NAME_LENGTH)
+                store.saveProfilePreset(
+                    ProfilePreset(
+                        id = ProfilePreset.idFor(name),
+                        name = name,
+                        savedAtMs = clock(),
+                        // Only questions this build actually asks are kept, so a profile saved
+                        // before a question was retired cannot bring a stale answer back.
+                        answers = action.answers.filterKeys { PreferenceLibrary.byId[it]?.asked == true },
+                        maybeConditions = action.conditions.mapNotNull { (prefId, condId) ->
+                            MaybeCondition.byId(condId)?.let { prefId to it }
+                        }.toMap()
+                    )
+                )
+            }
+            is DeleteProfilePreset -> store.deleteProfilePreset(action.id)
             else -> Unit
         }
     }
 
     /**
-     * The saved-settings list for one phone's view.
+     * The saved lists for one phone's view.
      *
-     * Read from the store only for the man and the screen that can act on it, so a whole evening
-     * of broadcasts does not decrypt a list nobody is looking at.
+     * Read from the store only for the man and the screen that can act on them, so a whole
+     * evening of broadcasts does not decrypt a list nobody is looking at. Saved settings are
+     * Player 1's; saved profiles are offered to both men, which is what makes them shared.
      */
-    private fun setupPresetsLocked(slot: Slot, state: GameState): List<SetupPresetSummary> =
-        if (slot == Slot.PLAYER_1 && state.phase == GamePhase.PLAYER_1_SETUP) {
-            store.listSetupPresets().map { SetupPresetSummary(it.id, it.name, it.savedAtMs) }
-        } else {
-            emptyList()
-        }
+    private fun savedListsLocked(slot: Slot, state: GameState): ViewBuilder.SavedLists {
+        val onSetup = slot == Slot.PLAYER_1 && state.phase == GamePhase.PLAYER_1_SETUP
+        val onProfile = state.phase == GamePhase.PRIVATE_PROFILES ||
+            state.phase == GamePhase.WAITING_FOR_PROFILES
+        if (!onSetup && !onProfile) return ViewBuilder.SavedLists()
+        return ViewBuilder.SavedLists(
+            setupPresets = if (onSetup) {
+                store.listSetupPresets().map { SetupPresetSummary(it.id, it.name, it.savedAtMs) }
+            } else {
+                emptyList()
+            },
+            profilePresets = if (onProfile) {
+                store.listProfilePresets().map { ProfilePresetSummary(it.id, it.name, it.savedAtMs) }
+            } else {
+                emptyList()
+            }
+        )
+    }
 
     // ------------------------------------------------------------------ contracts
 
@@ -779,7 +844,7 @@ class SessionManager(
         val es = engineState ?: return null
         ViewBuilder.phoneView(
             es.state, slot, connectionsLocked(), clock(), es.undoStack.isNotEmpty(),
-            setupPresetsLocked(slot, es.state)
+            savedListsLocked(slot, es.state)
         )
     }
 
@@ -792,7 +857,7 @@ class SessionManager(
                 val slot = conn.slot ?: continue
                 val view = ViewBuilder.phoneView(
                     es.state, slot, connections, clock(), es.undoStack.isNotEmpty(),
-                    setupPresetsLocked(slot, es.state)
+                    savedListsLocked(slot, es.state)
                 )
                 outbound += conn.id to StateChanged(view)
             }

@@ -29,11 +29,13 @@ import com.thecontract.core.protocol.CloseDraft
 import com.thecontract.core.protocol.ConfirmSignature
 import com.thecontract.core.protocol.ConsiderationPerformed
 import com.thecontract.core.protocol.ContinueFlow
+import com.thecontract.core.protocol.DeleteProfilePreset
 import com.thecontract.core.protocol.DeleteSetupPreset
 import com.thecontract.core.protocol.EndSession
 import com.thecontract.core.protocol.ExecutionCommand
 import com.thecontract.core.protocol.GameAction
 import com.thecontract.core.protocol.GlobalPause
+import com.thecontract.core.protocol.LoadProfilePreset
 import com.thecontract.core.protocol.LoadSetupPreset
 import com.thecontract.core.protocol.OpenDraft
 import com.thecontract.core.protocol.PickAmendment
@@ -45,6 +47,7 @@ import com.thecontract.core.protocol.ProposalRespond
 import com.thecontract.core.protocol.ResumeVote
 import com.thecontract.core.protocol.SaveContract
 import com.thecontract.core.protocol.SaveProfile
+import com.thecontract.core.protocol.SaveProfilePreset
 import com.thecontract.core.protocol.SaveSetupPreset
 import com.thecontract.core.protocol.StartExecution
 import com.thecontract.core.protocol.StopAllTimers
@@ -221,6 +224,16 @@ class GameEngine {
                 } else {
                     ok(es, s)
                 }
+            }
+
+            // Saved profiles are stored the same way, and either player may use them. A load
+            // arrives as an ordinary SaveProfile — the manager has turned the id into answers
+            // before the engine sees it — so this branch only gates the save and the delete.
+            is SaveProfilePreset, is DeleteProfilePreset, is LoadProfilePreset -> when {
+                slot == null -> reject(es, CODE_NOT_ALLOWED, "Saved profiles are used from a phone.")
+                s.phase != GamePhase.PRIVATE_PROFILES && s.phase != GamePhase.WAITING_FOR_PROFILES ->
+                    reject(es, CODE_PHASE, "Profiles are not open.")
+                else -> ok(es, s)
             }
 
             is SubmitSetup -> requireP1(es, slot) { handleSubmitSetup(es, action, now) }

@@ -90,12 +90,18 @@ data class ProfileItem(
 @Serializable
 data class ProfileSection(val id: String, val title: String, val items: List<ProfileItem>)
 
+/** One row of the saved-profiles list. The answers themselves stay on the television. */
+@Serializable
+data class ProfilePresetSummary(val id: String, val name: String, val savedAtMs: Long)
+
 @Serializable
 data class ProfileForm(
     val sections: List<ProfileSection>,
     val complete: Boolean,
     val defaultConditionId: String,
-    val conditionOptions: List<Choice>
+    val conditionOptions: List<Choice>,
+    val presets: List<ProfilePresetSummary> = emptyList(),
+    val presetLimit: Int = 0
 )
 
 @Serializable
