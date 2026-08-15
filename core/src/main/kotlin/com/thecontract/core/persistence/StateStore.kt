@@ -2,6 +2,7 @@ package com.thecontract.core.persistence
 
 import com.thecontract.core.model.SavedContract
 import com.thecontract.core.model.SessionRecord
+import com.thecontract.core.model.SetupPreset
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.util.concurrent.locks.ReentrantLock
@@ -33,6 +34,19 @@ interface StateStore {
     fun saveContract(contract: SavedContract)
 
     fun deleteContract(id: String)
+
+    /**
+     * Named shared setups, newest first. Outlive every session: they are keyed to the television,
+     * not to a game, so ending, abandoning or finishing a session leaves them alone.
+     */
+    fun listSetupPresets(): List<SetupPreset>
+
+    fun loadSetupPreset(id: String): SetupPreset?
+
+    /** Replaces any preset with the same id, which is how saving under an existing name works. */
+    fun saveSetupPreset(preset: SetupPreset)
+
+    fun deleteSetupPreset(id: String)
 }
 
 internal val StoreJson: Json = Json {
@@ -51,6 +65,7 @@ class InMemoryStateStore : StateStore {
     private val lock = ReentrantLock()
     private var session: SessionRecord? = null
     private val contracts = LinkedHashMap<String, SavedContract>()
+    private val presets = LinkedHashMap<String, SetupPreset>()
 
     override fun loadActiveSession(): SessionRecord? = lock.withLock { session }
 
@@ -65,6 +80,15 @@ class InMemoryStateStore : StateStore {
     override fun saveContract(contract: SavedContract) = lock.withLock { contracts[contract.id] = contract; Unit }
 
     override fun deleteContract(id: String) = lock.withLock { contracts.remove(id); Unit }
+
+    override fun listSetupPresets(): List<SetupPreset> =
+        lock.withLock { presets.values.sortedByDescending { it.savedAtMs } }
+
+    override fun loadSetupPreset(id: String): SetupPreset? = lock.withLock { presets[id] }
+
+    override fun saveSetupPreset(preset: SetupPreset) = lock.withLock { presets[preset.id] = preset; Unit }
+
+    override fun deleteSetupPreset(id: String) = lock.withLock { presets.remove(id); Unit }
 }
 
 /**
@@ -76,6 +100,7 @@ class JsonFileStateStore(private val directory: File) : StateStore {
     private val lock = ReentrantLock()
     private val sessionFile = File(directory, "active-session.json")
     private val contractsDir = File(directory, "contracts")
+    private val presetsFile = File(directory, "setup-presets.json")
 
     init {
         directory.mkdirs()
@@ -125,5 +150,29 @@ class JsonFileStateStore(private val directory: File) : StateStore {
     override fun deleteContract(id: String) = lock.withLock {
         File(contractsDir, "$id.json").delete()
         Unit
+    }
+
+    // Presets live in one small file rather than a file each: the list is capped, and it is always
+    // read and written whole.
+    private fun readPresetsLocked(): List<SetupPreset> {
+        if (!presetsFile.exists()) return emptyList()
+        return runCatching { StoreJson.decodeFromString<List<SetupPreset>>(presetsFile.readText()) }
+            .getOrDefault(emptyList())
+    }
+
+    override fun listSetupPresets(): List<SetupPreset> =
+        lock.withLock { readPresetsLocked().sortedByDescending { it.savedAtMs } }
+
+    override fun loadSetupPreset(id: String): SetupPreset? =
+        lock.withLock { readPresetsLocked().firstOrNull { it.id == id } }
+
+    override fun saveSetupPreset(preset: SetupPreset) = lock.withLock {
+        val next = readPresetsLocked().filterNot { it.id == preset.id } + preset
+        writeAtomically(presetsFile, StoreJson.encodeToString(next))
+    }
+
+    override fun deleteSetupPreset(id: String) = lock.withLock {
+        val next = readPresetsLocked().filterNot { it.id == id }
+        writeAtomically(presetsFile, StoreJson.encodeToString(next))
     }
 }

@@ -29,10 +29,12 @@ import com.thecontract.core.protocol.CloseDraft
 import com.thecontract.core.protocol.ConfirmSignature
 import com.thecontract.core.protocol.ConsiderationPerformed
 import com.thecontract.core.protocol.ContinueFlow
+import com.thecontract.core.protocol.DeleteSetupPreset
 import com.thecontract.core.protocol.EndSession
 import com.thecontract.core.protocol.ExecutionCommand
 import com.thecontract.core.protocol.GameAction
 import com.thecontract.core.protocol.GlobalPause
+import com.thecontract.core.protocol.LoadSetupPreset
 import com.thecontract.core.protocol.OpenDraft
 import com.thecontract.core.protocol.PickAmendment
 import com.thecontract.core.protocol.PickBundle
@@ -43,6 +45,7 @@ import com.thecontract.core.protocol.ProposalRespond
 import com.thecontract.core.protocol.ResumeVote
 import com.thecontract.core.protocol.SaveContract
 import com.thecontract.core.protocol.SaveProfile
+import com.thecontract.core.protocol.SaveSetupPreset
 import com.thecontract.core.protocol.StartExecution
 import com.thecontract.core.protocol.StopAllTimers
 import com.thecontract.core.protocol.ReadAgain
@@ -201,7 +204,22 @@ class GameEngine {
                 if (s.phase != GamePhase.PLAYER_1_SETUP) {
                     reject(es, CODE_PHASE, "Setup is not open.")
                 } else {
-                    ok(es, s.copy(setup = action.setup))
+                    // A wholesale replacement: the phone is holding a draft that no longer matches
+                    // what the game thinks the setup is, and the revision is how it finds out.
+                    ok(es, s.copy(setup = action.setup, setupRevision = s.setupRevision + 1))
+                }
+            }
+
+            // Saved settings live on the television beside the saved contracts, not in the game
+            // state, so the session manager does the storing. Gated here all the same, so a phone
+            // that is not Player 1 or is past the setup screen gets a real answer rather than a
+            // silent no-op. A load arrives as an UpdateSetup: the manager has already turned the
+            // id into a setup by the time the engine sees it.
+            is SaveSetupPreset, is DeleteSetupPreset, is LoadSetupPreset -> requireP1(es, slot) {
+                if (s.phase != GamePhase.PLAYER_1_SETUP) {
+                    reject(es, CODE_PHASE, "Setup is not open.")
+                } else {
+                    ok(es, s)
                 }
             }
 

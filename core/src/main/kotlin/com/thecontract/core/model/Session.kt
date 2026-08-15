@@ -252,6 +252,13 @@ data class GameState(
     val updatedAtMs: Long = 0,
     val setup: SharedSetup = SharedSetup(),
     val setupComplete: Boolean = false,
+    /**
+     * Bumped when [setup] is replaced wholesale by loading a saved preset. Player 1's phone holds
+     * the setup form as a local draft and only rebuilds it when this changes — the session version
+     * cannot serve, because it also moves when the second phone joins mid-setup, which would wipe
+     * a half-typed form.
+     */
+    val setupRevision: Int = 0,
     val profiles: Map<Slot, PrivateProfile> = emptyMap(),
     val negotiation: Negotiation = Negotiation(),
     val finale: FinaleState = FinaleState(),
@@ -325,6 +332,33 @@ data class SessionRecord(
     val finished: Boolean = false
 ) {
     fun slot(s: Slot): PlayerSlotState = slots[s] ?: PlayerSlotState(s)
+}
+
+/**
+ * A named shared setup kept on the television between games.
+ *
+ * Saved deliberately by Player 1 from the setup screen and reloaded the same way, so a pair who
+ * play the same way every time configure it once. It holds the whole of [SharedSetup] — names,
+ * roles, length, register, stop word, boundaries, equipment — and nothing else: a preset is the
+ * shared configuration both men agreed on out loud, never a private profile answer.
+ *
+ * [id] is derived from the trimmed, case-folded [name], which is what makes saving under a name
+ * already in the list an overwrite rather than a second entry.
+ */
+@Serializable
+data class SetupPreset(
+    val id: String,
+    val name: String,
+    val savedAtMs: Long,
+    val setup: SharedSetup
+) {
+    companion object {
+        const val MAX_PRESETS = 10
+        const val MAX_NAME_LENGTH = 40
+
+        fun idFor(name: String): String =
+            name.trim().lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-').ifBlank { "preset" }
+    }
 }
 
 /** A completed contract, saved on the TV only. */

@@ -6,10 +6,12 @@ import com.thecontract.core.engine.TimerEngine
 import com.thecontract.core.engine.ViewBuilder
 import com.thecontract.core.model.ConnectionState
 import com.thecontract.core.model.GamePhase
+import com.thecontract.core.model.GameState
 import com.thecontract.core.model.PendingReclaim
 import com.thecontract.core.model.PlayerSlotState
 import com.thecontract.core.model.SavedContract
 import com.thecontract.core.model.SessionRecord
+import com.thecontract.core.model.SetupPreset
 import com.thecontract.core.model.Slot
 import com.thecontract.core.net.LocalInterface
 import com.thecontract.core.net.NetworkScanner
@@ -19,23 +21,28 @@ import com.thecontract.core.protocol.Choice
 import com.thecontract.core.protocol.ClaimSlot
 import com.thecontract.core.protocol.ClientMessage
 import com.thecontract.core.protocol.ClientView
+import com.thecontract.core.protocol.DeleteSetupPreset
 import com.thecontract.core.protocol.ErrorMessage
 import com.thecontract.core.protocol.GameAction
 import com.thecontract.core.protocol.Hello
 import com.thecontract.core.protocol.HelloOk
 import com.thecontract.core.protocol.JoinInfo
+import com.thecontract.core.protocol.LoadSetupPreset
 import com.thecontract.core.protocol.Ping
 import com.thecontract.core.protocol.PlayerActionMessage
 import com.thecontract.core.protocol.Pong
 import com.thecontract.core.protocol.ProtocolJson
 import com.thecontract.core.protocol.Reconnect
 import com.thecontract.core.protocol.ReclaimPending
+import com.thecontract.core.protocol.SaveSetupPreset
 import com.thecontract.core.protocol.SavedContractSummary
 import com.thecontract.core.protocol.ServerMessage
 import com.thecontract.core.protocol.SessionFull
+import com.thecontract.core.protocol.SetupPresetSummary
 import com.thecontract.core.protocol.StateChanged
 import com.thecontract.core.protocol.StateSnapshot
 import com.thecontract.core.protocol.TimerUpdate
+import com.thecontract.core.protocol.UpdateSetup
 import java.security.SecureRandom
 import java.util.Base64
 import java.util.concurrent.locks.ReentrantLock
@@ -449,7 +456,10 @@ class SessionManager(
             val conn = clients[clientId] ?: return
             val slot = conn.slot ?: return
             val es = engineState ?: return
-            slot to ViewBuilder.phoneView(es.state, slot, connectionsLocked(), clock(), es.undoStack.isNotEmpty())
+            slot to ViewBuilder.phoneView(
+                es.state, slot, connectionsLocked(), clock(), es.undoStack.isNotEmpty(),
+                setupPresetsLocked(slot, es.state)
+            )
         }
         if (slot != null) transport?.send(clientId, StateSnapshot(view))
     }
@@ -479,7 +489,24 @@ class SessionManager(
         var reply: ServerMessage? = null
         lock.withLock {
             val es = engineState ?: return false
-            val result = engine.apply(es, slot, actionId, expectedVersion, action, clock())
+            // Saved settings live on the television beside the saved contracts, so they are
+            // resolved here rather than in the engine, which only ever sees game state. Loading
+            // one reaches the engine as the ordinary whole-setup replacement it is.
+            val loaded = (action as? LoadSetupPreset)?.let { store.loadSetupPreset(it.id) }
+            val problem = presetProblemLocked(action, loaded)
+            if (problem != null) {
+                replyTo?.let { id ->
+                    transport?.send(
+                        id,
+                        com.thecontract.core.protocol.ActionRejected(
+                            actionId, GameEngine.CODE_INVALID, problem, es.state.version
+                        )
+                    )
+                }
+                return false
+            }
+            val engineAction = if (loaded != null) UpdateSetup(loaded.setup) else action
+            val result = engine.apply(es, slot, actionId, expectedVersion, engineAction, clock())
             accepted = result.accepted
             if (result.accepted) {
                 // Setup can finish before or after the second phone joins; re-evaluate pairing
@@ -488,6 +515,8 @@ class SessionManager(
                 engineState = engine.onSlotClaimed(result.engine, claimed, clock())
                 record = record?.copy(state = engineState!!.state, undoStack = engineState!!.undoStack)
                 if (action is com.thecontract.core.protocol.SaveContract) saveCompletedContractLocked()
+                // A replayed tap must not restamp a preset and reshuffle the list under him.
+                if (result.code != "DUPLICATE") applyPresetActionLocked(action)
                 persistLocked()
                 reply = com.thecontract.core.protocol.ActionAccepted(actionId, engineState!!.state.version)
             } else {
@@ -584,6 +613,65 @@ class SessionManager(
         )
         store.saveContract(contract)
     }
+
+    // ------------------------------------------------------------------ saved settings
+
+    /**
+     * Why a saved-settings action cannot be carried out, or null if it can.
+     *
+     * Checked before the engine so the phone is told plainly rather than being handed a rejection
+     * about game state that would not explain anything. Deleting something already gone is not a
+     * problem: the list ends up as he asked, and a double tap on a slow socket must not raise an
+     * error. A full list is refused rather than quietly dropping his oldest saved setup.
+     */
+    private fun presetProblemLocked(action: GameAction, loaded: SetupPreset?): String? = when (action) {
+        is SaveSetupPreset -> {
+            val name = action.name.trim()
+            val existing = store.listSetupPresets()
+            when {
+                name.isEmpty() -> "Give these settings a name before saving them."
+                existing.size >= SetupPreset.MAX_PRESETS &&
+                    existing.none { it.id == SetupPreset.idFor(name) } ->
+                    "There is room for ${SetupPreset.MAX_PRESETS} saved settings. Delete one first."
+                else -> null
+            }
+        }
+        is LoadSetupPreset -> if (loaded == null) "Those saved settings are no longer on the TV." else null
+        else -> null
+    }
+
+    private fun applyPresetActionLocked(action: GameAction) {
+        when (action) {
+            is SaveSetupPreset -> {
+                val name = action.name.trim().take(SetupPreset.MAX_NAME_LENGTH)
+                store.saveSetupPreset(
+                    SetupPreset(
+                        id = SetupPreset.idFor(name),
+                        name = name,
+                        savedAtMs = clock(),
+                        setup = action.setup
+                    )
+                )
+            }
+            is DeleteSetupPreset -> store.deleteSetupPreset(action.id)
+            else -> Unit
+        }
+    }
+
+    /**
+     * The saved-settings list for one phone's view.
+     *
+     * Read from the store only for the man and the screen that can act on it, so a whole evening
+     * of broadcasts does not decrypt a list nobody is looking at.
+     */
+    private fun setupPresetsLocked(slot: Slot, state: GameState): List<SetupPresetSummary> =
+        if (slot == Slot.PLAYER_1 && state.phase == GamePhase.PLAYER_1_SETUP) {
+            store.listSetupPresets().map { SetupPresetSummary(it.id, it.name, it.savedAtMs) }
+        } else {
+            emptyList()
+        }
+
+    // ------------------------------------------------------------------ contracts
 
     fun listContracts(): List<SavedContract> = store.listContracts()
 
@@ -689,7 +777,10 @@ class SessionManager(
 
     fun phoneView(slot: Slot): ClientView? = lock.withLock {
         val es = engineState ?: return null
-        ViewBuilder.phoneView(es.state, slot, connectionsLocked(), clock(), es.undoStack.isNotEmpty())
+        ViewBuilder.phoneView(
+            es.state, slot, connectionsLocked(), clock(), es.undoStack.isNotEmpty(),
+            setupPresetsLocked(slot, es.state)
+        )
     }
 
     private fun broadcastLocked() {
@@ -699,7 +790,10 @@ class SessionManager(
             val connections = connectionsLocked()
             for (conn in clients.values) {
                 val slot = conn.slot ?: continue
-                val view = ViewBuilder.phoneView(es.state, slot, connections, clock(), es.undoStack.isNotEmpty())
+                val view = ViewBuilder.phoneView(
+                    es.state, slot, connections, clock(), es.undoStack.isNotEmpty(),
+                    setupPresetsLocked(slot, es.state)
+                )
                 outbound += conn.id to StateChanged(view)
             }
         }

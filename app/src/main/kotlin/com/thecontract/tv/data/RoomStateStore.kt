@@ -3,6 +3,7 @@ package com.thecontract.tv.data
 import android.content.Context
 import com.thecontract.core.model.SavedContract
 import com.thecontract.core.model.SessionRecord
+import com.thecontract.core.model.SetupPreset
 import com.thecontract.core.persistence.StateStore
 import kotlinx.serialization.json.Json
 
@@ -71,5 +72,33 @@ class RoomStateStore(context: Context) : StateStore {
 
     override fun deleteContract(id: String) {
         db.contracts().delete(id)
+    }
+
+    override fun listSetupPresets(): List<SetupPreset> =
+        db.setupPresets().all().mapNotNull { row ->
+            Crypto.decrypt(row.payload)?.let {
+                runCatching { json.decodeFromString<SetupPreset>(it) }.getOrNull()
+            }
+        }
+
+    override fun loadSetupPreset(id: String): SetupPreset? {
+        val row = db.setupPresets().byId(id) ?: return null
+        val plaintext = Crypto.decrypt(row.payload) ?: return null
+        return runCatching { json.decodeFromString<SetupPreset>(plaintext) }.getOrNull()
+    }
+
+    override fun saveSetupPreset(preset: SetupPreset) {
+        db.setupPresets().save(
+            SetupPresetEntity(
+                id = preset.id,
+                name = preset.name,
+                savedAtMs = preset.savedAtMs,
+                payload = Crypto.encrypt(json.encodeToString(preset))
+            )
+        )
+    }
+
+    override fun deleteSetupPreset(id: String) {
+        db.setupPresets().delete(id)
     }
 }

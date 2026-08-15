@@ -19,6 +19,7 @@ import com.thecontract.core.model.RenderedConsideration
 import com.thecontract.core.model.RenderedTerm
 import com.thecontract.core.model.RenderedTimer
 import com.thecontract.core.model.SessionLength
+import com.thecontract.core.model.SetupPreset
 import com.thecontract.core.model.SignedTerm
 import com.thecontract.core.model.Slot
 import com.thecontract.core.protocol.Choice
@@ -35,6 +36,7 @@ import com.thecontract.core.protocol.ProgressView
 import com.thecontract.core.protocol.SavedContractSummary
 import com.thecontract.core.protocol.SetupForm
 import com.thecontract.core.protocol.SetupOption
+import com.thecontract.core.protocol.SetupPresetSummary
 import com.thecontract.core.protocol.SignedTermCard
 import com.thecontract.core.protocol.TermCard
 import com.thecontract.core.protocol.TimerControl
@@ -140,7 +142,7 @@ object ViewBuilder {
         )
     }
 
-    private fun setupForm(s: GameState): SetupForm {
+    private fun setupForm(s: GameState, presets: List<SetupPresetSummary> = emptyList()): SetupForm {
         val setup = s.setup
         return SetupForm(
             player1Name = setup.player1.name,
@@ -173,7 +175,10 @@ object ViewBuilder {
                 "boundaries" to Boundary.entries.map { SetupOption(it.name, it.label) },
                 "equipment" to Equipment.entries.map { SetupOption(it.name, it.label) }
             ),
-            errors = setup.validationErrors()
+            errors = setup.validationErrors(),
+            presets = presets,
+            presetLimit = SetupPreset.MAX_PRESETS,
+            revision = s.setupRevision
         )
     }
 
@@ -236,8 +241,14 @@ object ViewBuilder {
         slot: Slot,
         connections: Map<Slot, ConnectionState>,
         nowMs: Long,
-        canGoBack: Boolean
-    ): ClientView = withReadAgain(s, phoneViewBody(s, slot, connections, nowMs, canGoBack))
+        canGoBack: Boolean,
+        /**
+         * Saved shared setups, supplied by the session manager: they are kept on the television
+         * rather than in the game state, and a view is built from the state alone. Reaches Player
+         * 1's setup screen and nothing else.
+         */
+        setupPresets: List<SetupPresetSummary> = emptyList()
+    ): ClientView = withReadAgain(s, phoneViewBody(s, slot, connections, nowMs, canGoBack, setupPresets))
 
     /**
      * "Read it again" sits on both phones, because the television is the shared screen and
@@ -256,7 +267,8 @@ object ViewBuilder {
         slot: Slot,
         connections: Map<Slot, ConnectionState>,
         nowMs: Long,
-        canGoBack: Boolean
+        canGoBack: Boolean,
+        setupPresets: List<SetupPresetSummary>
     ): ClientView {
         val base = baseView("phone", s, slot, connections, nowMs, canGoBack)
         val n = s.negotiation
@@ -293,7 +305,7 @@ object ViewBuilder {
                     base.copy(
                         heading = "Set the game up",
                         body = "You are Player 1, so you configure the shared setup. The other phone waits.",
-                        setup = setupForm(s)
+                        setup = setupForm(s, setupPresets)
                     )
                 } else {
                     base.copy(

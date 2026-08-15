@@ -333,6 +333,23 @@ h3 { font-size: 14px; margin: 16px 0 6px; color: var(--muted); text-transform: u
 .check { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel-2); }
 .check input { width: 20px; height: 20px; accent-color: var(--accent); }
 
+/* ------------------------------------------------------- saved settings */
+
+.presets {
+  margin: 12px 0 4px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+}
+.presets > .meta:first-child { margin-top: 0; }
+.presets .field:last-child, .presets .btn-primary + .meta { margin-bottom: 0; }
+.preset { padding: 12px 0; border-top: 1px solid var(--line); }
+.preset:first-of-type { border-top: 0; padding-top: 4px; }
+.preset-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.preset-head .meta { margin-top: 0; white-space: nowrap; }
+.preset-name { font-weight: 600; }
+
 /* ---------------------------------------------------------------- draft */
 
 .draft-term { border-top: 1px solid var(--line); padding: 12px 0; }
