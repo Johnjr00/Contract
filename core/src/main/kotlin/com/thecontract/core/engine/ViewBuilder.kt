@@ -350,8 +350,7 @@ object ViewBuilder {
                     base.copy(
                         heading = "Your private profile",
                         body = "Everything starts at Maybe. Nobody else — not the TV, not the other phone — " +
-                            "ever sees the answers you give here. Saved profiles are the one exception: " +
-                            "anything you save under a name, the other phone can load.",
+                            "ever sees the answers you give here.",
                         profile = profileForm(s, slot, saved.profilePresets)
                     )
                 }
